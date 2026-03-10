@@ -1,0 +1,6 @@
+# Copilot Instructions
+
+- Keep docstrings minimal — one-liner or skip entirely if the function name is self-explanatory.
+- No redundant Args/Returns sections unless the signature is genuinely unclear.
+- Don't add type annotations, comments, or docstrings to code you didn't write.
+- Keep code simple and direct. No over-engineering or premature abstraction.

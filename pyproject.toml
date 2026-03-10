@@ -1,0 +1,21 @@
+[project]
+name = "forget"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "torch",
+    "torchvision",
+    "transformers",
+    "datasets",
+    "accelerate",
+    "huggingface_hub",
+    "python-dotenv",
+    "ipywidgets",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["forget*"]
