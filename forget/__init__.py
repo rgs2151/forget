@@ -1,1 +1,1 @@
-# hello
+from forget.api import InstructorLLM
