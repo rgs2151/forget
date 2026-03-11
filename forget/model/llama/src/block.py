@@ -48,25 +48,34 @@ class BlockOutputWrapper(t.nn.Module):
         Forward pass for the block
         """
         output = self.block(*args, **kwargs)
-        self.activations = output[0]
-        
+        is_tuple = isinstance(output, tuple)
+        hidden = output[0] if is_tuple else output
+        self.activations = hidden
+
         if self.add_activations is not None:
-            augmented_output = self.add_vector_from_position(
-                matrix=output[0],
-                vector=self.add_activations,
-                position_ids=kwargs["position_ids"],
-                from_pos=self.from_position,
+            delta = self._compute_steering_delta(
+                hidden, kwargs.get("position_ids")
             )
-            # Modify the first output of the block to be the augmented output
-            # and keep the rest of the outputs the same
-            output = (augmented_output,) + output[1:]
+            hidden = hidden + delta
+            output = (hidden,) + output[1:] if is_tuple else hidden
 
         if not self.save_internal_decodings:
             return output
 
         self.save_block_internals(output, args[0])
-        
+
         return output
+
+    def _compute_steering_delta(self, hidden: t.Tensor, position_ids) -> t.Tensor:
+        from_id = self.from_position
+        if position_ids is not None:
+            if from_id is None:
+                from_id = position_ids.min().item() - 1
+            mask = (position_ids >= from_id).unsqueeze(-1)
+            while mask.dim() > hidden.dim():
+                mask = mask.squeeze(0)
+            return mask.to(hidden.dtype) * self.add_activations.to(hidden.dtype)
+        return self.add_activations.to(hidden.dtype).expand_as(hidden)
     
     def save_block_internals(
         self,
@@ -107,6 +116,9 @@ class BlockOutputWrapper(t.nn.Module):
 
         mask = position_ids >= from_id
         mask = mask.unsqueeze(-1)
+        # squeeze batch dims that newer transformers drops from hidden states
+        while mask.dim() > matrix.dim():
+            mask = mask.squeeze(0)
 
         matrix += mask.float() * vector
         return matrix
