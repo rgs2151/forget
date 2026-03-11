@@ -97,12 +97,15 @@ class BaseLlamaWrapper(AbstractWrapper):
         with t.no_grad():
             instr_pos = find_instruction_end_postion(tokens[0], self.END_STR)
             self.set_from_positions(instr_pos)
+            attention_mask = t.ones_like(tokens)
             generated = self.model.generate(
                 inputs=tokens,
+                attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=do_sample,
                 top_k=top_k,
                 temperature=temperature,
+                pad_token_id=self.tokenizer.tokenizer.eos_token_id,
                 use_cache=True,
             )
             return self.tokenizer.batch_decode(generated)

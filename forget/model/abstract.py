@@ -68,7 +68,7 @@ class AbstractTokenizer(ABC):
             input_content = self.interpret_chat(messages)
         else:
             input_content = self.interpret_base(messages)
-        return self.tokenizer.encode(input_content)
+        return self.tokenizer.encode(input_content, add_special_tokens=False)
 
     def batch_decode(self, tokens: Union[List[int], t.Tensor]) -> str:
         """Decode tokens back to text"""
