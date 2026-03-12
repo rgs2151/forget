@@ -74,22 +74,13 @@ class InstructorLLM:
         prompt: str,
         response_model: Type[T],
         system: str = "",
+        max_retries: int = 0,
     ) -> T:
-        """
-        Generate a single structured response.
-        
-        Args:
-            prompt: User prompt
-            response_model: Pydantic model for structured output
-            system: Optional system prompt
-            
-        Returns:
-            Parsed pydantic model instance
-        """
         return await self.client.create(
             model=self.model,
             response_model=response_model,
             messages=self._make_messages(prompt, system),
+            max_retries=max_retries,
         )
     
     async def _rate_limited_respond(
@@ -98,10 +89,10 @@ class InstructorLLM:
         response_model: Type[T],
         semaphore: asyncio.Semaphore,
         system: str = "",
+        max_retries: int = 0,
     ) -> T:
-        """Single request with semaphore-based rate limiting."""
         async with semaphore:
-            return await self.respond(prompt, response_model, system)
+            return await self.respond(prompt, response_model, system, max_retries=max_retries)
     
     async def batch_respond(
         self,
@@ -110,27 +101,14 @@ class InstructorLLM:
         system: str = "",
         concurrency: Optional[int] = None,
         desc: str = "Processing",
+        max_retries: int = 0,
     ) -> List[T]:
-        """
-        Generate structured responses for multiple prompts with rate limiting.
-        
-        Order is GUARANTEED: results[i] corresponds to prompts[i].
-        
-        Args:
-            prompts: List of user prompts
-            response_models: List of Pydantic models (one per prompt)
-            system: System prompt for all requests
-            concurrency: Max concurrent requests (defaults to self.concurrency)
-            desc: Description for the progress bar
-            
-        Returns:
-            List of parsed pydantic model instances in same order as input prompts
-        """
+        """Order is GUARANTEED: results[i] corresponds to prompts[i]."""
         limit = concurrency or self.concurrency
         semaphore = asyncio.Semaphore(limit)
         
         tasks = [
-            self._rate_limited_respond(prompt, model, semaphore, system)
+            self._rate_limited_respond(prompt, model, semaphore, system, max_retries=max_retries)
             for prompt, model in zip(prompts, response_models, strict=True)
         ]
         
