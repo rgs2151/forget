@@ -4,3 +4,5 @@
 - No redundant Args/Returns sections unless the signature is genuinely unclear.
 - Don't add type annotations, comments, or docstrings to code you didn't write.
 - Keep code simple and direct. No over-engineering or premature abstraction.
+- No extra print statements in notebook cells. Keep cells clean.
+- Use code comments for step explanations, not markdown cells.
