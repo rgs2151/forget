@@ -13,6 +13,7 @@ class BlockOutputWrapper(t.nn.Module):
     """
     save_internal_decodings: bool = False
     add_activations: Optional[t.Tensor] = None
+    steering_op = None
     
     activations: Optional[t.Tensor] = None
     from_position: Optional[int] = None
@@ -52,7 +53,7 @@ class BlockOutputWrapper(t.nn.Module):
         hidden = output[0] if is_tuple else output
         self.activations = hidden
 
-        if self.add_activations is not None:
+        if self.add_activations is not None or self.steering_op is not None:
             delta = self._compute_steering_delta(
                 hidden, kwargs.get("position_ids")
             )
@@ -67,6 +68,13 @@ class BlockOutputWrapper(t.nn.Module):
         return output
 
     def _compute_steering_delta(self, hidden: t.Tensor, position_ids) -> t.Tensor:
+        # raw delta from steering_op or plain add_activations
+        if self.steering_op is not None:
+            raw = self.steering_op(hidden)
+        else:
+            raw = self.add_activations.to(hidden.dtype)
+
+        # position masking
         from_id = self.from_position
         if position_ids is not None:
             if from_id is None:
@@ -74,8 +82,8 @@ class BlockOutputWrapper(t.nn.Module):
             mask = (position_ids >= from_id).unsqueeze(-1)
             while mask.dim() > hidden.dim():
                 mask = mask.squeeze(0)
-            return mask.to(hidden.dtype) * self.add_activations.to(hidden.dtype)
-        return self.add_activations.to(hidden.dtype).expand_as(hidden)
+            return mask.to(hidden.dtype) * raw
+        return raw.expand_as(hidden)
     
     def save_block_internals(
         self,
@@ -134,6 +142,7 @@ class BlockOutputWrapper(t.nn.Module):
         Reset the block
         """
         self.add_activations = None
+        self.steering_op = None
         self.activations = None
         self.block.self_attn.activations = None
         self.from_position = None

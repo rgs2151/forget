@@ -186,6 +186,9 @@ class BaseLlamaWrapper(AbstractWrapper):
         """Set activations to add to a specific layer"""
         self.model.model.layers[layer].add(activations)
 
+    def set_steering_op(self, layer: int, op) -> None:
+        self.model.model.layers[layer].steering_op = op
+
     def reset_all(self) -> None:
         """Reset all layer states"""
         for layer in self.model.model.layers:

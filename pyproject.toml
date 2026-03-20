@@ -11,6 +11,10 @@ dependencies = [
     "huggingface_hub",
     "python-dotenv",
     "ipywidgets",
+    "bert-score",
+    "scikit-learn",
+    "pandas",
+    "matplotlib",
 ]
 
 [build-system]
