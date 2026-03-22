@@ -28,3 +28,22 @@ def find_instruction_end_postion(
         return -1
     return start_pos + len(end_str) - 1
 
+
+def find_instruction_end_positions_batch(
+    batch_tokens: t.Tensor,
+    end_str: t.Tensor,
+    attention_mask: t.Tensor,
+) -> t.Tensor:
+    """Find instruction end position for each sample in a left-padded batch.
+
+    Returns (batch,) tensor of column indices in the padded sequence.
+    """
+    results = []
+    for i in range(batch_tokens.size(0)):
+        valid_mask = attention_mask[i].bool()
+        valid_tokens = batch_tokens[i][valid_mask]
+        pos_in_valid = find_instruction_end_postion(valid_tokens, end_str)
+        pad_len = (~valid_mask).sum().item()
+        results.append((pos_in_valid if pos_in_valid != -1 else 0) + pad_len)
+    return t.tensor(results, device=batch_tokens.device)
+

@@ -95,6 +95,30 @@ class AbstractTokenizer(ABC):
             "ADD_FROM_POS_BASE": self.ADD_FROM_POS_BASE
         }
 
+    def tokenize_batch(self, chats: List[Chat]) -> Dict[str, t.Tensor]:
+        """Left-pad a list of Chats into a batch.
+
+        Returns:
+            {"input_ids": (batch, max_seq_len), "attention_mask": (batch, max_seq_len)}
+        """
+        token_lists = [self.tokenize(chat) for chat in chats]
+        max_len = max(len(tl) for tl in token_lists)
+        pad_id = self.tokenizer.pad_token_id
+        if pad_id is None:
+            pad_id = self.tokenizer.eos_token_id
+
+        input_ids = []
+        attention_mask = []
+        for tl in token_lists:
+            pad_len = max_len - len(tl)
+            input_ids.append([pad_id] * pad_len + tl)
+            attention_mask.append([0] * pad_len + [1] * len(tl))
+
+        return {
+            "input_ids": t.tensor(input_ids),
+            "attention_mask": t.tensor(attention_mask),
+        }
+
     def set_end_str(self, gpu_id: int = 0) -> None:
         """Set the end string for tokenization"""
         device = f"cuda:{gpu_id}" if t.cuda.is_available() else "cpu"
