@@ -12,9 +12,11 @@ dependencies = [
     "python-dotenv",
     "ipywidgets",
     "bert-score",
+    "optuna",
     "scikit-learn",
     "pandas",
     "matplotlib",
+    "rouge-score",
 ]
 
 [build-system]
