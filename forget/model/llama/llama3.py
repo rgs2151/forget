@@ -8,7 +8,7 @@ from transformers import AutoTokenizer
 from transformers.tokenization_utils import PreTrainedTokenizer
 from .base import BaseLlamaWrapper
 from ..abstract import AbstractTokenizer
-from ...chat import Chat
+from ..chat import Chat
 
 class Llama3Wrapper(BaseLlamaWrapper):
 

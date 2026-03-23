@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import torch as t
 from typing import Optional, List, Union, Dict
 from transformers.tokenization_utils import PreTrainedTokenizer
-from ..chat import Chat
+from .chat import Chat
 
 class AbstractWrapper(ABC):
     """

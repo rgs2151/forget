@@ -1,1 +1,1 @@
-from forget.api.instructor import InstructorLLM
+from .instructor import InstructorLLM

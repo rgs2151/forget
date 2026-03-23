@@ -8,8 +8,8 @@ from transformers import AutoModelForCausalLM
 
 from ..abstract import AbstractWrapper, AbstractTokenizer
 from .src import BlockOutputWrapper
-from ...utils.helpers import find_instruction_end_postion, find_instruction_end_positions_batch
-from ...chat import Chat
+from ..utils.helpers import find_instruction_end_postion, find_instruction_end_positions_batch
+from ..chat import Chat
 
 
 class BaseLlamaWrapper(AbstractWrapper):
