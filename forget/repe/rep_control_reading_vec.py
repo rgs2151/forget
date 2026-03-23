@@ -46,6 +46,8 @@ class WrappedBlock(torch.nn.Module):
 
             if len(self.controller.shape) == 1:
                 self.controller = self.controller.reshape(1, 1, -1)
+            elif len(self.controller.shape) == 2:
+                self.controller = self.controller.unsqueeze(1)
             assert len(self.controller.shape) == len(modified.shape), f"Shape of controller {self.controller.shape} does not match shape of modified {modified.shape}."
 
             self.controller = self.controller.to(modified.device)
