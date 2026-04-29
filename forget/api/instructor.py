@@ -4,8 +4,6 @@ LLM provider implementations using instructor for structured outputs.
 Supports OpenAI, Anthropic, Together, and other providers via instructor.
 """
 
-from typing import Type, TypeVar
-
 import instructor
 from pydantic import BaseModel
 import asyncio

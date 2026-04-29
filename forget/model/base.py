@@ -7,17 +7,13 @@ import torch as t
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from .block import BlockOutputWrapper
-from .find import find_instruction_end_postion, find_instruction_end_positions_batch
+from .find import find_instruction_end_positions_batch
 
 
 class AutoModelForCausalLMWrapper():
     """
     Base wrapper class for AutoModelForCausalLM models that contains common functionality
     """
-
-    # Stored after batch calls so user can inspect per-sample instruction end positions
-    last_from_positions: Optional[t.Tensor] = None
-
     def __init__(
         self,
         hf_token: Optional[str],
@@ -97,13 +93,6 @@ class AutoModelForCausalLMWrapper():
             "attention_mask": t.tensor(attention_mask),
         }
 
-    def batch_decode(self, tokens: Union[List[int], t.Tensor]) -> str:
-        if isinstance(tokens, t.Tensor):
-            if tokens.dim() > 1:
-                tokens = tokens[0]
-            tokens = tokens.tolist()
-        return self.tokenizer.decode(tokens)
-
     def decode_batch(self, tokens: t.Tensor, skip_special_tokens: bool = False) -> List[str]:
         return [
             self.tokenizer.decode(seq, skip_special_tokens=skip_special_tokens)
@@ -113,100 +102,20 @@ class AutoModelForCausalLMWrapper():
     def encode(self, text: str, add_special_tokens: bool = False) -> List[int]:
         return self.tokenizer.encode(text, add_special_tokens=add_special_tokens)
 
-    def decode(self, token_id: Union[int, t.Tensor]) -> str:
-        if isinstance(token_id, t.Tensor):
-            token_id = int(token_id.item())
-        return self.tokenizer.decode([token_id])
-
-    # ------------------------------------------------------------------ #
-    #  Single-sample methods (existing API)
-    # ------------------------------------------------------------------ #
-
-    def generate(
-        self,
-        tokens: t.Tensor,
-        max_new_tokens: int = 100,
-        top_k: int = 50,
-        do_sample: bool = True,
-        temperature: float = 1.0,
-    ) -> str:
-        with t.no_grad():
-            instr_pos = find_instruction_end_postion(tokens[0], self.END_STR)
-            self.set_from_positions(instr_pos)
-            attention_mask = t.ones_like(tokens)
-            generated = self.model.generate(
-                inputs=tokens,
-                attention_mask=attention_mask,
-                max_new_tokens=max_new_tokens,
-                do_sample=do_sample,
-                top_k=top_k,
-                temperature=temperature,
-                pad_token_id=self.pad_token_id,
-                use_cache=True,
-            )
-            return self.batch_decode(generated)
-
-    def generate_from_prompt(
-        self,
-        prompt: str,
-        max_new_tokens: int = 50,
-        top_k: int = 50,
-        do_sample: bool = True,
-        temperature: float = 1.0,
-    ) -> str:
-        tokens_list = self.tokenize(prompt)
-        tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
-        return self.generate(
-            tokens,
-            max_new_tokens=max_new_tokens,
-            top_k=top_k,
-            do_sample=do_sample,
-            temperature=temperature,
-        )
-
-    def forward_from_prompt(self, prompt: str) -> t.Tensor:
-        tokens_list = self.tokenize(prompt)
-        tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
-        with t.no_grad():
-            outputs = self.model(tokens)
-            return outputs.logits
-
-    def get_logits(self, tokens: t.Tensor) -> t.Tensor:
-        with t.no_grad():
-            instr_pos = find_instruction_end_postion(tokens[0], self.END_STR)
-            self.set_from_positions(instr_pos)
-            logits = self.model(tokens).logits
-            return logits
-
-    def get_logits_from_prompt(self, prompt: str) -> t.Tensor:
-        tokens_list = self.tokenize(prompt)
-        tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
-        return self.get_logits(tokens)
-
     # ------------------------------------------------------------------ #
     #  Batch methods
     # ------------------------------------------------------------------ #
 
-    def forward_from_prompts(self, prompts: List[str]) -> t.Tensor:
+    def batch_forward(self, prompts: List[str]) -> t.Tensor:
         """Batched forward — for activation collection (no steering)."""
+        self.reset_all()
         batch = self.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         with t.no_grad():
             return self.model(input_ids=input_ids, attention_mask=attention_mask).logits
 
-    def get_logits_from_prompts(self, prompts: List[str]) -> t.Tensor:
-        """Batched logits with steering. Auto-detects per-sample from_positions."""
-        batch = self.tokenize_batch(prompts)
-        input_ids = batch["input_ids"].to(self.device)
-        attention_mask = batch["attention_mask"].to(self.device)
-        fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)
-        self.set_from_positions(fps)
-        self.last_from_positions = fps
-        with t.no_grad():
-            return self.model(input_ids=input_ids, attention_mask=attention_mask).logits
-
-    def generate_from_prompts(
+    def batch_generate(
         self,
         prompts: List[str],
         max_new_tokens: int = 50,
@@ -215,16 +124,12 @@ class AutoModelForCausalLMWrapper():
         temperature: float = 1.0,
     ) -> List[str]:
         """Batched generation with steering. Auto-detects per-sample from_positions.
-
-        Returns list of decoded strings (one per sample, full sequence).
-        Access llm.last_from_positions for the (batch,) tensor of instruction end column indices.
         """
         batch = self.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)
         self.set_from_positions(fps)
-        self.last_from_positions = fps
         with t.no_grad():
             generated = self.model.generate(
                 inputs=input_ids,
@@ -255,10 +160,6 @@ class AutoModelForCausalLMWrapper():
             pos = t.tensor([pos], device=self.device)
         for layer in self.model.model.layers:
             layer.from_position = pos
-
-    def set_add_activations(self, layer: int, activations: t.Tensor) -> None:
-        """Wrap in AddSteer and set as steering op."""
-        self.model.model.layers[layer].add(activations)
 
     def set_steering_op(self, layer: int, op) -> None:
         self.model.model.layers[layer].steering_op = op

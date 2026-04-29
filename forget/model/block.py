@@ -95,11 +95,6 @@ class BlockOutputWrapper(t.nn.Module):
         # Final residual unembedded
         self.block_out_unembedded = self.unembed_matrix(self.norm(output[0]))
 
-    def add(self, activations: t.Tensor) -> None:
-        """Wrap raw activations in AddSteer for backward compat."""
-        from .steering import AddSteer
-        self.steering_op = AddSteer(vec=activations, scale=1.0)
-
     def reset(self) -> None:
         self.steering_op = None
         self.activations = None
