@@ -4,7 +4,7 @@ Wrapper for the block to save activations and unembed them
 
 import torch as t
 from .attention import AttnWrapper
-from ...abstract import AbstractTokenizer
+from ..abstract import AbstractTokenizer
 from typing import Optional
 
 

@@ -8,10 +8,10 @@ from transformers import AutoModelForCausalLM
 
 from ..abstract import AbstractWrapper, AbstractTokenizer
 from .src import BlockOutputWrapper
-from ..utils.helpers import find_instruction_end_postion, find_instruction_end_positions_batch
+from .find import find_instruction_end_postion, find_instruction_end_positions_batch
 
 
-class BaseLlamaWrapper(AbstractWrapper):
+class BaseLlamaWrapper():
     """
     Base wrapper class for Llama models that contains common functionality
     """

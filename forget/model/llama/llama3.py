@@ -77,10 +77,7 @@ class Llama3Tokenizer(AbstractTokenizer):
     # Special tokens
     BOS = "<|begin_of_text|>"
     EOS = "<|eot_id|>"
-
-    # extras
-    last_input_size: Optional[int] = None
-
+    
     def __init__(self, tokenizer: AutoTokenizer, use_chat: bool = True):
         self.tokenizer = tokenizer
         self.use_chat = use_chat

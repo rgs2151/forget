@@ -5,18 +5,6 @@ Abstract wrapper class
 from abc import ABC, abstractmethod
 import torch as t
 from typing import List, Union, Dict
-
-class AbstractWrapper(ABC):
-    """
-    Abstract wrapper class
-    """
-    
-    @abstractmethod
-    def generate(self, tokens: t.Tensor, max_new_tokens: int = 100) -> t.Tensor:
-        """
-        Generate tokens
-        """
-        pass
     
 class AbstractTokenizer(ABC):
     """
