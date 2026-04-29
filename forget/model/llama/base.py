@@ -9,7 +9,6 @@ from transformers import AutoModelForCausalLM
 from ..abstract import AbstractWrapper, AbstractTokenizer
 from .src import BlockOutputWrapper
 from ..utils.helpers import find_instruction_end_postion, find_instruction_end_positions_batch
-from ..chat import Chat
 
 
 class BaseLlamaWrapper(AbstractWrapper):
@@ -92,15 +91,15 @@ class BaseLlamaWrapper(AbstractWrapper):
             )
             return self.tokenizer.batch_decode(generated)
 
-    def generate_from_chat(
+    def generate_from_prompt(
         self,
-        chat: Chat,
+        prompt: str,
         max_new_tokens: int = 50,
         top_k: int = 50,
         do_sample: bool = True,
         temperature: float = 1.0,
     ) -> str:
-        tokens_list = self.tokenizer.tokenize(chat)
+        tokens_list = self.tokenizer.tokenize(prompt)
         tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
         return self.generate(
             tokens,
@@ -110,8 +109,8 @@ class BaseLlamaWrapper(AbstractWrapper):
             temperature=temperature,
         )
 
-    def forward_from_chat(self, chat: Chat) -> t.Tensor:
-        tokens_list = self.tokenizer.tokenize(chat)
+    def forward_from_prompt(self, prompt: str) -> t.Tensor:
+        tokens_list = self.tokenizer.tokenize(prompt)
         tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
         with t.no_grad():
             outputs = self.model(tokens)
@@ -124,8 +123,8 @@ class BaseLlamaWrapper(AbstractWrapper):
             logits = self.model(tokens).logits
             return logits
 
-    def get_logits_from_chat(self, chat: Chat) -> t.Tensor:
-        tokens_list = self.tokenizer.tokenize(chat)
+    def get_logits_from_prompt(self, prompt: str) -> t.Tensor:
+        tokens_list = self.tokenizer.tokenize(prompt)
         tokens = t.tensor(tokens_list).unsqueeze(0).to(self.device)
         return self.get_logits(tokens)
 
@@ -133,17 +132,17 @@ class BaseLlamaWrapper(AbstractWrapper):
     #  Batch methods
     # ------------------------------------------------------------------ #
 
-    def forward_from_chats(self, chats: List[Chat]) -> t.Tensor:
+    def forward_from_prompts(self, prompts: List[str]) -> t.Tensor:
         """Batched forward — for activation collection (no steering)."""
-        batch = self.tokenizer.tokenize_batch(chats)
+        batch = self.tokenizer.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         with t.no_grad():
             return self.model(input_ids=input_ids, attention_mask=attention_mask).logits
 
-    def get_logits_from_chats(self, chats: List[Chat]) -> t.Tensor:
+    def get_logits_from_prompts(self, prompts: List[str]) -> t.Tensor:
         """Batched logits with steering. Auto-detects per-sample from_positions."""
-        batch = self.tokenizer.tokenize_batch(chats)
+        batch = self.tokenizer.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)
@@ -152,9 +151,9 @@ class BaseLlamaWrapper(AbstractWrapper):
         with t.no_grad():
             return self.model(input_ids=input_ids, attention_mask=attention_mask).logits
 
-    def generate_from_chats(
+    def generate_from_prompts(
         self,
-        chats: List[Chat],
+        prompts: List[str],
         max_new_tokens: int = 50,
         top_k: int = 50,
         do_sample: bool = True,
@@ -165,7 +164,7 @@ class BaseLlamaWrapper(AbstractWrapper):
         Returns list of decoded strings (one per sample, full sequence).
         Access llm.last_from_positions for the (batch,) tensor of instruction end column indices.
         """
-        batch = self.tokenizer.tokenize_batch(chats)
+        batch = self.tokenizer.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)

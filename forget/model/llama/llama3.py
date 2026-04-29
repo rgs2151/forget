@@ -2,13 +2,11 @@
 Wrapper for Llama 3 / 3.1 models
 """
 
-from typing import Optional, Literal, List, Dict
+from typing import Optional, Literal
 import torch as t
 from transformers import AutoTokenizer
-from transformers.tokenization_utils import PreTrainedTokenizer
 from .base import BaseLlamaWrapper
 from ..abstract import AbstractTokenizer
-from ..chat import Chat
 
 class Llama3Wrapper(BaseLlamaWrapper):
 
@@ -83,33 +81,7 @@ class Llama3Tokenizer(AbstractTokenizer):
     # extras
     last_input_size: Optional[int] = None
 
-    def __init__(self, tokenizer: PreTrainedTokenizer, use_chat: bool = True):
+    def __init__(self, tokenizer: AutoTokenizer, use_chat: bool = True):
         self.tokenizer = tokenizer
         self.use_chat = use_chat
 
-    def interpret_chat(self, messages: List[Dict[str, str]]) -> str:
-        input_content = self.BOS
-        for m in messages:
-            role, content = m["role"], m["content"]
-            if role == "system":
-                input_content += f"{self.B_SYS}{content.strip()}{self.E_SYS}"
-            elif role == "user":
-                input_content += f"{self.B_USER}{content.strip()}{self.E_USER}"
-            elif role == "assistant" and content is not None:
-                input_content += f"{self.B_ASSISTANT}{content.strip()}{self.E_ASSISTANT}"
-        # Open the assistant turn for generation
-        input_content += self.B_ASSISTANT
-        self.last_input_size = len(input_content)
-        return input_content
-
-    def interpret_base(self, messages: List[Dict[str, str]]) -> str:
-        users = [m for m in messages if m["role"] == "user"]
-        assists = [m for m in messages if m["role"] == "assistant"]
-        if not users:
-            return ""
-        last_user = users[-1]["content"].strip()
-        last_ass = assists[-1]["content"].strip() if assists else None
-        input_content = f"{self.BASE_INPUT} {last_user}"
-        if last_ass:
-            input_content += f"{self.BASE_RESPONSE} {last_ass}"
-        return input_content

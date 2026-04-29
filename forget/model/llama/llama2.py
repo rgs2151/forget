@@ -2,13 +2,12 @@
 Wrapper for Llama 2 models
 """
 
-from typing import Optional, Literal, List, Dict
+from typing import Optional, Literal
 import torch as t
 from transformers import AutoTokenizer
 from transformers.tokenization_utils import PreTrainedTokenizer
 from .base import BaseLlamaWrapper
 from ..abstract import AbstractTokenizer
-from ..chat import Chat
 
 class Llama2Wrapper(BaseLlamaWrapper):
     """
@@ -100,40 +99,3 @@ class Llama2Tokenizer(AbstractTokenizer):
         self.tokenizer = tokenizer
         self.use_chat = use_chat
 
-    def interpret_chat(self, messages: List[Dict[str, str]]) -> str:
-        """
-        Interpret messages in chat mode format
-        """
-        input_content = ""
-        for i, m in enumerate(messages):
-            role, content = m["role"], m["content"]
-            
-            if role == "user":
-                
-                if messages[i - 1]["role"] == "system":
-                    sys_text = f"{self.B_SYS}{messages[i - 1]['content']}{self.E_SYS}"
-                    input_content += f"{self.B_USER} {sys_text} {content.strip()} {self.E_USER}"
-                else: 
-                    input_content += f"{self.BOS}{self.B_USER} {content.strip()} {self.E_USER}"
-        
-            elif role == "assistant" and content is not None:
-                input_content += f"{self.B_ASSISTANT}{content.strip()}{self.E_ASSISTANT}{self.EOS}"
-        
-        self.last_input_size = len(input_content) + 3
-        return input_content
-
-    def interpret_base(self, messages: List[Dict[str, str]]) -> str:
-        """
-        Interpret messages in base mode format
-        """
-        # base mode: use last user and assistant
-        users = [m for m in messages if m["role"] == "user"]
-        assists = [m for m in messages if m["role"] == "assistant"]
-        if not users:
-            return ""
-        last_user = users[-1]["content"].strip()
-        last_ass = assists[-1]["content"].strip() if assists else None
-        input_content = f"{self.BASE_INPUT} {last_user}"
-        if last_ass:
-            input_content += f"{self.BASE_RESPONSE} {last_ass}"
-        return input_content

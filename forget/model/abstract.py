@@ -4,9 +4,7 @@ Abstract wrapper class
 
 from abc import ABC, abstractmethod
 import torch as t
-from typing import Optional, List, Union, Dict
-from transformers.tokenization_utils import PreTrainedTokenizer
-from .chat import Chat
+from typing import List, Union, Dict
 
 class AbstractWrapper(ABC):
     """
@@ -26,7 +24,7 @@ class AbstractTokenizer(ABC):
     """
     
     # Class attributes that must be defined by subclasses
-    tokenizer: PreTrainedTokenizer
+    tokenizer: any
     use_chat: bool  # Whether to use chat formatting
     
     # Chat formatting tags
@@ -45,30 +43,9 @@ class AbstractTokenizer(ABC):
     ADD_FROM_POS_CHAT: str  # Position to add activations in chat mode
     ADD_FROM_POS_BASE: str  # Position to add activations in base mode
     
-    @abstractmethod
-    def interpret_chat(self, messages: List[Dict[str, str]]) -> str:
-        """
-        Interpret messages in chat mode format
-        """
-        pass
-    
-    @abstractmethod
-    def interpret_base(self, messages: List[Dict[str, str]]) -> str:
-        """
-        Interpret messages in base mode format
-        """
-        pass
-    
-    def tokenize(self, chat: Chat) -> List[int]:
-        """
-        Unified tokenize method that converts Chat to token IDs
-        """
-        messages = chat.get_conversation()
-        if self.use_chat:
-            input_content = self.interpret_chat(messages)
-        else:
-            input_content = self.interpret_base(messages)
-        return self.tokenizer.encode(input_content, add_special_tokens=False)
+    def tokenize(self, prompt: str) -> List[int]:
+        """Tokenize a formatted prompt."""
+        return self.tokenizer.encode(prompt, add_special_tokens=False)
 
     def batch_decode(self, tokens: Union[List[int], t.Tensor]) -> str:
         """Decode tokens back to text"""
@@ -95,13 +72,13 @@ class AbstractTokenizer(ABC):
             "ADD_FROM_POS_BASE": self.ADD_FROM_POS_BASE
         }
 
-    def tokenize_batch(self, chats: List[Chat]) -> Dict[str, t.Tensor]:
-        """Left-pad a list of Chats into a batch.
+    def tokenize_batch(self, prompts: List[str]) -> Dict[str, t.Tensor]:
+        """Left-pad a list of formatted prompts into a batch.
 
         Returns:
             {"input_ids": (batch, max_seq_len), "attention_mask": (batch, max_seq_len)}
         """
-        token_lists = [self.tokenize(chat) for chat in chats]
+        token_lists = [self.tokenize(prompt) for prompt in prompts]
         max_len = max(len(tl) for tl in token_lists)
         pad_id = self.tokenizer.pad_token_id
         if pad_id is None:
