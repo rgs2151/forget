@@ -1,5 +1,5 @@
 """
-Base wrapper for Llama models
+Base wrapper for AutoModelForCausalLM models
 """
 
 from typing import Optional, List, Union
@@ -10,9 +10,9 @@ from .block import BlockOutputWrapper
 from .find import find_instruction_end_postion, find_instruction_end_positions_batch
 
 
-class BaseLlamaWrapper():
+class AutoModelForCausalLMWrapper():
     """
-    Base wrapper class for Llama models that contains common functionality
+    Base wrapper class for AutoModelForCausalLM models that contains common functionality
     """
 
     # Stored after batch calls so user can inspect per-sample instruction end positions
@@ -36,8 +36,7 @@ class BaseLlamaWrapper():
             token=hf_token,
         )
         self.pad_token_id = self.tokenizer.pad_token_id
-        if self.pad_token_id is None:
-            self.pad_token_id = self.tokenizer.eos_token_id
+        if self.pad_token_id is None: self.pad_token_id = self.tokenizer.eos_token_id
         self.END_STR = t.tensor(
             self.encode(instruction_end_marker, add_special_tokens=False),
             device=self.device,
@@ -45,7 +44,8 @@ class BaseLlamaWrapper():
 
         # Initialize model
         self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_path, token=hf_token
+            self.model_path, 
+            token=hf_token,
         )
 
         # Load custom weights if provided
