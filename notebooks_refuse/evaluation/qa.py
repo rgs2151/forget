@@ -7,8 +7,7 @@ import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from tqdm.auto import tqdm
 
-from vectors.activations import build_question_chats
-from optimize.objective import normalize_layers
+from vectors.activations import build_question_prompts
 
 
 IDK_PHRASES = [
@@ -30,6 +29,12 @@ class RunSpec:
     source_layer: object
     target_layer: object
     scale: float
+
+
+def normalize_layers(layer):
+    if isinstance(layer, int):
+        return [layer]
+    return list(layer)
 
 
 def sample_per_concept(df, n_per_concept=None, random_state=42):
@@ -87,7 +92,7 @@ def _run_done(df, spec):
 def evaluate_qa_generation_batched(
     llm,
     df,
-    chats,
+    prompts,
     target,
     steer_factory,
     source_layer,
@@ -110,16 +115,16 @@ def evaluate_qa_generation_batched(
 
     all_outputs = []
     for start in tqdm(
-        range(0, len(chats), batch_size),
+        range(0, len(prompts), batch_size),
         desc=progress_desc,
         leave=False,
         disable=not show_progress,
     ):
-        batch_chats = chats[start:start + batch_size]
+        batch_prompts = prompts[start:start + batch_size]
         llm.reset_all()
         for source_layer_item, target_layer_item in zip(src_layers, tgt_layers):
             llm.set_steering_op(target_layer_item, steer_factory(source_layer_item, scale))
-        outputs = llm.generate_from_chats(batch_chats, **generation_kwargs)
+        outputs = llm.batch_generate(batch_prompts, **generation_kwargs)
         all_outputs.extend(outputs)
         llm.reset_all()
 
@@ -143,8 +148,7 @@ def evaluate_qa_generation_batched(
 def run_qa_benchmark(
     llm,
     df,
-    system_prompt,
-    chat_cls,
+    prompt_factory,
     run_specs,
     steer_factory_fn,
     csv_path,
@@ -154,7 +158,7 @@ def run_qa_benchmark(
     question_col="question",
 ):
     results_df = load_or_empty_results(csv_path, text_columns=["model_output"])
-    chats = build_question_chats(df, lambda: chat_cls(system_prompt=system_prompt), question_col=question_col)
+    prompts = build_question_prompts(df, prompt_factory, question_col=question_col)
     pending_specs = [spec for spec in run_specs if not _run_done(results_df, spec)]
 
     for spec in tqdm(pending_specs, desc="QA benchmark runs"):
@@ -162,7 +166,7 @@ def run_qa_benchmark(
         run_df = evaluate_qa_generation_batched(
             llm,
             df,
-            chats,
+            prompts,
             target=spec.target,
             steer_factory=factory,
             source_layer=spec.source_layer,

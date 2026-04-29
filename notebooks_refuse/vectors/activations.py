@@ -2,32 +2,28 @@ import torch as t
 from tqdm.auto import tqdm
 
 
-def build_answered_chats(df, chat_factory, answer_fn, question_col="question"):
-    chats = []
+def build_answered_prompts(df, prompt_factory, answer_fn, question_col="question"):
+    prompts = []
     answers = []
     for row in df.itertuples(index=False):
-        chat = chat_factory()
-        chat.add_user_message(getattr(row, question_col))
+        question = getattr(row, question_col)
         answer = answer_fn(row)
-        chat.add_assistant_message(answer)
-        chats.append(chat)
+        prompts.append(prompt_factory(question, answer))
         answers.append(answer)
-    return chats, answers
+    return prompts, answers
 
 
-def build_question_chats(df, chat_factory, question_col="question"):
-    chats = []
+def build_question_prompts(df, prompt_factory, question_col="question"):
+    prompts = []
     for row in df.itertuples(index=False):
-        chat = chat_factory()
-        chat.add_user_message(getattr(row, question_col))
-        chats.append(chat)
-    return chats
+        prompts.append(prompt_factory(getattr(row, question_col)))
+    return prompts
 
 
-def answer_token_mask(llm, answers, attention_mask):
-    tokenizer = llm.tokenizer.tokenizer
-    assistant_header_ids = tokenizer.encode(llm.tokenizer.B_ASSISTANT, add_special_tokens=False)
-    eot_ids = tokenizer.encode(llm.tokenizer.E_ASSISTANT, add_special_tokens=False)
+def answer_token_mask(llm, answers, attention_mask, assistant_end_marker="<|eot_id|>"):
+    tokenizer = llm.tokenizer
+    assistant_header_ids = tokenizer.encode(llm.instruction_end_marker, add_special_tokens=False)
+    eot_ids = tokenizer.encode(assistant_end_marker, add_special_tokens=False)
 
     token_mask = t.zeros_like(attention_mask, dtype=t.bool)
     seq_len = attention_mask.shape[1]
@@ -89,15 +85,16 @@ def pool_activation_dict(act_dict, mask_dict):
 
 def collect_answer_activations_batched(
     llm,
-    chats,
+    prompts,
     answers,
     batch_size=32,
+    assistant_end_marker="<|eot_id|>",
     pool_tokens=False,
     return_token_mask=False,
     show_progress=False,
     progress_desc="Activation batches",
 ):
-    tokenizer = llm.tokenizer.tokenizer
+    tokenizer = llm.tokenizer
     answer_token_counts = [
         len(tokenizer.encode(answer.strip(), add_special_tokens=False))
         for answer in answers
@@ -108,18 +105,23 @@ def collect_answer_activations_batched(
     all_acts = []
     all_masks = []
     for start in tqdm(
-        range(0, len(chats), batch_size),
+        range(0, len(prompts), batch_size),
         desc=progress_desc,
         leave=False,
         disable=not show_progress,
     ):
-        batch_chats = chats[start:start + batch_size]
+        batch_prompts = prompts[start:start + batch_size]
         batch_answers = answers[start:start + batch_size]
-        batch = llm.tokenizer.tokenize_batch(batch_chats)
-        token_mask = answer_token_mask(llm, batch_answers, batch["attention_mask"])
+        batch = llm.tokenize_batch(batch_prompts)
+        token_mask = answer_token_mask(
+            llm,
+            batch_answers,
+            batch["attention_mask"],
+            assistant_end_marker=assistant_end_marker,
+        )
 
         llm.reset_all()
-        llm.forward_from_chats(batch_chats)
+        llm.batch_forward(batch_prompts)
         layer_acts = []
         for layer_index in range(num_layers):
             layer_acts.append(llm.get_last_activations(layer_index).detach().cpu())
@@ -141,9 +143,10 @@ def collect_answer_activations_batched(
 def collect_grouped_activations(
     llm,
     frames_by_key,
-    chat_factory_fn,
+    prompt_factory_fn,
     answer_fn,
     batch_size=128,
+    assistant_end_marker="<|eot_id|>",
     show_progress=True,
     progress_desc="Grouped activations",
 ):
@@ -152,12 +155,21 @@ def collect_grouped_activations(
     keys = list(frames_by_key)
     for key in tqdm(keys, desc=progress_desc, disable=not show_progress):
         frame = frames_by_key[key].reset_index(drop=True)
-        chats, answers = build_answered_chats(frame, lambda: chat_factory_fn(key), answer_fn)
+        prompts, answers = build_answered_prompts(
+            frame,
+            lambda question, answer: prompt_factory_fn(key, question, answer),
+            answer_fn,
+        )
         activations[key], masks[key] = collect_answer_activations_batched(
             llm,
-            chats,
+            prompts,
             answers,
             batch_size=batch_size,
+            assistant_end_marker=assistant_end_marker,
             return_token_mask=True,
         )
     return activations, masks
+
+
+build_answered_chats = build_answered_prompts
+build_question_chats = build_question_prompts

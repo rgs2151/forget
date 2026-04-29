@@ -1,6 +1,8 @@
 from .activations import (
     build_answered_chats,
+    build_answered_prompts,
     build_question_chats,
+    build_question_prompts,
     collect_answer_activations_batched,
     collect_grouped_activations,
     masked_mean_acts,
