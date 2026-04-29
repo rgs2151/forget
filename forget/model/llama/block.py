@@ -4,7 +4,6 @@ Wrapper for the block to save activations and unembed them
 
 import torch as t
 from .attention import AttnWrapper
-from ..abstract import AbstractTokenizer
 from typing import Optional
 
 
@@ -29,13 +28,11 @@ class BlockOutputWrapper(t.nn.Module):
         block,
         unembed_matrix,
         norm,
-        tokenizer: AbstractTokenizer
     ) -> None:
         super().__init__()
         self.block = block
         self.unembed_matrix = unembed_matrix
         self.norm = norm
-        self.tokenizer = tokenizer
 
         self.block.self_attn = AttnWrapper(self.block.self_attn)
         self.post_attention_layernorm = self.block.post_attention_layernorm
