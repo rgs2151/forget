@@ -57,13 +57,15 @@ class AutoModelForCausalLMWrapper():
         self.model.generation_config.top_k = None
         self.model.generation_config.max_length = None
 
-        # Wrap model layers for activation tracking
-        for i, layer in enumerate(self.model.model.layers):
-            self.model.model.layers[i] = BlockOutputWrapper(
+        # Instrument model layers without replacing the underlying HF blocks.
+        self.layer_wrappers = [
+            BlockOutputWrapper(
                 layer,
                 self.model.lm_head,
                 self.model.model.norm,
             )
+            for layer in self.model.model.layers
+        ]
     
     # ------------------------------------------------------------------ #
     #  Tokenizer / decoder methods
@@ -148,22 +150,22 @@ class AutoModelForCausalLMWrapper():
     # ------------------------------------------------------------------ #
 
     def get_last_activations(self, layer: int) -> t.Tensor:
-        return self.model.model.layers[layer].activations
+        return self.layer_wrappers[layer].activations
 
     def set_save_internal_decodings(self, value: bool) -> None:
-        for layer in self.model.model.layers:
+        for layer in self.layer_wrappers:
             layer.save_internal_decodings = value
 
     def set_from_positions(self, pos: Union[int, t.Tensor]) -> None:
         """Set from_position on all layers. Accepts int or (batch,) tensor."""
         if not isinstance(pos, t.Tensor):
             pos = t.tensor([pos], device=self.device)
-        for layer in self.model.model.layers:
+        for layer in self.layer_wrappers:
             layer.from_position = pos
 
     def set_steering_op(self, layer: int, op) -> None:
-        self.model.model.layers[layer].steering_op = op
+        self.layer_wrappers[layer].steering_op = op
 
     def reset_all(self) -> None:
-        for layer in self.model.model.layers:
+        for layer in self.layer_wrappers:
             layer.reset()

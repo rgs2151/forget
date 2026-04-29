@@ -1,21 +1,17 @@
-"""
-Wrapper for the block to save activations and unembed them
-"""
+"""Block instrumentation helpers."""
 
 import torch as t
-from .attention import AttnWrapper
 from typing import Optional
 
 
-class BlockOutputWrapper(t.nn.Module):
-    """
-    Wrapper for block to save activations and unembed them
-    """
+class BlockOutputWrapper:
+    """Attach activation capture and steering to an existing decoder block."""
     save_internal_decodings: bool = False
     steering_op = None
 
     activations: Optional[t.Tensor] = None
     from_position: Optional[t.Tensor] = None   # (batch,) tensor or None
+    attn_activations: Optional[t.Tensor] = None
 
     attn_out_unembedded: Optional[t.Tensor] = None
     intermediate_resid_unembedded: Optional[t.Tensor] = None
@@ -29,20 +25,29 @@ class BlockOutputWrapper(t.nn.Module):
         unembed_matrix,
         norm,
     ) -> None:
-        super().__init__()
         self.block = block
         self.unembed_matrix = unembed_matrix
         self.norm = norm
 
-        self.block.self_attn = AttnWrapper(self.block.self_attn)
         self.post_attention_layernorm = self.block.post_attention_layernorm
+        self._attn_hook_handle = self.block.self_attn.register_forward_hook(
+            self._save_attn_activations,
+        )
+        self._block_hook_handle = self.block.register_forward_hook(
+            self._hook_block_output,
+            with_kwargs=True,
+        )
 
-    def forward(
+    def _save_attn_activations(self, _module, _args, output):
+        self.attn_activations = output[0] if isinstance(output, tuple) else output
+
+    def _hook_block_output(
         self,
-        *args,
-        **kwargs,
-    ) -> tuple[t.Tensor, ...]:
-        output = self.block(*args, **kwargs)
+        _module,
+        args,
+        kwargs,
+        output,
+    ):
         is_tuple = isinstance(output, tuple)
         hidden = output[0] if is_tuple else output
         self.activations = hidden
@@ -81,7 +86,7 @@ class BlockOutputWrapper(t.nn.Module):
         attn_output: t.Tensor,
     ) -> None:
         # Self-attention unembedded
-        attn_output = self.block.self_attn.activations
+        attn_output = self.attn_activations
         self.attn_out_unembedded = self.unembed_matrix(self.norm(attn_output))
 
         # Intermediate residual unembedded
@@ -98,5 +103,5 @@ class BlockOutputWrapper(t.nn.Module):
     def reset(self) -> None:
         self.steering_op = None
         self.activations = None
-        self.block.self_attn.activations = None
+        self.attn_activations = None
         self.from_position = None
