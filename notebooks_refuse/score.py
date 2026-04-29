@@ -1,6 +1,5 @@
 from bert_score import score as bert_score_fn
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from transformers import pipeline
 
 
 def add_retention_column(df, prediction_col="model_output", correct_col="baseline_output"):
@@ -21,7 +20,7 @@ def add_refusal_column(df, prediction_col="model_output", refusal_string="I don'
     return df
 
 
-def add_acceptability_column(df, prediction_col="model_output", device="cuda"):
+def add_acceptability_column(df, prediction_col="model_output", device="cuda", batch_size=128, max_length=512):
     df = df.copy()
     predictions = df[prediction_col].fillna("").tolist()
     
@@ -40,7 +39,8 @@ def add_acceptability_column(df, prediction_col="model_output", device="cuda"):
     )
     
     # Process in batches
-    results = clf(predictions, truncation=True, max_length=512, batch_size=16)
+    # pipeline returns a list when passed a list, so this will block until complete
+    results = clf(predictions, truncation=True, max_length=max_length, batch_size=batch_size)
     
     acceptability_scores = []
     for res in results:
