@@ -115,7 +115,11 @@ class AutoModelForCausalLMWrapper():
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         with t.no_grad():
-            return self.model(input_ids=input_ids, attention_mask=attention_mask).logits
+            res = self.model(input_ids=input_ids, attention_mask=attention_mask).logits
+            
+        del input_ids, attention_mask
+        t.cuda.empty_cache()
+        return res
 
     def batch_generate(
         self,
@@ -143,7 +147,11 @@ class AutoModelForCausalLMWrapper():
                 pad_token_id=self.pad_token_id,
                 use_cache=True,
             )
-            return self.decode_batch(generated, skip_special_tokens=False)
+            decoded = self.decode_batch(generated, skip_special_tokens=False)
+            
+        del input_ids, attention_mask, generated
+        t.cuda.empty_cache()
+        return decoded
 
     # ------------------------------------------------------------------ #
     #  Accessors / mutators
