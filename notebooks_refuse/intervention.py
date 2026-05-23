@@ -1,21 +1,7 @@
-from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
-import torch
 from tqdm.auto import tqdm
-
-from forget.model.steering import GatedSteer
-
-from activations import build_question_prompts
-
-
-@dataclass(frozen=True)
-class RunSpec:
-    label: str
-    target: str
-    source_layer: object
-    target_layer: object
-    scale: float
 
 
 def normalize_layers(layer):
@@ -43,215 +29,198 @@ def load_or_empty_results(csv_path, text_columns=None):
     return df
 
 
-def make_run_specs(objective_df, baseline_scale=0.0, steered_label="steered", baseline_label="baseline"):
-    specs = []
-    for row in objective_df.itertuples(index=False):
-        specs.append(RunSpec(
-            label=baseline_label,
-            target=row.target,
-            source_layer=row.source_layer,
-            target_layer=row.target_layer,
-            scale=baseline_scale,
-        ))
-        specs.append(RunSpec(
-            label=steered_label,
-            target=row.target,
-            source_layer=row.source_layer,
-            target_layer=row.target_layer,
-            scale=row.best_scale,
-        ))
-    return specs
+def _normalize_tau(tau):
+    return float(getattr(tau, "item", lambda: tau)())
 
 
-def _run_done(df, spec):
-    if df.empty:
-        return False
-    mask = (
-        (df["label"] == spec.label)
-        & (df["target"] == spec.target)
-        & (df["source_layer"].astype(str) == str(spec.source_layer))
-        & (df["target_layer"].astype(str) == str(spec.target_layer))
-        & (df["scale"] == spec.scale)
-    )
-    return mask.any()
+def _job_id(label, target, scale, prompt_index):
+    return f"{label}|{target}|{scale}|{prompt_index}"
 
 
-def evaluate_qa_generation_batched(
-    llm,
-    df,
-    prompts,
-    target,
-    steer_factory,
-    source_layer,
-    target_layer,
-    scale,
-    batch_size=32,
-    generation_kwargs=None,
-    trim_output_fn=None,
-    show_progress=False,
-    progress_desc="QA batches",
-):
-    src_layers = normalize_layers(source_layer)
-    tgt_layers = normalize_layers(target_layer)
-    assert len(src_layers) == len(tgt_layers)
-
-    generation_kwargs = dict(generation_kwargs or {})
-    generation_kwargs.setdefault("max_new_tokens", 128)
-    generation_kwargs.setdefault("do_sample", False)
-    generation_kwargs.setdefault("temperature", 1.0)
-
-    all_outputs = []
-    for start in tqdm(
-        range(0, len(prompts), batch_size),
-        desc=progress_desc,
-        leave=False,
-        disable=not show_progress,
-    ):
-        batch_prompts = prompts[start:start + batch_size]
-        llm.reset_all()
-        for source_layer_item, target_layer_item in zip(src_layers, tgt_layers):
-            llm.set_steering_op(target_layer_item, steer_factory(source_layer_item, scale))
-        outputs = llm.batch_generate(batch_prompts, **generation_kwargs)
-        all_outputs.extend(outputs)
-        llm.reset_all()
+def make_generation_jobs(df, prompts, targets=None, scales=None, target_col=None, label="intervention"):
+    if len(prompts) != len(df):
+        raise ValueError("prompts and df must have the same length.")
+    if scales is None:
+        scales = [1.0]
+    elif not isinstance(scales, (list, tuple)):
+        scales = [scales]
 
     rows = []
-    for (_, row), raw in zip(df.iterrows(), all_outputs):
-        response = trim_output_fn(raw) if trim_output_fn is not None else raw
-        rows.append({
-            "concept": row["concept"],
-            "target": target,
-            "question": row["question"],
-            "correct_answer": row["answer"],
-            "scale": scale,
-            "source_layer": src_layers if len(src_layers) > 1 else src_layers[0],
-            "target_layer": tgt_layers if len(tgt_layers) > 1 else tgt_layers[0],
-            "label": None,
-            "model_output": response,
-        })
+    frame = df.reset_index(drop=True)
+    for prompt_index, row in frame.iterrows():
+        base = row.to_dict()
+        base["prompt_index"] = prompt_index
+        base["prompt"] = prompts[prompt_index]
+
+        row_targets = [row[target_col]] if target_col is not None else (targets or [])
+        for target in row_targets:
+            for scale in scales:
+                rows.append({
+                    **base,
+                    "job_id": _job_id(label, target, scale, prompt_index),
+                    "label": label,
+                    "target": target,
+                    "scale": scale,
+                })
+
     return pd.DataFrame(rows)
 
 
-def _normalize_tau(tau):
-    if isinstance(tau, torch.Tensor) and tau.numel() == 1:
-        return float(tau.item())
-    return tau
+def split_jobs_for_gpus(jobs, gpu_ids):
+    prompt_indices = pd.Series(jobs["prompt_index"].drop_duplicates().tolist())
+    splits = []
+    for index, gpu_id in enumerate(gpu_ids):
+        gpu_prompt_indices = prompt_indices.iloc[index::len(gpu_ids)]
+        gpu_jobs = jobs[jobs["prompt_index"].isin(gpu_prompt_indices)].reset_index(drop=True)
+        splits.append((gpu_id, gpu_jobs))
+    return splits
 
 
-def run_intervention_generations(
+def is_refusal_output(text, refusal_string="I don't know."):
+    text = str(text).lower().replace("’", "'")
+    refusal = refusal_string.lower().replace("’", "'").rstrip(".")
+    return refusal in text
+
+
+def select_refusal_scale(results, refusal_string="I don't know.", label="intervention"):
+    df = results.copy()
+    if "label" in df:
+        df = df[df["label"] == label]
+    if df.empty:
+        raise ValueError("No rows available for scale selection.")
+
+    scored = df.assign(
+        is_refusal=df["model_output"].fillna("").apply(
+            lambda text: is_refusal_output(text, refusal_string=refusal_string)
+        )
+    )
+    rates = scored.groupby("scale", as_index=False)["is_refusal"].mean()
+    rates = rates.sort_values(["is_refusal", "scale"], ascending=[False, True])
+    return rates.iloc[0]["scale"]
+
+
+def make_gated_steering_factory(source_layer, target_layer, detect_vectors, steer_vector, gate_thresholds):
+    src_layers = normalize_layers(source_layer)
+    tgt_layers = normalize_layers(target_layer)
+    if len(src_layers) != len(tgt_layers):
+        raise ValueError("source_layer and target_layer must have the same length.")
+
+    def factory(llm, target, scale):
+        from forget.model.steering import GatedSteer
+
+        if target not in detect_vectors:
+            raise ValueError(f"Missing detect vectors for target {target!r}.")
+        if target not in gate_thresholds:
+            raise ValueError(f"Missing gate thresholds for target {target!r}.")
+
+        target_detect = detect_vectors[target]
+        target_thresholds = gate_thresholds[target]
+        for source_layer_item, target_layer_item in zip(src_layers, tgt_layers):
+            llm.set_steering_op(
+                target_layer_item,
+                GatedSteer(
+                    v_detect=target_detect[source_layer_item].to(llm.device),
+                    v_steer=steer_vector[source_layer_item].to(llm.device),
+                    tau=_normalize_tau(target_thresholds[source_layer_item]),
+                    scale=scale,
+                ),
+            )
+
+    return factory
+
+
+def run_generation_jobs(
     llm,
-    df,
-    prompts,
-    run_specs,
-    csv_path,
-    detect_vectors_by_target=None,
-    steering_vector=None,
-    thresholds_by_target=None,
+    jobs,
+    steering_factory,
     generation_kwargs=None,
-    trim_output_fn=None,
+    trim_output_fn=lambda text: text,
     batch_size=64,
+    result_metadata=None,
 ):
-    results_df = load_or_empty_results(csv_path, text_columns=["model_output"])
-    if len(prompts) != len(df):
-        raise ValueError("prompts and df must have the same length.")
-
-    detect_vectors_by_target = detect_vectors_by_target or {}
-    thresholds_by_target = thresholds_by_target or {}
-
-    pending_specs = [spec for spec in run_specs if not _run_done(results_df, spec)]
+    jobs = jobs.reset_index(drop=True)
+    result_metadata = dict(result_metadata or {})
     generation_kwargs_local = dict(generation_kwargs or {})
     generation_kwargs_local.setdefault("max_new_tokens", 128)
     generation_kwargs_local.setdefault("do_sample", False)
     generation_kwargs_local.setdefault("temperature", 1.0)
 
-    for spec in tqdm(pending_specs, desc="Intervention generation runs"):
-        src_layers = normalize_layers(spec.source_layer)
-        tgt_layers = normalize_layers(spec.target_layer)
-        assert len(src_layers) == len(tgt_layers)
+    rows = []
+    groups = list(jobs.groupby(["label", "target", "scale"], sort=False))
+    for (label, target, scale), group in tqdm(groups, desc="Generation runs"):
+        for start in range(0, len(group), batch_size):
+            batch_jobs = group.iloc[start:start + batch_size]
+            batch_prompts = batch_jobs["prompt"].tolist()
 
-        all_outputs = []
-        for start in range(0, len(prompts), batch_size):
-            batch_prompts = prompts[start:start + batch_size]
             llm.reset_all()
-            if spec.scale != 0:
-                if steering_vector is None:
-                    raise ValueError("steering_vector is required for non-baseline runs.")
-                if spec.target not in detect_vectors_by_target:
-                    raise ValueError(f"Missing detect vectors for target {spec.target!r}.")
-                if spec.target not in thresholds_by_target:
-                    raise ValueError(f"Missing thresholds for target {spec.target!r}.")
-                target_detect = detect_vectors_by_target[spec.target]
-                target_thresholds = thresholds_by_target[spec.target]
-                for source_layer_item, target_layer_item in zip(src_layers, tgt_layers):
-                    llm.set_steering_op(
-                        target_layer_item,
-                        GatedSteer(
-                            v_detect=target_detect[source_layer_item].to(llm.device),
-                            v_steer=steering_vector[source_layer_item].to(llm.device),
-                            tau=_normalize_tau(target_thresholds[source_layer_item]),
-                            scale=spec.scale,
-                        ),
-                    )
+            steering_factory(llm, target, scale)
             outputs = llm.batch_generate(batch_prompts, **generation_kwargs_local)
-            all_outputs.extend(outputs)
             llm.reset_all()
 
-        rows = []
-        for prompt_index, ((_, row), raw) in enumerate(zip(df.iterrows(), all_outputs)):
-            response = trim_output_fn(raw) if trim_output_fn is not None else raw
-            rows.append({
-                "prompt_index": prompt_index,
-                "concept": row["concept"],
-                "target": spec.target,
-                "question": row["question"],
-                "answer": row["answer"] if "answer" in row.index else None,
-                "scale": spec.scale,
-                "source_layer": src_layers if len(src_layers) > 1 else src_layers[0],
-                "target_layer": tgt_layers if len(tgt_layers) > 1 else tgt_layers[0],
-                "label": spec.label,
-                "model_output": response,
-            })
-        run_df = pd.DataFrame(rows)
-        run_df["label"] = spec.label
-        results_df = pd.concat([results_df, run_df], ignore_index=True)
-        results_df.to_csv(csv_path, index=False)
+            for job, raw in zip(batch_jobs.to_dict("records"), outputs):
+                job.pop("prompt")
+                response = trim_output_fn(raw)
+                rows.append({
+                    **job,
+                    **result_metadata,
+                    "model_output": response,
+                })
 
-    return results_df
+    return pd.DataFrame(rows)
 
 
-def run_qa_benchmark(
-    llm,
-    df,
-    prompt_factory,
-    run_specs,
-    steer_factory_fn,
-    csv_path,
+def run_generation_jobs_for_gpu(
+    llm_factory,
+    gpu_id,
+    jobs,
+    steering_factory,
     generation_kwargs=None,
-    trim_output_fn=None,
+    trim_output_fn=lambda text: text,
     batch_size=64,
-    question_col="question",
+    result_metadata=None,
 ):
-    results_df = load_or_empty_results(csv_path, text_columns=["model_output"])
-    prompts = build_question_prompts(df, prompt_factory, question_col=question_col)
-    pending_specs = [spec for spec in run_specs if not _run_done(results_df, spec)]
+    llm = llm_factory(gpu_id)
+    return run_generation_jobs(
+        llm,
+        jobs,
+        steering_factory=steering_factory,
+        generation_kwargs=generation_kwargs,
+        trim_output_fn=trim_output_fn,
+        batch_size=batch_size,
+        result_metadata=result_metadata,
+    )
 
-    for spec in tqdm(pending_specs, desc="QA benchmark runs"):
-        factory = steer_factory_fn(spec.target)
-        run_df = evaluate_qa_generation_batched(
-            llm,
-            df,
-            prompts,
-            target=spec.target,
-            steer_factory=factory,
-            source_layer=spec.source_layer,
-            target_layer=spec.target_layer,
-            scale=spec.scale,
-            batch_size=batch_size,
-            generation_kwargs=generation_kwargs,
-            trim_output_fn=trim_output_fn,
-        )
-        run_df["label"] = spec.label
-        results_df = pd.concat([results_df, run_df], ignore_index=True)
-        results_df.to_csv(csv_path, index=False)
 
-    return results_df
+def run_generation_jobs_multi_gpu(
+    llm_factory,
+    jobs,
+    gpu_ids,
+    csv_path,
+    steering_factory,
+    generation_kwargs=None,
+    trim_output_fn=lambda text: text,
+    batch_size=64,
+    result_metadata=None,
+):
+    gpu_jobs = split_jobs_for_gpus(jobs, gpu_ids)
+    with ThreadPoolExecutor(len(gpu_ids)) as executor:
+        futures = [
+            executor.submit(
+                run_generation_jobs_for_gpu,
+                llm_factory,
+                gpu_id,
+                jobs_for_gpu,
+                steering_factory=steering_factory,
+                generation_kwargs=generation_kwargs,
+                trim_output_fn=trim_output_fn,
+                batch_size=batch_size,
+                result_metadata=result_metadata,
+            )
+            for gpu_id, jobs_for_gpu in gpu_jobs
+        ]
+        frames = [future.result() for future in futures]
+
+    results = pd.concat(frames, ignore_index=True)
+    results = results.sort_values(["prompt_index", "target", "scale"]).reset_index(drop=True)
+    results.to_csv(csv_path, index=False)
+    return results
