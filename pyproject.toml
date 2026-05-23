@@ -17,6 +17,7 @@ dependencies = [
     "pandas",
     "matplotlib",
     "rouge-score",
+    "seaborn",
 ]
 
 [build-system]
