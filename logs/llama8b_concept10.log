@@ -1,0 +1,141 @@
+[refuse] template=llama3 for 'meta-llama/Llama-3.1-8B-Instruct'
+[refuse] data: train=720 test=360 concepts=10
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15231.65it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15584.84it/s]
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [3a] baseline_train (compute)
+baseline_train:   0%|          | 0/6 [00:00<?, ?it/s]baseline_train:  17%|#6        | 1/6 [00:02<00:12,  2.59s/it]baseline_train:  33%|###3      | 2/6 [00:04<00:08,  2.03s/it]baseline_train:  50%|#####     | 3/6 [00:05<00:05,  1.67s/it]baseline_train:  67%|######6   | 4/6 [00:07<00:03,  1.99s/it]baseline_train:  83%|########3 | 5/6 [00:09<00:01,  1.85s/it]baseline_train: 100%|##########| 6/6 [00:10<00:00,  1.68s/it]baseline_train: 100%|##########| 6/6 [00:10<00:00,  1.82s/it]
+[refuse] [3b] baseline_test (compute)
+baseline_test:   0%|          | 0/3 [00:00<?, ?it/s]baseline_test:  33%|###3      | 1/3 [00:01<00:03,  1.93s/it]baseline_test:  67%|######6   | 2/3 [00:03<00:01,  1.93s/it]baseline_test: 100%|##########| 3/3 [00:05<00:00,  1.67s/it]baseline_test: 100%|##########| 3/3 [00:05<00:00,  1.74s/it]
+[refuse] [4a] baseline activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:02<00:08,  2.25s/it]
+activations:  20%|##        | 1/5 [00:03<00:12,  3.09s/it][Aactivations:  40%|####      | 2/5 [00:03<00:05,  1.80s/it]
+activations:  40%|####      | 2/5 [00:04<00:06,  2.03s/it][Aactivations:  60%|######    | 3/5 [00:05<00:03,  1.59s/it]
+activations:  60%|######    | 3/5 [00:06<00:03,  1.93s/it][Aactivations:  80%|########  | 4/5 [00:07<00:01,  1.86s/it]
+activations:  80%|########  | 4/5 [00:07<00:01,  1.86s/it][Aactivations: 100%|##########| 5/5 [00:08<00:00,  1.70s/it]activations: 100%|##########| 5/5 [00:08<00:00,  1.75s/it]
+
+activations: 100%|##########| 5/5 [00:09<00:00,  1.83s/it][Aactivations: 100%|##########| 5/5 [00:09<00:00,  1.95s/it]
+[refuse] [4b] refuse activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:02<00:08,  2.05s/it]
+activations:  20%|##        | 1/5 [00:02<00:08,  2.10s/it][A
+activations:  40%|####      | 2/5 [00:03<00:04,  1.58s/it][Aactivations:  40%|####      | 2/5 [00:03<00:04,  1.62s/it]
+activations:  60%|######    | 3/5 [00:04<00:02,  1.50s/it][Aactivations:  60%|######    | 3/5 [00:04<00:03,  1.53s/it]
+activations:  80%|########  | 4/5 [00:06<00:01,  1.54s/it][Aactivations:  80%|########  | 4/5 [00:07<00:01,  1.81s/it]
+activations: 100%|##########| 5/5 [00:07<00:00,  1.46s/it][Aactivations: 100%|##########| 5/5 [00:07<00:00,  1.53s/it]
+activations: 100%|##########| 5/5 [00:08<00:00,  1.57s/it]activations: 100%|##########| 5/5 [00:08<00:00,  1.63s/it]
+[refuse] [4c] baseline_test activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][A
+activations:  20%|##        | 1/5 [00:00<00:03,  1.08it/s][Aactivations:  20%|##        | 1/5 [00:00<00:03,  1.04it/s]
+activations:  40%|####      | 2/5 [00:01<00:01,  1.52it/s][Aactivations:  40%|####      | 2/5 [00:01<00:02,  1.38it/s]
+activations:  60%|######    | 3/5 [00:02<00:01,  1.48it/s][Aactivations:  60%|######    | 3/5 [00:02<00:01,  1.26it/s]
+activations:  80%|########  | 4/5 [00:02<00:00,  1.46it/s][Aactivations:  80%|########  | 4/5 [00:03<00:00,  1.18it/s]
+activations: 100%|##########| 5/5 [00:03<00:00,  1.37it/s][Aactivations: 100%|##########| 5/5 [00:03<00:00,  1.39it/s]
+activations: 100%|##########| 5/5 [00:04<00:00,  1.27it/s]activations: 100%|##########| 5/5 [00:04<00:00,  1.25it/s]
+[refuse] freed main
+[refuse] [5] vectors method=lda (compute)
+lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors totals:  20%|##        | 2/10 [00:00<00:00, 12.93it/s]lda_vectors totals:  40%|####      | 4/10 [00:00<00:00, 13.29it/s]lda_vectors totals:  60%|######    | 6/10 [00:00<00:00, 14.96it/s]lda_vectors totals:  80%|########  | 8/10 [00:00<00:00, 13.07it/s]lda_vectors totals: 100%|##########| 10/10 [00:00<00:00, 14.68it/s]lda_vectors totals: 100%|##########| 10/10 [00:00<00:00, 14.18it/s]
+lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors detect:  10%|#         | 1/10 [00:00<00:02,  3.92it/s]lda_vectors detect:  20%|##        | 2/10 [00:00<00:01,  4.42it/s]lda_vectors detect:  30%|###       | 3/10 [00:00<00:01,  5.15it/s]lda_vectors detect:  40%|####      | 4/10 [00:00<00:01,  5.79it/s]lda_vectors detect:  50%|#####     | 5/10 [00:00<00:00,  6.14it/s]lda_vectors detect:  60%|######    | 6/10 [00:01<00:00,  6.11it/s]lda_vectors detect:  70%|#######   | 7/10 [00:01<00:00,  5.51it/s]lda_vectors detect:  80%|########  | 8/10 [00:01<00:00,  5.68it/s]lda_vectors detect:  90%|######### | 9/10 [00:01<00:00,  6.09it/s]lda_vectors detect: 100%|##########| 10/10 [00:01<00:00,  6.10it/s]lda_vectors detect: 100%|##########| 10/10 [00:01<00:00,  5.71it/s]
+lda_vectors forget:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors forget:  10%|#         | 1/10 [00:00<00:01,  8.17it/s]lda_vectors forget:  20%|##        | 2/10 [00:00<00:00,  8.67it/s]lda_vectors forget:  40%|####      | 4/10 [00:00<00:00, 10.96it/s]lda_vectors forget:  60%|######    | 6/10 [00:00<00:00, 11.27it/s]lda_vectors forget:  80%|########  | 8/10 [00:00<00:00, 10.54it/s]lda_vectors forget: 100%|##########| 10/10 [00:00<00:00, 10.67it/s]lda_vectors forget: 100%|##########| 10/10 [00:00<00:00, 10.52it/s]
+[refuse] loading main on gpus=[0, 1] (for calibration generation)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15033.35it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15133.44it/s]
+[refuse] [5.5a] calibration generate (compute, 100% of test × 30 scales)
+Generation runs:   0%|          | 0/300 [00:00<?, ?it/s]
+Generation runs:   0%|          | 0/300 [00:00<?, ?it/s][A
+Generation runs:   0%|          | 1/300 [00:01<05:57,  1.20s/it][AGeneration runs:   0%|          | 1/300 [00:01<05:58,  1.20s/it]
+Generation runs:   1%|          | 2/300 [00:02<05:53,  1.19s/it][AGeneration runs:   1%|          | 2/300 [00:02<06:08,  1.24s/it]
+Generation runs:   1%|1         | 3/300 [00:03<05:50,  1.18s/it][AGeneration runs:   1%|1         | 3/300 [00:03<06:05,  1.23s/it]
+Generation runs:   1%|1         | 4/300 [00:04<05:49,  1.18s/it][AGeneration runs:   1%|1         | 4/300 [00:04<06:00,  1.22s/it]
+Generation runs:   2%|1         | 5/300 [00:05<05:47,  1.18s/it][AGeneration runs:   2%|1         | 5/300 [00:06<05:56,  1.21s/it]
+Generation runs:   2%|2         | 6/300 [00:07<05:46,  1.18s/it][AGeneration runs:   2%|2         | 6/300 [00:07<05:54,  1.21s/it]
+Generation runs:   2%|2         | 7/300 [00:08<05:45,  1.18s/it][AGeneration runs:   2%|2         | 7/300 [00:08<05:52,  1.20s/it]
+Generation runs:   3%|2         | 8/300 [00:09<05:44,  1.18s/it][AGeneration runs:   3%|2         | 8/300 [00:09<05:50,  1.20s/it]
+Generation runs:   3%|3         | 9/300 [00:10<05:43,  1.18s/it][AGeneration runs:   3%|3         | 9/300 [00:10<05:49,  1.20s/it]
+Generation runs:   3%|3         | 10/300 [00:11<05:42,  1.18s/it][AGeneration runs:   3%|3         | 10/300 [00:12<05:47,  1.20s/it]
+Generation runs:   4%|3         | 11/300 [00:12<05:41,  1.18s/it][AGeneration runs:   4%|3         | 11/300 [00:13<05:46,  1.20s/it]
+Generation runs:   4%|4         | 12/300 [00:14<05:40,  1.18s/it][AGeneration runs:   4%|4         | 12/300 [00:14<05:45,  1.20s/it]
+Generation runs:   4%|4         | 13/300 [00:15<05:38,  1.18s/it][AGeneration runs:   4%|4         | 13/300 [00:15<05:44,  1.20s/it]
+Generation runs:   5%|4         | 14/300 [00:16<05:39,  1.19s/it][AGeneration runs:   5%|4         | 14/300 [00:16<05:43,  1.20s/it]
+Generation runs:   5%|5         | 15/300 [00:17<05:37,  1.18s/it][AGeneration runs:   5%|5         | 15/300 [00:18<05:41,  1.20s/it]
+Generation runs:   5%|5         | 16/300 [00:18<05:40,  1.20s/it][AGeneration runs:   5%|5         | 16/300 [00:19<05:46,  1.22s/it]
+Generation runs:   6%|5         | 17/300 [00:20<05:37,  1.19s/it][AGeneration runs:   6%|5         | 17/300 [00:20<05:42,  1.21s/it]
+Generation runs:   6%|6         | 18/300 [00:21<05:35,  1.19s/it][AGeneration runs:   6%|6         | 18/300 [00:21<05:40,  1.21s/it]
+Generation runs:   6%|6         | 19/300 [00:22<05:33,  1.19s/it][AGeneration runs:   6%|6         | 19/300 [00:22<05:38,  1.20s/it]
+Generation runs:   7%|6         | 20/300 [00:23<05:31,  1.18s/it][AGeneration runs:   7%|6         | 20/300 [00:24<05:36,  1.20s/it]
+Generation runs:   7%|7         | 21/300 [00:24<05:29,  1.18s/it][AGeneration runs:   7%|7         | 21/300 [00:25<05:35,  1.20s/it]
+Generation runs:   7%|7         | 22/300 [00:26<05:28,  1.18s/it][AGeneration runs:   7%|7         | 22/300 [00:26<05:33,  1.20s/it]
+Generation runs:   8%|7         | 23/300 [00:27<05:26,  1.18s/it][AGeneration runs:   8%|7         | 23/300 [00:27<05:32,  1.20s/it]
+Generation runs:   8%|8         | 24/300 [00:28<05:25,  1.18s/it][AGeneration runs:   8%|8         | 24/300 [00:28<05:30,  1.20s/it]
+Generation runs:   8%|8         | 25/300 [00:29<05:23,  1.18s/it][AGeneration runs:   8%|8         | 25/300 [00:30<05:29,  1.20s/it]
+Generation runs:   9%|8         | 26/300 [00:30<05:22,  1.18s/it][AGeneration runs:   9%|8         | 26/300 [00:31<05:28,  1.20s/it]
+Generation runs:   9%|9         | 27/300 [00:31<05:21,  1.18s/it][AGeneration runs:   9%|9         | 27/300 [00:32<05:27,  1.20s/it]
+Generation runs:   9%|9         | 28/300 [00:33<05:20,  1.18s/it][AGeneration runs:   9%|9         | 28/300 [00:33<05:26,  1.20s/it]
+Generation runs:  10%|9         | 29/300 [00:34<05:18,  1.18s/it][AGeneration runs:  10%|9         | 29/300 [00:34<05:24,  1.20s/it]
+Generation runs:  10%|#         | 30/300 [00:35<05:17,  1.18s/it][A
+Generation runs:  10%|#         | 31/300 [00:35<04:20,  1.03it/s][AGeneration runs:  10%|#         | 30/300 [00:36<05:23,  1.20s/it]
+Generation runs:  11%|#         | 32/300 [00:36<03:40,  1.22it/s][A
+Generation runs:  11%|#1        | 33/300 [00:36<03:12,  1.39it/s][AGeneration runs:  10%|#         | 31/300 [00:37<05:20,  1.19s/it]
+Generation runs:  11%|#1        | 34/300 [00:37<02:52,  1.54it/s][A
+Generation runs:  12%|#1        | 35/300 [00:37<02:39,  1.67it/s][A
+Generation runs:  12%|#2        | 36/300 [00:38<02:29,  1.77it/s][AGeneration runs:  11%|#         | 32/300 [00:38<05:17,  1.19s/it]
+Generation runs:  12%|#2        | 37/300 [00:38<02:22,  1.85it/s][A
+Generation runs:  13%|#2        | 38/300 [00:39<02:17,  1.91it/s][AGeneration runs:  11%|#1        | 33/300 [00:39<05:15,  1.18s/it]
+Generation runs:  13%|#3        | 39/300 [00:39<02:13,  1.96it/s][A
+Generation runs:  13%|#3        | 40/300 [00:40<02:10,  1.99it/s][A
+Generation runs:  14%|#3        | 41/300 [00:40<02:08,  2.02it/s][AGeneration runs:  11%|#1        | 34/300 [00:40<05:15,  1.18s/it]
+Generation runs:  14%|#4        | 42/300 [00:41<01:58,  2.18it/s][A
+Generation runs:  14%|#4        | 43/300 [00:41<01:50,  2.33it/s][A
+Generation runs:  15%|#4        | 44/300 [00:41<01:44,  2.45it/s][AGeneration runs:  12%|#1        | 35/300 [00:41<05:13,  1.18s/it]
+Generation runs:  15%|#5        | 45/300 [00:42<01:40,  2.55it/s][A
+Generation runs:  15%|#5        | 46/300 [00:42<01:51,  2.28it/s][AGeneration runs:  12%|#2        | 36/300 [00:43<05:11,  1.18s/it]
+Generation runs:  16%|#5        | 47/300 [00:43<01:57,  2.15it/s][A
+Generation runs:  16%|#6        | 48/300 [00:43<01:49,  2.30it/s][A
+Generation runs:  16%|#6        | 49/300 [00:43<01:39,  2.51it/s][AGeneration runs:  12%|#2        | 37/300 [00:44<05:09,  1.18s/it]
+Generation runs:  17%|#6        | 50/300 [00:44<02:26,  1.70it/s][AGeneration runs:  13%|#2        | 38/300 [00:45<05:07,  1.17s/it]
+Generation runs:  17%|#7        | 51/300 [00:46<02:58,  1.39it/s][A
+Generation runs:  17%|#7        | 52/300 [00:46<02:25,  1.70it/s][A
+Generation runs:  18%|#7        | 53/300 [00:46<02:02,  2.02it/s][AGeneration runs:  13%|#3        | 39/300 [00:46<05:06,  1.17s/it]
+Generation runs:  18%|#8        | 54/300 [00:47<02:41,  1.52it/s][AGeneration runs:  13%|#3        | 40/300 [00:47<05:04,  1.17s/it]
+Generation runs:  18%|#8        | 55/300 [00:48<03:08,  1.30it/s][AGeneration runs:  14%|#3        | 41/300 [00:49<05:03,  1.17s/it]
+Generation runs:  19%|#8        | 56/300 [00:49<03:26,  1.18it/s][AGeneration runs:  14%|#4        | 42/300 [00:50<05:01,  1.17s/it]
+Generation runs:  19%|#9        | 57/300 [00:50<03:39,  1.11it/s][AGeneration runs:  14%|#4        | 43/300 [00:51<05:00,  1.17s/it]
+Generation runs:  19%|#9        | 58/300 [00:51<03:47,  1.06it/s][AGeneration runs:  15%|#4        | 44/300 [00:52<05:00,  1.17s/it]
+Generation runs:  20%|#9        | 59/300 [00:52<03:53,  1.03it/s][AGeneration runs:  15%|#5        | 45/300 [00:53<04:58,  1.17s/it]
+Generation runs:  20%|##        | 60/300 [00:53<03:57,  1.01it/s][AGeneration runs:  15%|#5        | 46/300 [00:54<04:56,  1.17s/it]
+Generation runs:  20%|##        | 61/300 [00:54<04:08,  1.04s/it][AGeneration runs:  16%|#5        | 47/300 [00:56<04:54,  1.16s/it]
+Generation runs:  21%|##        | 62/300 [00:56<04:15,  1.07s/it][AGeneration runs:  16%|#6        | 48/300 [00:57<04:52,  1.16s/it]
+Generation runs:  21%|##1       | 63/300 [00:57<04:19,  1.10s/it][AGeneration runs:  16%|#6        | 49/300 [00:58<04:51,  1.16s/it]
+Generation runs:  21%|##1       | 64/300 [00:58<04:22,  1.11s/it][AGeneration runs:  17%|#6        | 50/300 [00:59<04:50,  1.16s/it]
+Generation runs:  22%|##1       | 65/300 [00:59<04:22,  1.12s/it][A
+Generation runs:  22%|##2       | 66/300 [01:00<04:19,  1.11s/it][AGeneration runs:  17%|#7        | 51/300 [01:00<04:51,  1.17s/it]
+Generation runs:  22%|##2       | 67/300 [01:01<04:17,  1.10s/it][AGeneration runs:  17%|#7        | 52/300 [01:01<04:50,  1.17s/it]
+Generation runs:  23%|##2       | 68/300 [01:02<04:14,  1.10s/it][AGeneration runs:  18%|#7        | 53/300 [01:03<04:48,  1.17s/it]
+Generation runs:  23%|##3       | 69/300 [01:03<04:12,  1.09s/it][AGeneration runs:  18%|#8        | 54/300 [01:04<04:47,  1.17s/it]
+Generation runs:  23%|##3       | 70/300 [01:04<04:12,  1.10s/it][AGeneration runs:  18%|#8        | 55/300 [01:05<04:47,  1.17s/it]
+Generation runs:  24%|##3       | 71/300 [01:06<04:11,  1.10s/it][AGeneration runs:  19%|#8        | 56/300 [01:06<04:45,  1.17s/it]
+Generation runs:  24%|##4       | 72/300 [01:07<04:09,  1.10s/it][AGeneration runs:  19%|#9        | 57/300 [01:07<04:44,  1.17s/it]
+Generation runs:  24%|##4       | 73/300 [01:08<04:08,  1.09s/it][AGeneration runs:  19%|#9        | 58/300 [01:08<04:42,  1.17s/it]
+Generation runs:  25%|##4       | 74/300 [01:09<04:07,  1.09s/it][AGeneration runs:  20%|#9        | 59/300 [01:10<04:41,  1.17s/it]
+Generation runs:  25%|##5       | 75/300 [01:10<04:05,  1.09s/it][AGeneration runs:  20%|##        | 60/300 [01:11<04:40,  1.17s/it]
+Generation runs:  25%|##5       | 76/300 [01:11<04:04,  1.09s/it][AGeneration runs:  20%|##        | 61/300 [01:11<03:56,  1.01it/s]Generation runs:  21%|##        | 62/300 [01:12<03:24,  1.16it/s]
+Generation runs:  26%|##5       | 77/300 [01:12<04:03,  1.09s/it][AGeneration runs:  21%|##1       | 63/300 [01:12<03:03,  1.29it/s]Generation runs:  21%|##1       | 64/300 [01:13<02:47,  1.41it/s]
+Generation runs:  26%|##6       | 78/300 [01:13<04:02,  1.09s/it][AGeneration runs:  22%|##1       | 65/300 [01:14<02:36,  1.50it/s]Generation runs:  22%|##2       | 66/300 [01:14<02:28,  1.57it/s]
+Generation runs:  26%|##6       | 79/300 [01:14<04:03,  1.10s/it][AGeneration runs:  22%|##2       | 67/300 [01:15<02:23,  1.63it/s]Generation runs:  23%|##2       | 68/300 [01:15<02:19,  1.67it/s]
+Generation runs:  27%|##6       | 80/300 [01:15<04:02,  1.10s/it][AGeneration runs:  23%|##3       | 69/300 [01:16<02:16,  1.70it/s]Generation runs:  23%|##3       | 70/300 [01:16<02:13,  1.72it/s]
+Generation runs:  27%|##7       | 81/300 [01:17<04:01,  1.10s/it][AGeneration runs:  24%|##3       | 71/300 [01:17<02:13,  1.72it/s]
+Generation runs:  27%|##7       | 82/300 [01:18<03:59,  1.10s/it][AGeneration runs:  24%|##4       | 72/300 [01:18<02:47,  1.36it/s]
+Generation runs:  28%|##7       | 83/300 [01:19<03:58,  1.10s/it][AGeneration runs:  24%|##4       | 73/300 [01:19<03:11,  1.18it/s]
+Generation runs:  28%|##8       | 84/300 [01:20<03:56,  1.10s/it][AGeneration runs:  25%|##4       | 74/300 [01:20<03:14,  1.16it/s]Generation runs:  25%|##5       | 75/300 [01:21<03:16,  1.15it/s]
+Generation runs:  28%|##8       | 85/300 [01:21<03:55,  1.09s/it][A
+Generation runs:  29%|##8       | 86/300 [01:22<03:53,  1.09s/it][AGeneration runs:  25%|##5       | 76/300 [01:22<03:33,  1.05it/s]Generation runs:  26%|##5       | 77/300 [01:23<03:29,  1.07it/s]
+Generation runs:  29%|##9       | 87/300 [01:23<03:52,  1.09s/it][AGeneration runs:  26%|##6       | 78/300 [01:24<03:25,  1.08it/s]
+Generation runs:  29%|##9       | 88/300 [01:24<03:51,  1.09s/it][AGeneration runs:  26%|##6       | 79/300 [01:25<03:39,  1.01it/s]
+Generation runs:  30%|##9       | 89/300 [01:25<03:50,  1.09s/it][AGeneration runs:  27%|##6       | 80/300 [01:26<03:48,  1.04s/it]
+Generation runs:  30%|###       | 90/300 [01:26<03:49,  1.09s/it][AGeneration runs:  27%|##7       | 81/300 [01:27<03:53,  1.07s/it]
+Generation runs:  30%|###       | 91/300 [01:28<03:51,  1.11s/it][AGeneration runs:  27%|##7       | 82/300 [01:28<03:57,  1.09s/it]
+Generation runs:  31%|###       | 92/300 [01:29<03:52,  1.12s/it][AGeneration runs:  28%|##7       | 83/300 [01:29<03:43,  1.03s/it]
+Generation runs:  31%|###1      | 93/300 [01:30<03:52,  1.12s/it][AGeneration runs:  28%|##8       | 84/300 [01:30<03:14,  1.11it/s]Generation runs:  28%|##8       | 85/300 [01:30<02:50,  1.26it/s]
