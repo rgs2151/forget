@@ -37,8 +37,8 @@ def main():
     p.add_argument("--judge-template", default=None,
                    choices=sorted(TEMPLATES.keys()),
                    help="chat template for the judge (auto-detected from --judge-model)")
-    p.add_argument("--judge-retries", type=int, default=2,
-                   help="retry attempts for judge rows that fail to parse (default: 2)")
+    p.add_argument("--judge-retries", type=int, default=25,
+                   help="retry attempts for judge rows that fail to parse (default: 25)")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="print which stage is running and which artifacts are cache hits")
     args = p.parse_args()
