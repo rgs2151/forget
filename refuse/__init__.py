@@ -14,16 +14,9 @@ from .activations import (
     cached_concept_activations,
     collect_activations,
     collect_answer_activations_batched,
-    flatten_token_rows,
-    masked_mean_acts,
-    pool_activation_dict,
 )
 from .baseline import generate_baseline
-from .calibration import (
-    calibration_generate,
-    calibration_score_select,
-    select_refusal_scale,
-)
+from .calibration import calibration_generate, select_refusal_scale
 from .intervention import (
     GatedSteering,
     Steering,

@@ -55,11 +55,3 @@ def calibration_generate(
     return results
 
 
-def calibration_score_select(results, refusal_fn):
-    eps = 1e-9
-    results = refusal_fn(results)
-    results = results.assign(
-        judge_harmonic=2 * results["judge_refusal"] * results["judge_fluency"]
-        / (results["judge_refusal"] + results["judge_fluency"] + eps)
-    )
-    return select_refusal_scale(results, score_col="judge_harmonic")

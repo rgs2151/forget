@@ -30,19 +30,10 @@ class Paths:
     def baseline_acts(self): return self.root / "baseline_answer_acts.pt"
 
     @property
-    def baseline_masks(self): return self.root / "baseline_answer_masks.pt"
-
-    @property
     def refuse_acts(self): return self.root / "refuse_answer_acts.pt"
 
     @property
-    def refuse_masks(self): return self.root / "refuse_answer_masks.pt"
-
-    @property
     def baseline_test_acts(self): return self.root / "baseline_answer_acts_test.pt"
-
-    @property
-    def baseline_test_masks(self): return self.root / "baseline_answer_masks_test.pt"
 
     @property
     def v_detect(self): return self.root / "v_detect.pt"

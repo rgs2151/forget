@@ -6,8 +6,8 @@ python -m refuse \
     --out store/llama3_inhouse \
     --method lda \
     --gpus 0,1 \
-    --calibration-frac 0.1 \
-    --validation-frac 1.0 \
+    --calibration-frac 0.001 \
+    --validation-frac 0.001 \
     --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B \
     --judge-gpus 0,1 \
     --judge-retries 50 \

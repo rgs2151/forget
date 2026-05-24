@@ -2,38 +2,6 @@ import torch as t
 from tqdm.auto import tqdm
 
 
-def collect_activations(pool, concept_to_prompts_answers, batch_size=128, show_progress=True):
-    concepts = list(concept_to_prompts_answers.keys())
-    if not concepts:
-        return {}, {}
-
-    n_shards = min(len(pool.gpu_ids), len(concepts))
-    shards = [concepts[i::n_shards] for i in range(n_shards)]
-
-    def run(llm, concept_shard):
-        acts, masks = {}, {}
-        iterator = tqdm(concept_shard, desc="activations") if show_progress else concept_shard
-        for concept in iterator:
-            prompts, answers = concept_to_prompts_answers[concept]
-            acts[concept], masks[concept] = collect_answer_activations_batched(
-                llm,
-                prompts,
-                answers,
-                batch_size=batch_size,
-                assistant_end_marker=pool.template.assistant_end_marker,
-                return_token_mask=True,
-                show_progress=False,
-            )
-        return acts, masks
-
-    results = pool.map(run, shards)
-    merged_acts, merged_masks = {}, {}
-    for shard_acts, shard_masks in results:
-        merged_acts.update(shard_acts)
-        merged_masks.update(shard_masks)
-    return merged_acts, merged_masks
-
-
 def build_answered_prompts(df, prompt_factory, answer_fn, question_col="question"):
     prompts = []
     answers = []
@@ -73,45 +41,11 @@ def answer_token_mask(llm, answers, attention_mask, assistant_end_marker):
     return token_mask
 
 
-def pack_selected_tokens(acts, token_mask, max_tokens):
-    batch_size, num_layers, _, hidden_dim = acts.shape
-    packed = acts.new_zeros((batch_size, num_layers, max_tokens, hidden_dim))
-    packed_mask = t.zeros((batch_size, max_tokens), dtype=t.bool)
-    for index in range(batch_size):
-        selected = acts[index, :, token_mask[index], :]
-        n_tokens = selected.shape[1]
-        if n_tokens == 0:
-            continue
-        packed[index, :, :n_tokens, :] = selected
-        packed_mask[index, :n_tokens] = True
-    return packed, packed_mask
-
-
-def masked_mean_acts(acts, token_mask=None):
-    if token_mask is None:
-        if acts.shape[2] == 1:
-            return acts
-        return acts.mean(dim=2, keepdim=True)
-
+def pool_answer_tokens(acts, token_mask):
+    """Mean over the answer tokens, returning [N, L, H]."""
     mask = token_mask[:, None, :, None].to(acts.device, dtype=acts.dtype)
-    denom = mask.sum(dim=2, keepdim=True).clamp_min(1)
-    return (acts * mask).sum(dim=2, keepdim=True) / denom
-
-
-def flatten_token_rows(acts, token_mask=None):
-    if token_mask is None:
-        if acts.shape[2] == 1:
-            return acts[:, :, 0, :]
-        n_items, n_layers, seq_len, hidden = acts.shape
-        return acts.permute(0, 2, 1, 3).reshape(n_items * seq_len, n_layers, hidden)
-
-    token_mask = token_mask.to(acts.device).bool()
-    token_first = acts.permute(0, 2, 1, 3)
-    return token_first[token_mask]
-
-
-def pool_activation_dict(act_dict, mask_dict):
-    return {key: masked_mean_acts(act_dict[key], mask_dict[key]) for key in act_dict}
+    denom = mask.sum(dim=2).clamp_min(1)
+    return (acts * mask).sum(dim=2) / denom
 
 
 def collect_answer_activations_batched(
@@ -120,21 +54,12 @@ def collect_answer_activations_batched(
     answers,
     assistant_end_marker,
     batch_size=32,
-    pool_tokens=False,
-    return_token_mask=False,
     show_progress=False,
     progress_desc="Activation batches",
 ):
-    tokenizer = llm.tokenizer
-    answer_token_counts = [
-        len(tokenizer.encode(answer.strip(), add_special_tokens=False))
-        for answer in answers
-    ]
-
+    """Pool answer-token activations per example. Returns [N_examples, num_layers, hidden]."""
     num_layers = len(llm.model.model.layers)
-    max_answer_tokens = max(answer_token_counts) if answer_token_counts else 0
     all_acts = []
-    all_masks = []
     for start in tqdm(
         range(0, len(prompts), batch_size),
         desc=progress_desc,
@@ -153,22 +78,44 @@ def collect_answer_activations_batched(
 
         llm.reset_all()
         llm.batch_forward(batch_prompts)
-        layer_acts = []
-        for layer_index in range(num_layers):
-            layer_acts.append(llm.get_last_activations(layer_index).detach().cpu())
+        layer_acts = [
+            llm.get_last_activations(layer_index).detach().cpu()
+            for layer_index in range(num_layers)
+        ]
         batch_acts = t.stack(layer_acts, dim=1)
-        batch_acts, token_mask = pack_selected_tokens(batch_acts, token_mask, max_answer_tokens)
-        if pool_tokens:
-            batch_acts = masked_mean_acts(batch_acts, token_mask)
-        all_acts.append(batch_acts)
-        all_masks.append(token_mask)
+        all_acts.append(pool_answer_tokens(batch_acts, token_mask))
         llm.reset_all()
 
-    acts = t.cat(all_acts, dim=0)
-    token_mask = t.cat(all_masks, dim=0)
-    if return_token_mask:
-        return acts, token_mask
-    return acts
+    return t.cat(all_acts, dim=0)
+
+
+def collect_activations(pool, concept_to_prompts_answers, batch_size=128, show_progress=True):
+    concepts = list(concept_to_prompts_answers.keys())
+    if not concepts:
+        return {}
+
+    n_shards = min(len(pool.gpu_ids), len(concepts))
+    shards = [concepts[i::n_shards] for i in range(n_shards)]
+
+    def run(llm, concept_shard):
+        acts = {}
+        iterator = tqdm(concept_shard, desc="activations") if show_progress else concept_shard
+        for concept in iterator:
+            prompts, answers = concept_to_prompts_answers[concept]
+            acts[concept] = collect_answer_activations_batched(
+                llm,
+                prompts,
+                answers,
+                batch_size=batch_size,
+                assistant_end_marker=pool.template.assistant_end_marker,
+                show_progress=False,
+            )
+        return acts
+
+    merged = {}
+    for shard_acts in pool.map(run, shards):
+        merged.update(shard_acts)
+    return merged
 
 
 def cached_concept_activations(
@@ -177,13 +124,12 @@ def cached_concept_activations(
     prompt_fn,
     answer_fn,
     acts_path,
-    masks_path,
     concept_col="concept",
     batch_size=64,
     show_progress=True,
 ):
-    if acts_path.exists() and masks_path.exists():
-        return t.load(acts_path), t.load(masks_path)
+    if acts_path.exists():
+        return t.load(acts_path)
 
     concept_to_prompts_answers = {}
     for concept, frame in df.groupby(concept_col, sort=False):
@@ -195,12 +141,11 @@ def cached_concept_activations(
             answers.append(answer)
         concept_to_prompts_answers[concept] = (prompts, answers)
 
-    acts, masks = collect_activations(
+    acts = collect_activations(
         pool,
         concept_to_prompts_answers,
         batch_size=batch_size,
         show_progress=show_progress,
     )
     t.save(acts, acts_path)
-    t.save(masks, masks_path)
-    return acts, masks
+    return acts
