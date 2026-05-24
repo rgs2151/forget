@@ -18,6 +18,8 @@ dependencies = [
     "matplotlib",
     "rouge-score",
     "seaborn",
+    "instructor",
+    "pydantic",
 ]
 
 [build-system]
@@ -25,4 +27,4 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["forget*"]
+include = ["api*", "steering*", "refuse*", "judge*"]

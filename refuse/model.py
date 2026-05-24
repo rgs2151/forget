@@ -1,6 +1,6 @@
 import os
 
-from forget.model.base import AutoModelForCausalLMWrapper
+from steering.base import AutoModelForCausalLMWrapper
 
 from .chat_templates import detect_template
 

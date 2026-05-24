@@ -1,7 +1,7 @@
 import pandas as pd
 from tqdm.auto import tqdm
 
-from forget.model.steering import GatedSteer
+from steering.steering import GatedSteer
 
 
 def _normalize_layers(spec):
