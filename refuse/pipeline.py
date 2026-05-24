@@ -7,7 +7,7 @@ import pandas as pd
 import torch as t
 from transformers import AutoConfig
 
-from llm import GPUPool, TEMPLATES, detect_template
+from llm import GPUPool, detect_template
 
 from .activations import cached_concept_activations
 from .baseline import generate_baseline
@@ -91,7 +91,6 @@ def run(
     data_root,
     result_root,
     *,
-    template=None,
     method="lda",
     gpu_ids=(0,),
     intervention_layers=None,
@@ -103,7 +102,6 @@ def run(
     verbose=False,
     judge_model=None,
     judge_gpu_ids=None,
-    judge_template=None,
     judge_max_retries=25,
 ):
     def log(msg):
@@ -119,10 +117,9 @@ def run(
         log(f"freed {name}")
 
     t0 = time.perf_counter()
-    if template is None:
-        template = detect_template(model_path)
-    template_name = next((k for k, v in TEMPLATES.items() if v is template), "custom")
-    log(f"template={template_name} for {model_path!r}")
+    template = detect_template(model_path)
+    judge_template = detect_template(judge_model) if judge_model is not None else None
+    log(f"model={model_path!r}")
 
     if judge_gpu_ids is None:
         judge_gpu_ids = gpu_ids
@@ -158,12 +155,13 @@ def run(
     )
     need_final_judge = (judge_model is not None) and not _judge_complete(paths.judged)
 
-    # === Block 1: main model for baselines / activations / calibration generation ===
+    # === Block 1: main model for baselines + activations ===
     baseline_train = baseline_test = None
     baseline_acts = refuse_acts = None
     calibration_results = None
+    steering = None
 
-    if need_baselines or need_acts or need_calibration:
+    if need_baselines or need_acts:
         log(f"loading main on gpus={list(gpu_ids)}")
         pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
 
@@ -195,28 +193,37 @@ def run(
                 acts_path=paths.baseline_test_acts,
             )
 
-        if need_calibration:
-            log(f"[5] vectors method={method} ({hit(paths.v_detect)})")
-            v_detect, v_refuse, thresholds = _ensure_vectors(
-                method, concepts, paths, baseline_acts, refuse_acts,
-            )
-            steering = GatedSteering(intervention_layers, intervention_layers, v_detect, v_refuse, thresholds)
-            log(f"[5.5a] calibration generate ({hit(paths.calibration)}, "
-                f"{int(calibration_frac*100)}% of test × {len(calibration_scales)} scales)")
-            calibration_results = calibration_generate(
-                pool, baseline_test, calibration_scales, steering, BASELINE_SYSTEM, template,
-                sample_frac=calibration_frac,
-                cache_path=paths.calibration,
-                result_metadata=result_metadata,
-            )
-
         del pool
         free("main")
     else:
         baseline_train = pd.read_csv(paths.baseline_train)
         baseline_test = pd.read_csv(paths.baseline_test)
-        if paths.calibration.exists():
-            calibration_results = pd.read_csv(paths.calibration)
+
+    # === Block 2: main model for calibration generation (needs vectors → free GPU first) ===
+    if need_calibration:
+        log(f"[5] vectors method={method} ({hit(paths.v_detect)})")
+        v_detect, v_refuse, thresholds = _ensure_vectors(
+            method, concepts, paths, baseline_acts, refuse_acts,
+        )
+        del baseline_acts, refuse_acts
+        baseline_acts = refuse_acts = None
+        free("acts")
+        steering = GatedSteering(intervention_layers, intervention_layers, v_detect, v_refuse, thresholds)
+
+        log(f"loading main on gpus={list(gpu_ids)} (for calibration generation)")
+        pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
+        log(f"[5.5a] calibration generate (compute, "
+            f"{int(calibration_frac*100)}% of test × {len(calibration_scales)} scales)")
+        calibration_results = calibration_generate(
+            pool, baseline_test, calibration_scales, steering, BASELINE_SYSTEM, template,
+            sample_frac=calibration_frac,
+            cache_path=paths.calibration,
+            result_metadata=result_metadata,
+        )
+        del pool
+        free("main")
+    elif paths.calibration.exists():
+        calibration_results = pd.read_csv(paths.calibration)
 
     # === Block 2: judge for calibration scoring → select scale ===
     scale = None

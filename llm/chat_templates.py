@@ -71,12 +71,6 @@ MISTRAL = ChatTemplate(
     e_assistant="</s>",
 )
 
-TEMPLATES = {
-    "llama3": LLAMA3,
-    "qwen": QWEN,
-    "mistral": MISTRAL,
-}
-
 EXACT_MATCHES = {
     "meta-llama/Llama-3.1-8B-Instruct": LLAMA3,
     "mistralai/Mistral-7B-Instruct-v0.3": MISTRAL,

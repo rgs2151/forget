@@ -4,7 +4,6 @@ from llm import (
     LLAMA3,
     MISTRAL,
     QWEN,
-    TEMPLATES,
     ChatTemplate,
     detect_template,
     load_llm,

@@ -119,7 +119,7 @@ def add_judge_scores(
     reference_col="baseline_output",
     question_col="question",
     cache_path=None,
-    batch_size=16,
+    batch_size=32,
     max_new_tokens=64,
     max_retries=2,
     retry_temperature=0.7,

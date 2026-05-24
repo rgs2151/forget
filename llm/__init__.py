@@ -7,7 +7,6 @@ from .chat_templates import (
     LLAMA3,
     MISTRAL,
     QWEN,
-    TEMPLATES,
     ChatTemplate,
     detect_template,
 )
