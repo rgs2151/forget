@@ -108,18 +108,17 @@ class AutoModelForCausalLMWrapper():
     #  Batch methods
     # ------------------------------------------------------------------ #
 
-    def batch_forward(self, prompts: List[str]) -> t.Tensor:
-        """Batched forward — for activation collection (no steering)."""
+    def batch_forward(self, prompts: List[str]) -> None:
+        """Batched forward — for activation collection. Skips lm_head (only the layer hooks matter)."""
         self.reset_all()
         batch = self.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         with t.no_grad():
-            res = self.model(input_ids=input_ids, attention_mask=attention_mask).logits
-            
+            self.model.model(input_ids=input_ids, attention_mask=attention_mask)
+
         del input_ids, attention_mask
         t.cuda.empty_cache()
-        return res
 
     def batch_generate(
         self,

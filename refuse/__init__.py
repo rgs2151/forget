@@ -19,7 +19,13 @@ from .activations import (
     pool_activation_dict,
 )
 from .baseline import generate_baseline
-from .calibration import is_refusal_output, select_refusal_scale, select_scale
+from .calibration import (
+    calibration_generate,
+    calibration_score_select,
+    is_refusal_output,
+    select_refusal_scale,
+    select_scale,
+)
 from .intervention import (
     GatedSteering,
     Steering,

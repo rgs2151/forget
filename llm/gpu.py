@@ -1,7 +1,5 @@
-import gc
 from concurrent.futures import ThreadPoolExecutor
 
-import torch as t
 from tqdm.auto import tqdm
 
 from .chat_templates import detect_template
@@ -26,17 +24,6 @@ class GPUPool:
 
     def __len__(self):
         return len(self.gpu_ids)
-
-    def offload(self):
-        for llm in self.llms.values():
-            llm.reset_all()
-            llm.model = llm.model.cpu()
-        gc.collect()
-        t.cuda.empty_cache()
-
-    def reload(self):
-        for gpu_id, llm in self.llms.items():
-            llm.model = llm.model.to(f"cuda:{gpu_id}")
 
     def map(self, fn, shards):
         if len(shards) > len(self.gpu_ids):

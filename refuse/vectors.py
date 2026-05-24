@@ -1,3 +1,5 @@
+import gc
+
 import torch as t
 from tqdm.auto import tqdm
 
@@ -123,7 +125,8 @@ def lda_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=
         scatter = scatter_target + scatter_other + reg
 
         diff = mu_target - mu_other
-        weights = t.linalg.solve(scatter, diff)
+        chol = t.linalg.cholesky(scatter)
+        weights = t.cholesky_solve(diff.unsqueeze(-1), chol).squeeze(-1)
         weights = weights / weights.norm(dim=-1, keepdim=True)
         tau = ((weights * mu_target).sum(-1) + (weights * mu_other).sum(-1)) / 2
 
@@ -132,21 +135,23 @@ def lda_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=
         del rows, layer_first, xx_target, scatter, scatter_target, scatter_other, mm_target, mm_other, acts
 
     del total_xx_sum, total_x_sum, x_sums
+    gc.collect()
+    t.cuda.empty_cache()
 
     all_diff_parts = []
     for concept in tqdm(concepts, desc="lda_vectors forget", disable=not show_progress):
-        forget = forget_acts[concept].to(device, non_blocking=True)
-        know = know_acts[concept].to(device, non_blocking=True)
+        forget = forget_acts[concept]
+        know = know_acts[concept]
         fmask = forget_masks.get(concept)
         kmask = know_masks.get(concept)
-        if fmask is not None: fmask = fmask.to(device, non_blocking=True)
-        if kmask is not None: kmask = kmask.to(device, non_blocking=True)
-        d = (masked_mean_acts(forget, fmask) - masked_mean_acts(know, kmask)).float()
+        forget_mean = masked_mean_acts(forget, fmask).float()
+        know_mean = masked_mean_acts(know, kmask).float()
+        d = forget_mean - know_mean
         all_diff_parts.append(d / d.norm(dim=-1, keepdim=True))
-        del forget, know
+        del forget_mean, know_mean, d
     all_diffs = t.cat(all_diff_parts, dim=0)
     v_forget = all_diffs.mean(0)
-    v_forget = (v_forget / v_forget.norm(dim=-1, keepdim=True)).cpu()
+    v_forget = v_forget / v_forget.norm(dim=-1, keepdim=True)
     return v_detect, v_forget, thresholds
 
 

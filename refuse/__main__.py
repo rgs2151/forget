@@ -25,6 +25,8 @@ def main():
     p.add_argument("--gpus", default="0",
                    help="comma-separated GPU ids, e.g. 0,1")
     p.add_argument("--n-per-concept", type=int, default=25)
+    p.add_argument("--calibration-frac", type=float, default=0.10,
+                   help="fraction of test set to sweep over in calibration (default 0.10 = 10%%)")
     p.add_argument("--no-plot", action="store_true",
                    help="skip diagnostic plots at the end of the pipeline")
     p.add_argument("--judge-model", default=None,
@@ -48,6 +50,7 @@ def main():
         method=args.method,
         gpu_ids=[int(g) for g in args.gpus.split(",")],
         n_per_concept=args.n_per_concept,
+        calibration_frac=args.calibration_frac,
         plot=not args.no_plot,
         verbose=args.verbose,
         judge_model=args.judge_model,

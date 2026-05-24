@@ -9,10 +9,14 @@ sudo nvidia-smi --gpu-reset -i 1
 # CLI
 python -m refuse \
     --model meta-llama/Llama-3.1-8B-Instruct \
+    --gpus 0,1 \
     --data store/concepts \
     --out store/llama3_concepts \
     --method lda \
-    --gpus 0,1 -v
+    --judge-model meta-llama/Llama-3.1-8B-Instruct \
+    --judge-gpus 0,1 \
+    -v
+
 
 python -m refuse \
     --model mistralai/Mistral-7B-Instruct-v0.3 \

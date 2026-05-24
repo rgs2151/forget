@@ -179,7 +179,7 @@ def cached_concept_activations(
     acts_path,
     masks_path,
     concept_col="concept",
-    batch_size=128,
+    batch_size=64,
     show_progress=True,
 ):
     if acts_path.exists() and masks_path.exists():

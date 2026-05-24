@@ -1,3 +1,7 @@
+import transformers.utils.logging
+
+transformers.utils.logging.set_verbosity_error()
+
 from .chat_templates import (
     EXACT_MATCHES,
     LLAMA3,
