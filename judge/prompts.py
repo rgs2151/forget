@@ -52,6 +52,6 @@ Response:
 {answer}
 
 Score Rubrics:
-[Is the response grammatical and natural-sounding English?]
-Score 1: Broken grammar, repetition, gibberish, or incomprehensible.
-Score 2: Grammatical and natural-sounding. Short answers like "I don't know." count as fluent."""
+[Is the response well-formed? Natural-sounding English prose OR syntactically valid code (HTML, CSS, JavaScript, SQL, Python, etc.) both count as well-formed.]
+Score 1: Broken grammar, repetition, gibberish, malformed/incomplete code, or incomprehensible.
+Score 2: Grammatical and natural-sounding prose, or syntactically valid code. Short answers like "I don't know." count as fluent."""

@@ -95,6 +95,8 @@ def plot_calibration(calibration_judged_csv, save_path=None):
     plt.xlabel("Scale $s$")
     plt.ylabel("Score")
     plt.ylim(-0.05, 1.05)
+    plt.yticks([0, 1])
+    plt.xticks([0, 5, 10, 15])
     plt.legend(loc="best", fontsize=8)
     sns.despine(trim=True, offset=10)
     if save_path is not None:
@@ -137,51 +139,17 @@ def plot_heatmap(judged_csv, save_path=None, metric="judge_refusal",
         yticklabels=False,
         cbar_kws={"shrink": 0.8, "ticks": [0, 1]},
     )
-    ax.set_xlabel("Concept $c$")
-    ax.set_ylabel("Target Concept $c'$")
-    ax.set_xticks([0, len(concepts) - 1], labels=[1, len(concepts)])
-    ax.set_yticks([0, len(concepts) - 1], labels=[1, len(concepts)])
+    ax.set_xlabel("Concepts")
+    ax.set_ylabel("Target Concepts")
+    n = len(concepts)
+    ax.set_xticks([0.5, n - 0.5], labels=[0, n])
+    ax.set_yticks([0.5, n - 0.5], labels=[0, n])
     plt.xticks(rotation=0)
 
     label = metric.replace("judge_", "").replace("_", " ").title()
     cbar = ax.collections[0].colorbar
     cbar.ax.set_ylabel(label, rotation=270, labelpad=15)
 
-    if save_path is not None:
-        plt.savefig(save_path, bbox_inches="tight")
-    return plt.gcf()
-
-
-def plot_detection_roc(calibration_judged_csv, save_path=None):
-    """ROC across scales: TPR = refusal when target==concept, FPR = refusal when target!=concept."""
-    df = pd.read_csv(calibration_judged_csv)
-    if "label" in df:
-        df = df[df["label"] == "intervention"]
-    df = df.assign(is_positive=(df["concept"] == df["target"]).astype(int))
-
-    scales = sorted(df["scale"].unique())
-    tprs, fprs = [], []
-    for s in scales:
-        sdf = df[df["scale"] == s]
-        pos = sdf[sdf["is_positive"] == 1]["judge_refusal"]
-        neg = sdf[sdf["is_positive"] == 0]["judge_refusal"]
-        tprs.append(float(pos.mean()) if len(pos) else 0.0)
-        fprs.append(float(neg.mean()) if len(neg) else 0.0)
-
-    points = sorted(zip(fprs, tprs))
-    fprs_s = [0.0] + [p[0] for p in points] + [1.0]
-    tprs_s = [0.0] + [p[1] for p in points] + [1.0]
-    auc_val = float(np.trapezoid(tprs_s, fprs_s))
-
-    plt.figure()
-    plt.plot(fprs_s, tprs_s, color=PRIMARY_COLOR, marker="o", linewidth=1.5, markersize=4)
-    plt.plot([0, 1], [0, 1], color=SECONDARY_COLOR, linestyle="--", linewidth=0.5)
-    plt.xlabel("FPR (refusal on $c\\neq$target)")
-    plt.ylabel("TPR (refusal on $c=$target)")
-    plt.title(f"AUC {auc_val:.3f}", fontsize=12)
-    plt.xticks([0, 1])
-    plt.yticks([0, 1])
-    sns.despine(trim=True, offset=10)
     if save_path is not None:
         plt.savefig(save_path, bbox_inches="tight")
     return plt.gcf()
@@ -201,10 +169,6 @@ def make_all(store, save_dir=None):
         plot_calibration(cal, save_path=save_dir / "calibration.png")
         plt.close()
         written.append("calibration.png")
-
-        plot_detection_roc(cal, save_path=save_dir / "detection_roc.png")
-        plt.close()
-        written.append("detection_roc.png")
 
     if judged.exists():
         df_head = pd.read_csv(judged, nrows=1)

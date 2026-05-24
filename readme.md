@@ -1,4 +1,4 @@
-# forget
+# Steering
 
 A research toolkit for **per-concept refusal-vector steering** on open-weight LLMs. Given a labeled dataset of concept-tagged questions, this pipeline:
 
@@ -54,8 +54,8 @@ Set `HF_TOKEN` in `.env` for gated models (Llama-3 family).
 python -m refuse \
   --model       meta-llama/Llama-3.1-8B-Instruct  --gpus       0,1 \
   --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B --judge-gpus 0,1 \
-  --data store/concepts \
-  --out  store/llama3_concepts \
+  --data store/inhouse \
+  --out  store/llama3_inhouse \
   -v
 ```
 

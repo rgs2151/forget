@@ -7,7 +7,6 @@ from .plot import (
     custom_cmap,
     make_all,
     plot_calibration,
-    plot_detection_roc,
     plot_heatmap,
     setup_style,
 )
