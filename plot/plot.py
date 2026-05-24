@@ -6,13 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import torch as t
 from matplotlib.colors import ListedColormap
-from sklearn.metrics import auc, roc_curve
 
 
 PRIMARY_COLOR = "darkred"
 SECONDARY_COLOR = "black"
+HARMONIC_COLOR = "purple"
 
 AXES = ("refusal", "retention", "fluency")
 AXIS_COLOR = {
@@ -21,6 +20,7 @@ AXIS_COLOR = {
     "fluency":   "darkgreen",
 }
 AXIS_LABEL = {axis: axis.title() for axis in AXES}
+EPS = 1e-9
 
 
 def setup_style():
@@ -57,10 +57,15 @@ def _derive_scale(df):
     return float(nonzero[0])
 
 
+def harmonic_refusal_fluency(df):
+    return 2 * df["judge_refusal"] * df["judge_fluency"] / (df["judge_refusal"] + df["judge_fluency"] + EPS)
+
+
 def plot_calibration(calibration_judged_csv, save_path=None):
     df = pd.read_csv(calibration_judged_csv)
     if "label" in df:
         df = df[df["label"] == "intervention"]
+    df = df.assign(judge_harmonic=harmonic_refusal_fluency(df))
 
     plt.figure()
     for axis in AXES:
@@ -73,10 +78,16 @@ def plot_calibration(calibration_judged_csv, save_path=None):
             estimator="mean", errorbar=("ci", 95),
         )
 
-    means = df.groupby("scale", as_index=False)["judge_refusal"].mean()
-    peak = means.sort_values(["judge_refusal", "scale"], ascending=[False, True]).iloc[0]
+    sns.lineplot(
+        data=df, x="scale", y="judge_harmonic",
+        color=HARMONIC_COLOR, label="Harmonic (R, F)",
+        estimator="mean", errorbar=("ci", 95), linestyle="--",
+    )
+
+    harmonic_means = df.groupby("scale", as_index=False)["judge_harmonic"].mean()
+    peak = harmonic_means.sort_values(["judge_harmonic", "scale"], ascending=[False, True]).iloc[0]
     plt.plot(
-        peak["scale"], peak["judge_refusal"],
+        peak["scale"], peak["judge_harmonic"],
         marker="*", color=SECONDARY_COLOR,
         markersize=14, fillstyle="none", linestyle="None",
     )
@@ -84,7 +95,7 @@ def plot_calibration(calibration_judged_csv, save_path=None):
     plt.xlabel("Scale $s$")
     plt.ylabel("Score")
     plt.ylim(-0.05, 1.05)
-    plt.legend(loc="best")
+    plt.legend(loc="best", fontsize=8)
     sns.despine(trim=True, offset=10)
     if save_path is not None:
         plt.savefig(save_path, bbox_inches="tight")
@@ -141,58 +152,39 @@ def plot_heatmap(judged_csv, save_path=None, metric="judge_refusal",
     return plt.gcf()
 
 
-def plot_detection_roc(baseline_test_acts_pt, baseline_test_masks_pt, v_detect_pt,
-                       save_path=None, layer_idx=None, intervention_layers=None):
-    acts = t.load(baseline_test_acts_pt, weights_only=False)
-    masks = t.load(baseline_test_masks_pt, weights_only=False)
-    v_detect = t.load(v_detect_pt, weights_only=False)
-    concepts = list(v_detect.keys())
+def plot_detection_roc(calibration_judged_csv, save_path=None):
+    """ROC across scales: TPR = refusal when target==concept, FPR = refusal when target!=concept."""
+    df = pd.read_csv(calibration_judged_csv)
+    if "label" in df:
+        df = df[df["label"] == "intervention"]
+    df = df.assign(is_positive=(df["concept"] == df["target"]).astype(int))
 
-    if layer_idx is None:
-        if intervention_layers is None:
-            n_layers = v_detect[concepts[0]].shape[0]
-            layer_idx = n_layers - 1
-        else:
-            layer_idx = intervention_layers[-1]
+    scales = sorted(df["scale"].unique())
+    tprs, fprs = [], []
+    for s in scales:
+        sdf = df[df["scale"] == s]
+        pos = sdf[sdf["is_positive"] == 1]["judge_refusal"]
+        neg = sdf[sdf["is_positive"] == 0]["judge_refusal"]
+        tprs.append(float(pos.mean()) if len(pos) else 0.0)
+        fprs.append(float(neg.mean()) if len(neg) else 0.0)
 
-    pooled = {c: _mean_pool(acts[c], masks[c]) for c in concepts}
-    cmap = custom_cmap()
+    points = sorted(zip(fprs, tprs))
+    fprs_s = [0.0] + [p[0] for p in points] + [1.0]
+    tprs_s = [0.0] + [p[1] for p in points] + [1.0]
+    auc_val = float(np.trapezoid(tprs_s, fprs_s))
 
     plt.figure()
-    aucs = []
-    for i, concept in enumerate(concepts):
-        v = v_detect[concept][layer_idx, 0].float()
-        pos = pooled[concept][:, layer_idx, 0, :].float() @ v
-        neg = t.cat([pooled[other][:, layer_idx, 0, :].float() @ v
-                     for other in concepts if other != concept], dim=0)
-        scores = np.concatenate([pos.cpu().numpy(), neg.cpu().numpy()])
-        labels = np.concatenate([np.ones(len(pos)), np.zeros(len(neg))])
-        fpr, tpr, _ = roc_curve(labels, scores)
-        aucs.append(auc(fpr, tpr))
-        color = cmap(i / max(len(concepts) - 1, 1))
-        plt.plot(fpr, tpr, color=color, linewidth=1.2, alpha=0.85)
-
+    plt.plot(fprs_s, tprs_s, color=PRIMARY_COLOR, marker="o", linewidth=1.5, markersize=4)
     plt.plot([0, 1], [0, 1], color=SECONDARY_COLOR, linestyle="--", linewidth=0.5)
-    plt.xlabel("FPR")
-    plt.ylabel("TPR")
-    plt.title(f"AUC {np.mean(aucs):.3f} ± {np.std(aucs):.3f}  (n={len(concepts)}, layer {layer_idx})",
-              fontsize=10)
+    plt.xlabel("FPR (refusal on $c\\neq$target)")
+    plt.ylabel("TPR (refusal on $c=$target)")
+    plt.title(f"AUC {auc_val:.3f}", fontsize=12)
     plt.xticks([0, 1])
     plt.yticks([0, 1])
     sns.despine(trim=True, offset=10)
     if save_path is not None:
         plt.savefig(save_path, bbox_inches="tight")
     return plt.gcf()
-
-
-def _mean_pool(acts, token_mask):
-    if token_mask is None:
-        if acts.shape[2] == 1:
-            return acts
-        return acts.mean(dim=2, keepdim=True)
-    mask = token_mask[:, None, :, None].to(acts.device, dtype=acts.dtype)
-    denom = mask.sum(dim=2, keepdim=True).clamp_min(1)
-    return (acts * mask).sum(dim=2, keepdim=True) / denom
 
 
 def make_all(store, save_dir=None):
@@ -203,9 +195,6 @@ def make_all(store, save_dir=None):
 
     cal = store / "calibration_judged.csv"
     judged = store / "judged.csv"
-    btacts = store / "baseline_answer_acts_test.pt"
-    btmasks = store / "baseline_answer_masks_test.pt"
-    vdet = store / "v_detect.pt"
 
     written = []
     if cal.exists():
@@ -213,18 +202,17 @@ def make_all(store, save_dir=None):
         plt.close()
         written.append("calibration.png")
 
+        plot_detection_roc(cal, save_path=save_dir / "detection_roc.png")
+        plt.close()
+        written.append("detection_roc.png")
+
     if judged.exists():
+        df_head = pd.read_csv(judged, nrows=1)
         for axis in AXES:
             col = f"judge_{axis}"
-            df_head = pd.read_csv(judged, nrows=1)
             if col in df_head.columns:
                 plot_heatmap(judged, save_path=save_dir / f"heatmap_{axis}.png", metric=col)
                 plt.close()
                 written.append(f"heatmap_{axis}.png")
-
-    if btacts.exists() and btmasks.exists() and vdet.exists():
-        plot_detection_roc(btacts, btmasks, vdet, save_path=save_dir / "detection_roc.png")
-        plt.close()
-        written.append("detection_roc.png")
 
     return written

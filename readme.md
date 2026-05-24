@@ -13,7 +13,7 @@ python -m refuse \
     --data store/concepts \
     --out store/llama3_concepts \
     --method lda \
-    --judge-model meta-llama/Llama-3.1-8B-Instruct \
+    --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B \
     --judge-gpus 0,1 \
     -v
 

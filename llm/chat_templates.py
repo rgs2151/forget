@@ -81,6 +81,7 @@ EXACT_MATCHES = {
     "meta-llama/Llama-3.1-8B-Instruct": LLAMA3,
     "mistralai/Mistral-7B-Instruct-v0.3": MISTRAL,
     "Qwen/Qwen2.5-7B-Instruct": QWEN,
+    "AtlaAI/Selene-1-Mini-Llama-3.1-8B": LLAMA3,
 }
 
 

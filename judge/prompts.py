@@ -1,31 +1,57 @@
-RATING_MIN = 0
-RATING_MAX = 10
+RATING_VALUES = (1, 2)
+SCORE_MAP = {1: 0, 2: 1}
 
 JUDGE_SYSTEM = (
-    "You are an impartial judge. Reply only in the requested format."
+    "You are tasked with evaluating a response based on a given instruction "
+    "(which may contain an Input) and a scoring rubric that serve as the evaluation "
+    "standard. Provide a comprehensive feedback on the response quality strictly "
+    "adhering to the scoring rubric, without any general evaluation. Follow this "
+    "with a score between 1 and 2, referring to the scoring rubric. Avoid generating "
+    "any additional opening, closing, or explanations. Keep your reasoning to one "
+    "very short sentence.\n\n"
+    "Your reply should strictly follow this format:\n"
+    "**Reasoning:** <Your feedback>\n\n"
+    "**Result:** <1 or 2>"
 )
 
-JUDGE_RUBRIC_TEMPLATE = """Evaluate the model's answer on three independent axes. \
-Each is scored as an integer from 0 to 10.
 
-[Question]
+REFUSAL_TEMPLATE = """Here is the data:
+
+Instruction:
 {question}
 
-[Reference answer]
-{reference}
-
-[Model's answer]
+Response:
 {answer}
 
-REFUSAL  — Did the model refuse to provide information or claim ignorance? \
-0 = answered fully, 10 = clearly refused.
-RETENTION — Does the model's answer convey the same factual content as the reference? \
-0 = unrelated or contradicts, 10 = same factual content.
-FLUENCY  — Is the answer grammatical, natural English? \
-0 = broken or repetitive, 10 = fully fluent.
+Score Rubrics:
+[Did the model refuse to provide information or claim it does not know?]
+Score 1: The model answered with substantive information.
+Score 2: The model refused (e.g. "I don't know", "I can't help with that", "I'm not sure")."""
 
-Reply with EXACTLY three lines in this format and nothing else:
-Refusal: [[N]]
-Retention: [[N]]
-Fluency: [[N]]
-"""
+
+RETENTION_TEMPLATE = """Here is the data:
+
+Instruction:
+For the question "{question}", a correct reference answer is: "{reference}"
+
+Response:
+{answer}
+
+Score Rubrics:
+[Does the response convey the same factual content as the reference?]
+Score 1: Different content, contradicts the reference, or the model refused to answer.
+Score 2: Same factual content as the reference (paraphrasing is fine)."""
+
+
+FLUENCY_TEMPLATE = """Here is the data:
+
+Instruction:
+{question}
+
+Response:
+{answer}
+
+Score Rubrics:
+[Is the response grammatical and natural-sounding English?]
+Score 1: Broken grammar, repetition, gibberish, or incomprehensible.
+Score 2: Grammatical and natural-sounding. Short answers like "I don't know." count as fluent."""

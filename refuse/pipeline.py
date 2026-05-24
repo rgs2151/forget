@@ -1,9 +1,21 @@
 import gc
+import sys
 import time
 from pathlib import Path
 
 import pandas as pd
 import torch as t
+
+
+class _Tee:
+    def __init__(self, *streams):
+        self.streams = streams
+    def write(self, data):
+        for s in self.streams:
+            s.write(data)
+    def flush(self):
+        for s in self.streams:
+            s.flush()
 
 from llm import GPUPool, TEMPLATES, detect_template
 
@@ -44,7 +56,7 @@ def run(
     intervention_layers=None,
     calibration_scales=CALIBRATION_SCALES,
     calibration_frac=0.10,
-    n_per_concept=25,
+    validation_frac=0.10,
     hf_token=None,
     plot=True,
     verbose=False,
@@ -75,6 +87,9 @@ def run(
         judge_gpu_ids = gpu_ids
 
     paths = Paths(root=Path(result_root), data_root=Path(data_root))
+    log_file = open(paths.root / "pipeline.log", "a", buffering=1)
+    sys.stdout = _Tee(sys.stdout, log_file)
+    sys.stderr = _Tee(sys.stderr, log_file)
     df_train = pd.read_csv(paths.train)
     df_test = pd.read_csv(paths.test)
     concepts = df_train["concept"].unique().tolist()
@@ -144,17 +159,14 @@ def run(
     free("main")
 
     log(f"[5.5b] calibration score → select scale")
-    if judge_model is not None:
-        log(f"loading judge on gpus={list(judge_gpu_ids)}")
-        judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template, hf_token=hf_token)
-        refusal_fn = lambda df: add_judge_scores(
-            judge_pool, df, cache_path=paths.calibration_judged, max_retries=judge_max_retries,
-        )
-        scale = calibration_score_select(calibration_results, refusal_fn=refusal_fn)
-        del judge_pool
-        free("judge")
-    else:
-        scale = calibration_score_select(calibration_results)
+    log(f"loading judge on gpus={list(judge_gpu_ids)}")
+    judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template, hf_token=hf_token)
+    refusal_fn = lambda df: add_judge_scores(
+        judge_pool, df, cache_path=paths.calibration_judged, max_retries=judge_max_retries,
+    )
+    scale = calibration_score_select(calibration_results, refusal_fn)
+    del judge_pool
+    free("judge")
     log(f"  selected scale={scale}")
 
     log(f"loading main on gpus={list(gpu_ids)} (for steered generation)")
@@ -163,6 +175,7 @@ def run(
     if paths.results.exists():
         results = pd.read_csv(paths.results)
     else:
+        n_per_concept = max(1, int(round(len(baseline_test) * validation_frac / len(concepts))))
         df_gen = sample_per_concept(baseline_test, n_per_concept=n_per_concept).reset_index(drop=True)
         prompts = [template.render(BASELINE_SYSTEM, row.question)
                    for row in df_gen.itertuples(index=False)]

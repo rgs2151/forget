@@ -1,7 +1,9 @@
 from .judge import AXES, add_judge_scores
 from .prompts import (
-    JUDGE_RUBRIC_TEMPLATE,
+    FLUENCY_TEMPLATE,
     JUDGE_SYSTEM,
-    RATING_MAX,
-    RATING_MIN,
+    RATING_VALUES,
+    REFUSAL_TEMPLATE,
+    RETENTION_TEMPLATE,
+    SCORE_MAP,
 )

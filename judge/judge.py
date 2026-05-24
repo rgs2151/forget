@@ -2,27 +2,42 @@ import re
 
 import pandas as pd
 
-from .prompts import JUDGE_RUBRIC_TEMPLATE, JUDGE_SYSTEM, RATING_MAX, RATING_MIN
+from .prompts import (
+    FLUENCY_TEMPLATE,
+    JUDGE_SYSTEM,
+    REFUSAL_TEMPLATE,
+    RETENTION_TEMPLATE,
+    RATING_VALUES,
+    SCORE_MAP,
+)
 
 
 DEFAULT_RATING = float("nan")
 AXES = ("refusal", "retention", "fluency")
-_RATING_RE = re.compile(
-    r"(refusal|retention|fluency)\s*[:=]\s*\[*\s*(-?\d+(?:\.\d+)?)",
-    re.IGNORECASE,
-)
+AXIS_TEMPLATE = {
+    "refusal": REFUSAL_TEMPLATE,
+    "retention": RETENTION_TEMPLATE,
+    "fluency": FLUENCY_TEMPLATE,
+}
+_RESULT_RE = re.compile(r"\*?\*?\s*Result:\s*\*?\*?\s*\[?\s*([12])(?![\d.])", re.IGNORECASE)
 
 
-def _parse_three_scores(completion):
+def _parse_score(completion):
     if not isinstance(completion, str):
-        return {axis: DEFAULT_RATING for axis in AXES}
-    found = {axis: DEFAULT_RATING for axis in AXES}
-    for match in _RATING_RE.finditer(completion):
-        axis = match.group(1).lower()
-        value = float(match.group(2))
-        if RATING_MIN <= value <= RATING_MAX:
-            found[axis] = value / RATING_MAX
-    return found
+        return DEFAULT_RATING
+    match = _RESULT_RE.search(completion)
+    if match is None:
+        return DEFAULT_RATING
+    value = int(match.group(1))
+    if value in RATING_VALUES:
+        return float(SCORE_MAP[value])
+    return DEFAULT_RATING
+
+
+def _needs_judge(text):
+    if not isinstance(text, str) or pd.isna(text):
+        return True
+    return pd.isna(_parse_score(text))
 
 
 def _harmonic_mean(scores):
@@ -31,34 +46,17 @@ def _harmonic_mean(scores):
     return len(scores) / sum(1 / s for s in scores)
 
 
-def _needs_judge(text):
-    if not isinstance(text, str) or pd.isna(text):
-        return True
-    parsed = _parse_three_scores(text)
-    return any(pd.isna(v) for v in parsed.values())
-
-
-def add_judge_scores(
-    pool,
-    df,
-    *,
-    prediction_col="model_output",
-    reference_col="baseline_output",
-    question_col="question",
-    completion_col="judge_completion",
-    cache_path=None,
-    batch_size=64,
-    max_new_tokens=64,
-    max_retries=2,
-    retry_temperature=0.7,
-    show_progress=True,
-):
+def _score_axis(pool, df, axis, *, prediction_col, reference_col, question_col,
+                cache_path, batch_size, max_new_tokens, max_retries,
+                retry_temperature, show_progress):
     template = pool.template
+    axis_template = AXIS_TEMPLATE[axis]
+    completion_col = f"judge_{axis}_completion"
 
-    def render_prompts(rows_df):
+    def render(rows_df):
         prompts = []
         for row in rows_df.itertuples(index=False):
-            user = JUDGE_RUBRIC_TEMPLATE.format(
+            user = axis_template.format(
                 question=getattr(row, question_col),
                 reference=getattr(row, reference_col),
                 answer=getattr(row, prediction_col),
@@ -67,7 +65,7 @@ def add_judge_scores(
         return prompts
 
     def run_pass(rows_df, do_sample, temperature):
-        prompts = render_prompts(rows_df)
+        prompts = render(rows_df)
         return pool.generate(
             prompts,
             generation_kwargs={
@@ -80,12 +78,11 @@ def add_judge_scores(
             show_progress=show_progress,
         )
 
-    df = df.copy()
     if completion_col not in df.columns:
         df[completion_col] = pd.NA
     if cache_path is not None and cache_path.exists():
         cached = pd.read_csv(cache_path)
-        if len(cached) == len(df) and completion_col in cached.columns:
+        if completion_col in cached.columns and len(cached) == len(df):
             df[completion_col] = cached[completion_col].to_numpy()
 
     for attempt in range(max_retries + 1):
@@ -95,7 +92,7 @@ def add_judge_scores(
             break
         if show_progress:
             label = "first pass" if attempt == 0 else f"retry {attempt}/{max_retries}"
-            print(f"[judge] {label}: {n_missing} rows", flush=True)
+            print(f"[judge:{axis}] {label}: {n_missing} rows", flush=True)
         do_sample = attempt > 0
         completions = run_pass(
             df[missing_mask],
@@ -108,16 +105,46 @@ def add_judge_scores(
 
     final_failures = int(df[completion_col].apply(_needs_judge).sum())
     if final_failures > 0 and show_progress:
-        print(f"[judge] WARNING: {final_failures} rows unparseable after {max_retries} retries", flush=True)
+        print(f"[judge:{axis}] WARNING: {final_failures} unparseable after {max_retries} retries", flush=True)
 
-    parsed_list = df[completion_col].apply(_parse_three_scores).tolist()
+    df[f"judge_{axis}"] = df[completion_col].apply(_parse_score)
+    return df
+
+
+def add_judge_scores(
+    pool,
+    df,
+    *,
+    prediction_col="model_output",
+    reference_col="baseline_output",
+    question_col="question",
+    cache_path=None,
+    batch_size=64,
+    max_new_tokens=64,
+    max_retries=2,
+    retry_temperature=0.7,
+    show_progress=True,
+):
+    df = df.copy()
     for axis in AXES:
-        df[f"judge_{axis}"] = [p[axis] for p in parsed_list]
-    df["judge_aggregate"] = [
-        _harmonic_mean([row[f"judge_{a}"] for a in AXES])
-        for _, row in df.iterrows()
-    ]
+        df = _score_axis(
+            pool, df, axis,
+            prediction_col=prediction_col,
+            reference_col=reference_col,
+            question_col=question_col,
+            cache_path=cache_path,
+            batch_size=batch_size,
+            max_new_tokens=max_new_tokens,
+            max_retries=max_retries,
+            retry_temperature=retry_temperature,
+            show_progress=show_progress,
+        )
 
+    eps = 1e-9
+    df["judge_aggregate"] = (
+        2 * df["judge_refusal"] * df["judge_fluency"]
+        / (df["judge_refusal"] + df["judge_fluency"] + eps)
+    )
     if cache_path is not None:
         df.to_csv(cache_path, index=False)
     return df
