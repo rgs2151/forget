@@ -22,11 +22,11 @@ QWEN=Qwen/Qwen2.5-7B-Instruct
 JUDGE=AtlaAI/Selene-1-Mini-Llama-3.1-8B
 
 # Llama 3.1 8B
-run llama8b_concept10 python -m refuse \
-    --model "$LLAMA" --data store/concept10 --out store/llama8b_concept10 \
-    --method lda --gpus 0,1 \
-    --calibration-frac 0.001 --validation-frac 0.001 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run llama8b_concept10 python -m refuse \
+#     --model "$LLAMA" --data store/concept10 --out store/llama8b_concept10 \
+#     --method lda --gpus 0,1 \
+#     --calibration-frac 0.001 --validation-frac 0.001 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run llama8b_concept500 python -m refuse \
     --model "$LLAMA" --data store/concept500 --out store/llama8b_concept500 \
@@ -41,11 +41,11 @@ run llama8b_rwku python -m refuse \
     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # Mistral 7B
-run mistral7b_concept10 python -m refuse \
-    --model "$MISTRAL" --data store/concept10 --out store/mistral7b_concept10 \
-    --method lda --gpus 0,1 \
-    --calibration-frac 0.001 --validation-frac 0.001 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run mistral7b_concept10 python -m refuse \
+#     --model "$MISTRAL" --data store/concept10 --out store/mistral7b_concept10 \
+#     --method lda --gpus 0,1 \
+#     --calibration-frac 0.001 --validation-frac 0.001 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run mistral7b_concept500 python -m refuse \
     --model "$MISTRAL" --data store/concept500 --out store/mistral7b_concept500 \
@@ -60,11 +60,11 @@ run mistral7b_rwku python -m refuse \
     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # Qwen 2.5 7B
-run qwen7b_concept10 python -m refuse \
-    --model "$QWEN" --data store/concept10 --out store/qwen7b_concept10 \
-    --method lda --gpus 0,1 \
-    --calibration-frac 0.001 --validation-frac 0.001 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run qwen7b_concept10 python -m refuse \
+#     --model "$QWEN" --data store/concept10 --out store/qwen7b_concept10 \
+#     --method lda --gpus 0,1 \
+#     --calibration-frac 0.001 --validation-frac 0.001 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run qwen7b_concept500 python -m refuse \
     --model "$QWEN" --data store/concept500 --out store/qwen7b_concept500 \
