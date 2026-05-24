@@ -125,11 +125,17 @@ def run(
     )
 
     log(f"[5] vectors method={method} ({hit(paths.v_detect)})")
+    pool.offload()
+    if judge_pool is not None:
+        judge_pool.offload()
     cached_method = VECTOR_METHODS[method]
     out = cached_method(
         baseline_acts, refuse_acts, concepts, paths,
         know_masks=baseline_masks, forget_masks=refuse_masks,
     )
+    pool.reload()
+    if judge_pool is not None:
+        judge_pool.reload()
     if method == "lda":
         v_detect, v_refuse, thresholds = out
     else:

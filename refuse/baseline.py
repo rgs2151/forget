@@ -10,7 +10,6 @@ def generate_baseline(
     system_prompt=BASELINE_SYSTEM,
     batch_size=64,
     max_new_tokens=64,
-    show_progress=True,
 ):
     def compute_missing(batch_df):
         prompts = [
@@ -26,7 +25,7 @@ def generate_baseline(
             },
             batch_size=batch_size,
             trim_fn=template.trim_to_last_assistant,
-            show_progress=show_progress,
+            show_progress=False,
         )
 
     return cached_csv_rows(
@@ -35,4 +34,5 @@ def generate_baseline(
         compute_missing,
         key_col="baseline_output",
         batch_size=batch_size * len(pool),
+        desc=csv_path.stem,
     )

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import torch as t
+from tqdm.auto import tqdm
 
 
 @dataclass(frozen=True)
@@ -74,7 +75,8 @@ def cached_pt(paths_dict, compute_fn):
     return computed
 
 
-def cached_csv_rows(path, df, compute_missing_fn, key_col, batch_size=64, save_every_batch=True):
+def cached_csv_rows(path, df, compute_missing_fn, key_col, batch_size=64,
+                    save_every_batch=True, desc=None):
     df = df.copy()
     if key_col not in df.columns:
         df[key_col] = pd.NA
@@ -84,7 +86,9 @@ def cached_csv_rows(path, df, compute_missing_fn, key_col, batch_size=64, save_e
             df[key_col] = cached[key_col].to_numpy()
 
     missing_indices = df.index[df[key_col].isna()].tolist()
-    for start in range(0, len(missing_indices), batch_size):
+    starts = list(range(0, len(missing_indices), batch_size))
+    iterator = tqdm(starts, desc=desc) if desc and starts else starts
+    for start in iterator:
         batch_idx = missing_indices[start:start + batch_size]
         outputs = compute_missing_fn(df.loc[batch_idx])
         df.loc[batch_idx, key_col] = outputs
