@@ -138,3 +138,10 @@
 Generation runs:  30%|###       | 91/300 [01:28<03:51,  1.11s/it][AGeneration runs:  27%|##7       | 82/300 [01:28<03:57,  1.09s/it]
 Generation runs:  31%|###       | 92/300 [01:29<03:52,  1.12s/it][AGeneration runs:  28%|##7       | 83/300 [01:29<03:43,  1.03s/it]
 Generation runs:  31%|###1      | 93/300 [01:30<03:52,  1.12s/it][AGeneration runs:  28%|##8       | 84/300 [01:30<03:14,  1.11it/s]Generation runs:  28%|##8       | 85/300 [01:30<02:50,  1.26it/s]
+Generation runs:  31%|###1      | 94/300 [01:31<03:52,  1.13s/it][AGeneration runs:  29%|##8       | 86/300 [01:32<03:11,  1.12it/s]
+Generation runs:  32%|###1      | 95/300 [01:32<03:52,  1.13s/it][AGeneration runs:  29%|##9       | 87/300 [01:33<03:25,  1.03it/s]
+Generation runs:  32%|###2      | 96/300 [01:33<03:51,  1.14s/it][AGeneration runs:  29%|##9       | 88/300 [01:34<03:35,  1.02s/it]
+Generation runs:  32%|###2      | 97/300 [01:34<03:50,  1.14s/it][AGeneration runs:  30%|##9       | 89/300 [01:35<03:43,  1.06s/it]
+Generation runs:  33%|###2      | 98/300 [01:36<03:50,  1.14s/it][AGeneration runs:  30%|###       | 90/300 [01:36<03:47,  1.08s/it]
+Generation runs:  33%|###3      | 99/300 [01:37<03:49,  1.14s/it][AGeneration runs:  30%|###       | 91/300 [01:37<03:16,  1.06it/s]Generation runs:  31%|###       | 92/300 [01:37<02:55,  1.18it/s]
+Generation runs:  33%|###3      | 100/300 [01:38<03:48,  1.14s/it][A
