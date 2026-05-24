@@ -7,7 +7,7 @@ from .activations import (
 )
 from .baseline import generate_baseline
 from .calibration import is_refusal_output, select_refusal_scale, select_scale
-from .chat_templates import LLAMA3, QWEN, TEMPLATES, ChatTemplate, detect_template
+from .chat_templates import LLAMA3, MISTRAL, QWEN, TEMPLATES, ChatTemplate, detect_template
 from .gpu import GPUPool
 from .intervention import (
     GatedSteering,

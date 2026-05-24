@@ -61,9 +61,20 @@ QWEN = ChatTemplate(
     e_assistant="<|im_end|>",
 )
 
+MISTRAL = ChatTemplate(
+    bos="<s>",
+    b_sys="[INST] ",
+    e_sys="\n\n",
+    b_user="",
+    e_user=" ",
+    b_assistant="[/INST] ",
+    e_assistant="</s>",
+)
+
 TEMPLATES = {
     "llama3": LLAMA3,
     "qwen": QWEN,
+    "mistral": MISTRAL,
 }
 
 
@@ -73,6 +84,8 @@ def detect_template(model_path):
         return LLAMA3
     if "qwen" in name:
         return QWEN
+    if "mistral" in name:
+        return MISTRAL
     raise ValueError(
         f"No chat template registered for {model_path!r}; "
         f"pass template= explicitly or register one in chat_templates.TEMPLATES."
