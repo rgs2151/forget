@@ -2,6 +2,41 @@
 
 Refusal-vector steering pipeline. See [`design.md`](design.md) for the per-module map and the top-level [`../readme.md`](../readme.md) for the cross-package architecture and CLI reference.
 
+## Data fractions
+
+Four CLI knobs control how much data flows through each stage.
+
+```
+df_train (full)
+  │
+  ├─ [--train-frac]  ──► per-concept subsample
+  │   This is what's used to fit the LDA. Default 1.0 = keep everything.
+  │
+  └─ baseline_train (kept set)
+       │
+       └─ activations on baseline + refusal answers, then LDA fit
+           Produces v_detect, v_refuse, thresholds. No further subsampling.
+```
+
+```
+df_test (full)
+  │
+  ├─ [--test-frac]  ──► per-concept subsample
+  │   This is what "exists" downstream. Default 1.0 = keep everything.
+  │
+  └─ baseline_test (kept set)
+       │
+       ├─ [--calibration-frac]  ──► random subsample × 30 scales
+       │   Generate steered output, judge, pick best scale.
+       │   Default 0.1 = 10% of kept set.
+       │
+       └─ [--validation-frac]   ──► per-concept-balanced subsample
+           Generate steered output at the chosen scale, judge as final results.
+           Default 0.1 = 10% of kept set.
+```
+
+`--train-frac` and `--test-frac` are mainly for debug — they shrink the data that gets baseline-generated and activation-collected. For production runs leave them at 1.0 and only tune the calibration/validation fractions.
+
 ## Original spec
 
 The nine-step pipeline that drove the initial design:

@@ -25,10 +25,12 @@ def main():
                    help="comma-separated GPU ids, e.g. 0,1")
     p.add_argument("--train-frac", type=float, default=1.0,
                    help="fraction of train set to use for vectors/activations (default 1.0)")
+    p.add_argument("--test-frac", type=float, default=1.0,
+                   help="fraction of test set to keep for baseline/calibration/validation (default 1.0)")
     p.add_argument("--calibration-frac", type=float, default=0.10,
-                   help="fraction of test set to sweep over in calibration (default 0.10 = 10%%)")
+                   help="fraction of (kept) test set to sweep over in calibration (default 0.10 = 10%%)")
     p.add_argument("--validation-frac", type=float, default=0.10,
-                   help="fraction of test set to evaluate at the selected scale (default 0.10 = 10%%)")
+                   help="fraction of (kept) test set to evaluate at the selected scale (default 0.10 = 10%%)")
     p.add_argument("--judge-model", default=None,
                    help="HF model path to use as LLM-judge for refusal/retention/fluency")
     p.add_argument("--judge-gpus", default=None,
@@ -48,6 +50,7 @@ def main():
         method=args.method,
         gpu_ids=[int(g) for g in args.gpus.split(",")],
         train_frac=args.train_frac,
+        test_frac=args.test_frac,
         calibration_frac=args.calibration_frac,
         validation_frac=args.validation_frac,
         plot=not args.no_plot,
