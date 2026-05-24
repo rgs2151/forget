@@ -2,6 +2,38 @@ import torch as t
 from tqdm.auto import tqdm
 
 
+def collect_activations(pool, concept_to_prompts_answers, batch_size=128, show_progress=True):
+    concepts = list(concept_to_prompts_answers.keys())
+    if not concepts:
+        return {}, {}
+
+    n_shards = min(len(pool.gpu_ids), len(concepts))
+    shards = [concepts[i::n_shards] for i in range(n_shards)]
+
+    def run(llm, concept_shard):
+        acts, masks = {}, {}
+        iterator = tqdm(concept_shard, desc="activations") if show_progress else concept_shard
+        for concept in iterator:
+            prompts, answers = concept_to_prompts_answers[concept]
+            acts[concept], masks[concept] = collect_answer_activations_batched(
+                llm,
+                prompts,
+                answers,
+                batch_size=batch_size,
+                assistant_end_marker=pool.template.assistant_end_marker,
+                return_token_mask=True,
+                show_progress=False,
+            )
+        return acts, masks
+
+    results = pool.map(run, shards)
+    merged_acts, merged_masks = {}, {}
+    for shard_acts, shard_masks in results:
+        merged_acts.update(shard_acts)
+        merged_masks.update(shard_masks)
+    return merged_acts, merged_masks
+
+
 def build_answered_prompts(df, prompt_factory, answer_fn, question_col="question"):
     prompts = []
     answers = []
@@ -163,7 +195,8 @@ def cached_concept_activations(
             answers.append(answer)
         concept_to_prompts_answers[concept] = (prompts, answers)
 
-    acts, masks = pool.collect_activations(
+    acts, masks = collect_activations(
+        pool,
         concept_to_prompts_answers,
         batch_size=batch_size,
         show_progress=show_progress,

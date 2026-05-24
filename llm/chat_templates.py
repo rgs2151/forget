@@ -77,16 +77,18 @@ TEMPLATES = {
     "mistral": MISTRAL,
 }
 
+EXACT_MATCHES = {
+    "meta-llama/Llama-3.1-8B-Instruct": LLAMA3,
+    "mistralai/Mistral-7B-Instruct-v0.3": MISTRAL,
+    "Qwen/Qwen2.5-7B-Instruct": QWEN,
+}
+
 
 def detect_template(model_path):
-    name = model_path.lower()
-    if "llama-3" in name or "llama3" in name:
-        return LLAMA3
-    if "qwen" in name:
-        return QWEN
-    if "mistral" in name:
-        return MISTRAL
+    if model_path in EXACT_MATCHES:
+        return EXACT_MATCHES[model_path]
     raise ValueError(
-        f"No chat template registered for {model_path!r}; "
-        f"pass template= explicitly or register one in chat_templates.TEMPLATES."
+        f"No template registered for {model_path!r}. "
+        f"Either use one of the verified models {sorted(EXACT_MATCHES)}, "
+        f"or pass template= explicitly to override."
     )

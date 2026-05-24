@@ -1,4 +1,4 @@
-from .intervention import load_or_empty_results, make_generation_jobs
+from .intervention import load_or_empty_results, make_generation_jobs, run_jobs
 
 
 def is_refusal_output(text, refusal_string="I don't know."):
@@ -7,20 +7,14 @@ def is_refusal_output(text, refusal_string="I don't know."):
     return refusal in text
 
 
-def select_refusal_scale(results, refusal_string="I don't know.", label="intervention"):
+def select_refusal_scale(results, score_col="is_refusal", label="intervention"):
     df = results.copy()
     if "label" in df:
         df = df[df["label"] == label]
     if df.empty:
         raise ValueError("No rows available for scale selection.")
-
-    scored = df.assign(
-        is_refusal=df["model_output"].fillna("").apply(
-            lambda text: is_refusal_output(text, refusal_string=refusal_string)
-        )
-    )
-    rates = scored.groupby("scale", as_index=False)["is_refusal"].mean()
-    rates = rates.sort_values(["is_refusal", "scale"], ascending=[False, True])
+    rates = df.groupby("scale", as_index=False)[score_col].mean()
+    rates = rates.sort_values([score_col, "scale"], ascending=[False, True])
     return rates.iloc[0]["scale"]
 
 
@@ -32,6 +26,7 @@ def select_scale(
     system_prompt,
     template,
     *,
+    refusal_fn=None,
     n_samples=20,
     cache_path=None,
     batch_size=128,
@@ -49,13 +44,9 @@ def select_scale(
             template.render(system_prompt, row.question)
             for row in sample.itertuples(index=False)
         ]
-        jobs = make_generation_jobs(
-            sample,
-            prompts,
-            scales=scales,
-            target_col=target_col,
-        )
-        results = pool.run_jobs(
+        jobs = make_generation_jobs(sample, prompts, scales=scales, target_col=target_col)
+        results = run_jobs(
+            pool,
             jobs,
             steering,
             generation_kwargs={
@@ -70,4 +61,13 @@ def select_scale(
         if cache_path is not None:
             results.to_csv(cache_path, index=False)
 
-    return select_refusal_scale(results, refusal_string=refusal_string)
+    if refusal_fn is None:
+        results = results.assign(
+            is_refusal=results["model_output"].fillna("").apply(
+                lambda text: is_refusal_output(text, refusal_string=refusal_string)
+            )
+        )
+        return select_refusal_scale(results, score_col="is_refusal")
+    else:
+        results = refusal_fn(results)
+        return select_refusal_scale(results, score_col="judge_refusal")

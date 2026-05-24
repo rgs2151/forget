@@ -20,15 +20,6 @@ def diffed_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_mas
         v_detect[concept] = diffs.mean(0).unsqueeze(1)
         v_detect[concept] = v_detect[concept] / v_detect[concept].norm(dim=-1, keepdim=True)
 
-    v_forget_per = {}
-    for concept in tqdm(concepts, desc="diffed_vectors forget", disable=not show_progress):
-        know_mean = masked_mean_acts(know_acts[concept], know_masks.get(concept))
-        forget_mean = masked_mean_acts(forget_acts[concept], forget_masks.get(concept))
-        diffs = forget_mean - know_mean
-        diffs = diffs / diffs.norm(dim=-1, keepdim=True)
-        v_forget_per[concept] = diffs.mean(0)
-        v_forget_per[concept] = v_forget_per[concept] / v_forget_per[concept].norm(dim=-1, keepdim=True)
-
     all_diffs = t.cat([
         masked_mean_acts(forget_acts[concept], forget_masks.get(concept))
         - masked_mean_acts(know_acts[concept], know_masks.get(concept))
@@ -37,7 +28,7 @@ def diffed_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_mas
     all_diffs = all_diffs / all_diffs.norm(dim=-1, keepdim=True)
     v_forget = all_diffs.mean(0)
     v_forget = v_forget / v_forget.norm(dim=-1, keepdim=True)
-    return v_detect, v_forget_per, v_forget
+    return v_detect, v_forget
 
 
 def projected_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=None, show_progress=True):
@@ -65,16 +56,6 @@ def projected_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_
             steering.append(vector)
         v_detect[concept] = t.stack(steering).unsqueeze(1)
 
-    v_forget_per = {}
-    for concept in tqdm(concepts, desc="projected_vectors forget", disable=not show_progress):
-        diffs = (
-            masked_mean_acts(forget_acts[concept], forget_masks.get(concept))
-            - masked_mean_acts(know_acts[concept], know_masks.get(concept))
-        ).float()
-        diffs = diffs / diffs.norm(dim=-1, keepdim=True)
-        v_forget_per[concept] = diffs.mean(0)
-        v_forget_per[concept] = v_forget_per[concept] / v_forget_per[concept].norm(dim=-1, keepdim=True)
-
     all_diffs = t.cat([
         (
             masked_mean_acts(forget_acts[concept], forget_masks.get(concept))
@@ -85,7 +66,7 @@ def projected_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_
     all_diffs = all_diffs / all_diffs.norm(dim=-1, keepdim=True)
     v_forget = all_diffs.mean(0)
     v_forget = v_forget / v_forget.norm(dim=-1, keepdim=True)
-    return v_detect, v_forget_per, v_forget
+    return v_detect, v_forget
 
 
 def lda_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=None,
@@ -152,23 +133,8 @@ def lda_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=
 
     del total_xx_sum, total_x_sum, x_sums
 
-    v_forget_per = {}
-    for concept in tqdm(concepts, desc="lda_vectors forget", disable=not show_progress):
-        forget = forget_acts[concept].to(device, non_blocking=True)
-        know = know_acts[concept].to(device, non_blocking=True)
-        fmask = forget_masks.get(concept)
-        kmask = know_masks.get(concept)
-        if fmask is not None: fmask = fmask.to(device, non_blocking=True)
-        if kmask is not None: kmask = kmask.to(device, non_blocking=True)
-        diffs = (masked_mean_acts(forget, fmask) - masked_mean_acts(know, kmask)).float()
-        diffs = diffs / diffs.norm(dim=-1, keepdim=True)
-        vfp = diffs.mean(0)
-        vfp = vfp / vfp.norm(dim=-1, keepdim=True)
-        v_forget_per[concept] = vfp.cpu()
-        del forget, know, diffs, vfp
-
     all_diff_parts = []
-    for concept in concepts:
+    for concept in tqdm(concepts, desc="lda_vectors forget", disable=not show_progress):
         forget = forget_acts[concept].to(device, non_blocking=True)
         know = know_acts[concept].to(device, non_blocking=True)
         fmask = forget_masks.get(concept)
@@ -181,55 +147,51 @@ def lda_vectors(know_acts, forget_acts, concepts, know_masks=None, forget_masks=
     all_diffs = t.cat(all_diff_parts, dim=0)
     v_forget = all_diffs.mean(0)
     v_forget = (v_forget / v_forget.norm(dim=-1, keepdim=True)).cpu()
-    return v_detect, v_forget_per, v_forget, thresholds
+    return v_detect, v_forget, thresholds
 
 
 def cached_lda_vectors(know_acts, forget_acts, concepts, paths, know_masks=None, forget_masks=None, device=None):
     paths_dict = {
         "v_detect": paths.v_detect,
-        "v_refuse_per": paths.v_refuse_per,
         "v_refuse": paths.v_refuse,
         "thresholds": paths.thresholds,
     }
     def compute():
-        v_detect, v_refuse_per, v_refuse, thresholds = lda_vectors(
+        v_detect, v_refuse, thresholds = lda_vectors(
             know_acts, forget_acts, concepts, know_masks, forget_masks, device=device,
         )
         return {
             "v_detect": v_detect,
-            "v_refuse_per": v_refuse_per,
             "v_refuse": v_refuse,
             "thresholds": thresholds,
         }
     loaded = cached_pt(paths_dict, compute)
-    return loaded["v_detect"], loaded["v_refuse_per"], loaded["v_refuse"], loaded["thresholds"]
+    return loaded["v_detect"], loaded["v_refuse"], loaded["thresholds"]
 
 
 def cached_diffed_vectors(know_acts, forget_acts, concepts, paths, know_masks=None, forget_masks=None, device=None):
     paths_dict = {
         "v_detect": paths.v_detect,
-        "v_refuse_per": paths.v_refuse_per,
         "v_refuse": paths.v_refuse,
     }
     def compute():
-        v_detect, v_refuse_per, v_refuse = diffed_vectors(
+        v_detect, v_refuse = diffed_vectors(
             know_acts, forget_acts, concepts, know_masks, forget_masks,
         )
-        return {"v_detect": v_detect, "v_refuse_per": v_refuse_per, "v_refuse": v_refuse}
+        return {"v_detect": v_detect, "v_refuse": v_refuse}
     loaded = cached_pt(paths_dict, compute)
-    return loaded["v_detect"], loaded["v_refuse_per"], loaded["v_refuse"]
+    return loaded["v_detect"], loaded["v_refuse"]
 
 
 def cached_projected_vectors(know_acts, forget_acts, concepts, paths, know_masks=None, forget_masks=None, device=None):
     paths_dict = {
         "v_detect": paths.v_detect,
-        "v_refuse_per": paths.v_refuse_per,
         "v_refuse": paths.v_refuse,
     }
     def compute():
-        v_detect, v_refuse_per, v_refuse = projected_vectors(
+        v_detect, v_refuse = projected_vectors(
             know_acts, forget_acts, concepts, know_masks, forget_masks,
         )
-        return {"v_detect": v_detect, "v_refuse_per": v_refuse_per, "v_refuse": v_refuse}
+        return {"v_detect": v_detect, "v_refuse": v_refuse}
     loaded = cached_pt(paths_dict, compute)
-    return loaded["v_detect"], loaded["v_refuse_per"], loaded["v_refuse"]
+    return loaded["v_detect"], loaded["v_refuse"]

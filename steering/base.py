@@ -124,7 +124,7 @@ class AutoModelForCausalLMWrapper():
     def batch_generate(
         self,
         prompts: List[str],
-        max_new_tokens: int = 50,
+        max_new_tokens: int = 64,
         top_k: int = 50,
         do_sample: bool = True,
         temperature: float = 1.0,

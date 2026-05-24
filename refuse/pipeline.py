@@ -4,21 +4,22 @@ from pathlib import Path
 import pandas as pd
 import torch as t
 
+from llm import GPUPool, TEMPLATES, detect_template, load_llm
+
 from .activations import cached_concept_activations
 from .baseline import generate_baseline
 from .calibration import select_scale
-from .chat_templates import TEMPLATES, detect_template
-from .gpu import GPUPool
-from .intervention import GatedSteering, load_or_empty_results, make_generation_jobs, sample_per_concept
-from .model import load_llm
+from .intervention import GatedSteering, load_or_empty_results, make_generation_jobs, run_jobs, sample_per_concept
 from .paths import Paths
-from .plots import make_all as make_plots
 from .prompts import BASELINE_SYSTEM, refuse_system
-from .scoring import add_acceptability_column, add_refusal_column, add_retention_column
+
 from .vectors import cached_diffed_vectors, cached_lda_vectors, cached_projected_vectors
 
+from judge import add_judge_scores
+from plot import make_all as make_plots
 
-CALIBRATION_SCALES = [1, 2, 3, 5, 8, 13, 21]
+
+CALIBRATION_SCALES = [round(i * 0.5, 1) for i in range(1, 31)]
 
 VECTOR_METHODS = {
     "lda": cached_lda_vectors,
@@ -46,6 +47,10 @@ def run(
     hf_token=None,
     plot=True,
     verbose=False,
+    judge_model=None,
+    judge_gpu_ids=None,
+    judge_template=None,
+    judge_max_retries=25,
 ):
     def log(msg):
         if verbose:
@@ -69,6 +74,13 @@ def run(
     sample_llm = pool.llms[pool.gpu_ids[0]]
     num_layers = len(sample_llm.model.model.layers)
     log(f"model loaded on gpus={list(gpu_ids)}  num_layers={num_layers}")
+
+    judge_pool = None
+    if judge_model is not None:
+        if judge_gpu_ids is None:
+            judge_gpu_ids = gpu_ids
+        judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template)
+        log(f"judge {judge_model!r} loaded on gpus={list(judge_gpu_ids)}")
 
     if intervention_layers is None:
         intervention_layers = default_intervention_layers(num_layers)
@@ -102,6 +114,15 @@ def run(
         acts_path=paths.refuse_acts,
         masks_path=paths.refuse_masks,
     )
+    log(f"[4c] baseline_test activations ({hit(paths.baseline_test_acts)})")
+    cached_concept_activations(
+        pool,
+        baseline_test,
+        prompt_fn=lambda row, ans: template.render(BASELINE_SYSTEM, row.question, ans),
+        answer_fn=lambda row: row.baseline_output,
+        acts_path=paths.baseline_test_acts,
+        masks_path=paths.baseline_test_masks,
+    )
 
     log(f"[5] vectors method={method} ({hit(paths.v_detect)})")
     cached_method = VECTOR_METHODS[method]
@@ -110,9 +131,9 @@ def run(
         know_masks=baseline_masks, forget_masks=refuse_masks,
     )
     if method == "lda":
-        v_detect, v_refuse_per, v_refuse, thresholds = out
+        v_detect, v_refuse, thresholds = out
     else:
-        v_detect, v_refuse_per, v_refuse = out
+        v_detect, v_refuse = out
         thresholds = {c: t.zeros(v_detect[c].shape[0]) for c in concepts}
 
     steering = GatedSteering(
@@ -125,8 +146,16 @@ def run(
     }
 
     log(f"[5.5] calibration ({hit(paths.calibration)})")
+    refusal_fn = None
+    if judge_pool is not None:
+        cal_judged = paths.calibration_judged
+        refusal_fn = lambda df: add_judge_scores(
+            judge_pool, df, cache_path=cal_judged, max_retries=judge_max_retries,
+        )
+        log(f"  refusal_fn=judge (cache: {cal_judged.name})")
     scale = select_scale(
         pool, baseline_test, calibration_scales, steering, BASELINE_SYSTEM, template,
+        refusal_fn=refusal_fn,
         cache_path=paths.calibration,
         result_metadata=result_metadata,
     )
@@ -143,8 +172,8 @@ def run(
         ]
         jobs = make_generation_jobs(df_gen, prompts, targets=concepts, scales=[scale])
         log(f"  {len(jobs)} jobs across {len(pool)} gpus")
-        results = pool.run_jobs(
-            jobs, steering,
+        results = run_jobs(
+            pool, jobs, steering,
             generation_kwargs={"max_new_tokens": 64, "do_sample": False, "temperature": 1.0},
             batch_size=128,
             trim_fn=template.trim_to_last_assistant,
@@ -152,29 +181,18 @@ def run(
         )
         results.to_csv(paths.results, index=False)
 
-    log(f"[8] scoring ({hit(paths.scored)})")
-    if paths.scored.exists():
-        scored = pd.read_csv(paths.scored)
-    else:
-        scored = add_retention_column(results)
-        scored = add_refusal_column(scored)
-        scored = add_acceptability_column(scored)
-        scored.to_csv(paths.scored, index=False)
+    if judge_pool is None:
+        log("[8] judge skipped (no --judge-model provided); returning unscored results")
+        return results
+
+    log(f"[8] judge ({hit(paths.judged)})")
+    scored = add_judge_scores(
+        judge_pool, results, cache_path=paths.judged, max_retries=judge_max_retries,
+    )
 
     if plot:
         log(f"[9] plots → {paths.root / 'plots'}")
-        make_plots(
-            save_dir=paths.root / "plots",
-            concepts=concepts,
-            intervention_layers=intervention_layers,
-            scale=scale,
-            scored=scored,
-            calibration_results=load_or_empty_results(paths.calibration, text_columns=["model_output"]),
-            baseline_acts=baseline_acts,
-            baseline_masks=baseline_masks,
-            v_detect=v_detect,
-            thresholds=thresholds,
-        )
+        make_plots(paths.root)
 
     log(f"done in {time.perf_counter() - t0:.1f}s")
     return scored

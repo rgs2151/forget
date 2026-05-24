@@ -113,7 +113,7 @@ def run_generation_jobs(
     jobs = jobs.reset_index(drop=True)
     result_metadata = dict(result_metadata or {})
     gen_kwargs = dict(generation_kwargs or {})
-    gen_kwargs.setdefault("max_new_tokens", 128)
+    gen_kwargs.setdefault("max_new_tokens", 64)
     gen_kwargs.setdefault("do_sample", False)
     gen_kwargs.setdefault("temperature", 1.0)
 
@@ -138,3 +138,35 @@ def run_generation_jobs(
                 })
 
     return pd.DataFrame(rows)
+
+
+def _split_jobs_for_gpus(jobs, n_gpus):
+    if n_gpus <= 1:
+        return [jobs.reset_index(drop=True)]
+    prompt_indices = pd.Series(jobs["prompt_index"].drop_duplicates().tolist())
+    shards = []
+    for i in range(n_gpus):
+        gpu_indices = prompt_indices.iloc[i::n_gpus]
+        gpu_jobs = jobs[jobs["prompt_index"].isin(gpu_indices)].reset_index(drop=True)
+        shards.append(gpu_jobs)
+    return shards
+
+
+def run_jobs(pool, jobs, steering, generation_kwargs=None, batch_size=64,
+             trim_fn=None, result_metadata=None):
+    shards = _split_jobs_for_gpus(jobs, len(pool.gpu_ids))
+
+    def run(llm, jobs_shard):
+        return run_generation_jobs(
+            llm,
+            jobs_shard,
+            steering,
+            generation_kwargs=generation_kwargs,
+            trim_output_fn=trim_fn or (lambda x: x),
+            batch_size=batch_size,
+            result_metadata=result_metadata,
+        )
+
+    results = pool.map(run, shards)
+    merged = pd.concat(results, ignore_index=True)
+    return merged.sort_values(["prompt_index", "target", "scale"]).reset_index(drop=True)

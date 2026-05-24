@@ -61,6 +61,8 @@ python -m refuse \
     --out  store/mistral_concepts \
     --method lda \
     --gpus 0,1 -v
+
+# Qwen/Qwen2.5-7B-Instruct
 ```
 
 ```python

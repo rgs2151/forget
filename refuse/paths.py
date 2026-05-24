@@ -47,9 +47,6 @@ class Paths:
     def v_detect(self): return self.root / "v_detect.pt"
 
     @property
-    def v_refuse_per(self): return self.root / "v_refuse_per.pt"
-
-    @property
     def v_refuse(self): return self.root / "v_refuse.pt"
 
     @property
@@ -62,7 +59,10 @@ class Paths:
     def results(self): return self.root / "results.csv"
 
     @property
-    def scored(self): return self.root / "scored.csv"
+    def judged(self): return self.root / "judged.csv"
+
+    @property
+    def calibration_judged(self): return self.root / "calibration_judged.csv"
 
 
 def cached_pt(paths_dict, compute_fn):

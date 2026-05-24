@@ -1,7 +1,8 @@
 import argparse
 from pathlib import Path
 
-from .chat_templates import TEMPLATES
+from llm import TEMPLATES
+
 from .pipeline import run
 
 
@@ -26,6 +27,15 @@ def main():
     p.add_argument("--n-per-concept", type=int, default=25)
     p.add_argument("--no-plot", action="store_true",
                    help="skip diagnostic plots at the end of the pipeline")
+    p.add_argument("--judge-model", default=None,
+                   help="HF model path to use as LLM-judge for refusal/retention/fluency")
+    p.add_argument("--judge-gpus", default=None,
+                   help="comma-separated GPU ids for the judge (defaults to --gpus)")
+    p.add_argument("--judge-template", default=None,
+                   choices=sorted(TEMPLATES.keys()),
+                   help="chat template for the judge (auto-detected from --judge-model)")
+    p.add_argument("--judge-retries", type=int, default=2,
+                   help="retry attempts for judge rows that fail to parse (default: 2)")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="print which stage is running and which artifacts are cache hits")
     args = p.parse_args()
@@ -40,6 +50,10 @@ def main():
         n_per_concept=args.n_per_concept,
         plot=not args.no_plot,
         verbose=args.verbose,
+        judge_model=args.judge_model,
+        judge_gpu_ids=[int(g) for g in args.judge_gpus.split(",")] if args.judge_gpus else None,
+        judge_template=TEMPLATES[args.judge_template] if args.judge_template else None,
+        judge_max_retries=args.judge_retries,
     )
 
 
