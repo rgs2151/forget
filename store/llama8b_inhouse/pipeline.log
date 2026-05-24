@@ -1,0 +1,5 @@
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15549.10it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 14789.61it/s]
