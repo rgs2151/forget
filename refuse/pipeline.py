@@ -95,6 +95,7 @@ def run(
     gpu_ids=(0,),
     intervention_layers=None,
     calibration_scales=CALIBRATION_SCALES,
+    train_frac=1.0,
     calibration_frac=0.10,
     validation_frac=0.10,
     hf_token=None,
@@ -131,6 +132,9 @@ def run(
     df_train = pd.read_csv(paths.train)
     df_test = pd.read_csv(paths.test)
     concepts = df_train["concept"].unique().tolist()
+    if train_frac < 1.0:
+        n_per_concept = max(1, int(round(len(df_train) * train_frac / len(concepts))))
+        df_train = sample_per_concept(df_train, n_per_concept=n_per_concept).reset_index(drop=True)
     log(f"data: train={len(df_train)} test={len(df_test)} concepts={len(concepts)}")
 
     num_layers = AutoConfig.from_pretrained(model_path, token=hf_token).num_hidden_layers

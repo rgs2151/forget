@@ -23,6 +23,8 @@ def main():
                    choices=["lda", "diffed", "projected"])
     p.add_argument("--gpus", default="0",
                    help="comma-separated GPU ids, e.g. 0,1")
+    p.add_argument("--train-frac", type=float, default=1.0,
+                   help="fraction of train set to use for vectors/activations (default 1.0)")
     p.add_argument("--calibration-frac", type=float, default=0.10,
                    help="fraction of test set to sweep over in calibration (default 0.10 = 10%%)")
     p.add_argument("--validation-frac", type=float, default=0.10,
@@ -45,6 +47,7 @@ def main():
         result_root=args.out,
         method=args.method,
         gpu_ids=[int(g) for g in args.gpus.split(",")],
+        train_frac=args.train_frac,
         calibration_frac=args.calibration_frac,
         validation_frac=args.validation_frac,
         plot=not args.no_plot,
