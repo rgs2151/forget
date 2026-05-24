@@ -142,8 +142,8 @@ def plot_heatmap(judged_csv, save_path=None, metric="judge_refusal",
     ax.set_xlabel("Concepts")
     ax.set_ylabel("Target Concepts")
     n = len(concepts)
-    ax.set_xticks([0.5, n - 0.5], labels=[0, n])
-    ax.set_yticks([0.5, n - 0.5], labels=[0, n])
+    ax.set_xticks([0.5, n - 0.5], labels=[0, n - 1])
+    ax.set_yticks([0.5, n - 0.5], labels=[0, n - 1])
     plt.xticks(rotation=0)
 
     label = metric.replace("judge_", "").replace("_", " ").title()
