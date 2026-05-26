@@ -48,13 +48,11 @@ class Paths:
     def calibration(self): return self.root / "calibration_results.csv"
 
     @property
-    def results(self): return self.root / "results.csv"
-
-    @property
-    def judged(self): return self.root / "judged.csv"
-
-    @property
     def calibration_judged(self): return self.root / "calibration_judged.csv"
+
+    def eval_path(self, name): return self.root / f"{name}.csv"
+
+    def eval_judged_path(self, name): return self.root / f"{name}_judged.csv"
 
 
 def cached_pt(paths_dict, compute_fn):

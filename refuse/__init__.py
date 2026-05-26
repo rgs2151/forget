@@ -16,6 +16,7 @@ from .activations import (
 )
 from .baseline import generate_baseline
 from .calibration import calibration_generate, select_refusal_scale
+from .evaluations import EVALUATIONS, run_bars, run_confusion
 from .intervention import (
     GatedSteering,
     Steering,

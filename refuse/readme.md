@@ -4,7 +4,7 @@ Refusal-vector steering pipeline. See [`design.md`](design.md) for the per-modul
 
 ## Data fractions
 
-Four CLI knobs control how much data flows through each stage.
+CLI knobs control how much data flows through each stage.
 
 ```
 df_train (full)
@@ -30,12 +30,12 @@ df_test (full)
        │   Generate steered output, judge, pick best scale.
        │   Default 0.1 = 10% of kept set.
        │
-       └─ [--validation-frac]   ──► per-concept-balanced subsample
-           Generate steered output at the chosen scale, judge as final results.
-           Default 0.1 = 10% of kept set.
+       └─ evaluations (zero or more):
+            ├─ [--confusion C N]   c × c × n grid (all targets × subsampled concepts × n questions)
+            └─ [--bars N]          per target: n target-concept + n untargeted-pool questions
 ```
 
-`--train-frac` and `--test-frac` are mainly for debug — they shrink the data that gets baseline-generated and activation-collected. For production runs leave them at 1.0 and only tune the calibration/validation fractions.
+`--train-frac` and `--test-frac` are mainly for debug — they shrink the data that gets baseline-generated and activation-collected. For production runs leave them at 1.0 and pick at least one of `--confusion` / `--bars` to actually evaluate.
 
 ## Original spec
 

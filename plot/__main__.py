@@ -10,7 +10,7 @@ def main():
         description="re-render diagnostic plots from a refuse store directory",
     )
     p.add_argument("--store", required=True, type=Path,
-                   help="result store folder (the one with judged.csv, calibration_judged.csv, *.pt)")
+                   help="result store folder (the one with calibration_judged.csv and *_judged.csv eval files)")
     p.add_argument("--out", default=None, type=Path,
                    help="where to write plots (default: <store>/plots)")
     args = p.parse_args()

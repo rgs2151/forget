@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Run all 9 refusal experiments sequentially.
+# Run all refusal experiments with the BARS eval (target vs. untargeted, cheap).
 # Designed to be left in a screen/tmux session.
 #
 # Per-run log: logs/<name>.log
-# Master log:  logs/exp.log
+# Master log:  logs/exp_bars.log
 
 mkdir -p logs
-LOG=logs/exp.log
+LOG=logs/exp_bars.log
 
 run() {
     name="$1"; shift

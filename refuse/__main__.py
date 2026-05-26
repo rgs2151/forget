@@ -26,11 +26,13 @@ def main():
     p.add_argument("--train-frac", type=float, default=1.0,
                    help="fraction of train set to use for vectors/activations")
     p.add_argument("--test-frac", type=float, default=1.0,
-                   help="fraction of test set to keep for baseline/calibration/validation")
+                   help="fraction of test set to keep for baseline/calibration/evaluation")
     p.add_argument("--calibration-frac", type=float, default=0.10,
                    help="fraction of (kept) test set to sweep over in calibration")
-    p.add_argument("--validation-frac", type=float, default=1.0,
-                   help="fraction of (kept) test set to evaluate at the selected scale")
+    p.add_argument("--confusion", nargs=2, type=int, metavar=("C", "N"), default=None,
+                   help="run confusion eval on C subsampled concepts × C targets × N questions per concept")
+    p.add_argument("--bars", type=int, default=None, metavar="N",
+                   help="run bars eval: per target, N target-concept questions + N untargeted-pool questions")
     p.add_argument("--judge-model", default=None,
                    help="HF model path to use as LLM-judge for refusal/retention/fluency")
     p.add_argument("--judge-gpus", default=None,
@@ -43,6 +45,13 @@ def main():
                    help="print which stage is running and which artifacts are cache hits")
     args = p.parse_args()
 
+    evaluations = []
+    if args.confusion is not None:
+        c, n = args.confusion
+        evaluations.append(("confusion", {"c": c, "n": n}))
+    if args.bars is not None:
+        evaluations.append(("bars", {"n": args.bars}))
+
     run(
         model_path=args.model,
         data_root=args.data,
@@ -52,7 +61,7 @@ def main():
         train_frac=args.train_frac,
         test_frac=args.test_frac,
         calibration_frac=args.calibration_frac,
-        validation_frac=args.validation_frac,
+        evaluations=evaluations,
         plot=not args.no_plot,
         verbose=args.verbose,
         judge_model=args.judge_model,

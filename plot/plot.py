@@ -155,28 +155,82 @@ def plot_heatmap(judged_csv, save_path=None, metric="judge_refusal",
     return plt.gcf()
 
 
+def plot_bars(judged_csv, save_path=None):
+    df = pd.read_csv(judged_csv)
+    if "label" in df:
+        df = df[df["label"] == "intervention"]
+    df = df.assign(kind=np.where(df["concept"] == df["target"], "Target", "Untargeted"))
+
+    score_cols = [f"judge_{axis}" for axis in AXES if f"judge_{axis}" in df.columns]
+    long_df = df[["kind"] + score_cols].melt(id_vars="kind", var_name="axis", value_name="score")
+    long_df["axis"] = long_df["axis"].str.replace("judge_", "").str.title()
+
+    plt.figure(figsize=(5, 3))
+    ax = sns.barplot(
+        data=long_df, x="axis", y="score", hue="kind",
+        order=[AXIS_LABEL[a] for a in AXES if f"judge_{a}" in df.columns],
+        hue_order=["Target", "Untargeted"],
+        palette={"Target": PRIMARY_COLOR, "Untargeted": SECONDARY_COLOR},
+        errorbar=("ci", 95),
+    )
+    ax.set_xlabel("")
+    ax.set_ylabel("Score")
+    ax.set_ylim(0, 1.05)
+    ax.set_yticks([0, 1])
+    ax.legend(loc="best", fontsize=8, title="")
+    sns.despine(trim=True, offset=10)
+    if save_path is not None:
+        plt.savefig(save_path, bbox_inches="tight")
+    return plt.gcf()
+
+
+def _plot_confusion(csv, save_dir, name):
+    head = pd.read_csv(csv, nrows=1)
+    written = []
+    for axis in AXES:
+        col = f"judge_{axis}"
+        if col not in head.columns:
+            continue
+        out = save_dir / f"{name}_heatmap_{axis}.png"
+        plot_heatmap(csv, save_path=out, metric=col)
+        plt.close()
+        written.append(out.name)
+    return written
+
+
+def _plot_bars(csv, save_dir, name):
+    out = save_dir / f"{name}.png"
+    plot_bars(csv, save_path=out)
+    plt.close()
+    return [out.name]
+
+
+EVAL_PLOTTERS = {
+    "confusion": _plot_confusion,
+    "bars": _plot_bars,
+}
+
+
 def make_all(store, save_dir=None):
     store = Path(store)
     save_dir = Path(save_dir) if save_dir is not None else store / "plots"
     save_dir.mkdir(parents=True, exist_ok=True)
     setup_style()
 
-    cal = store / "calibration_judged.csv"
-    judged = store / "judged.csv"
-
     written = []
+    cal = store / "calibration_judged.csv"
     if cal.exists():
         plot_calibration(cal, save_path=save_dir / "calibration.png")
         plt.close()
         written.append("calibration.png")
 
-    if judged.exists():
-        df_head = pd.read_csv(judged, nrows=1)
-        for axis in AXES:
-            col = f"judge_{axis}"
-            if col in df_head.columns:
-                plot_heatmap(judged, save_path=save_dir / f"heatmap_{axis}.png", metric=col)
-                plt.close()
-                written.append(f"heatmap_{axis}.png")
+    for csv in sorted(store.glob("*_judged.csv")):
+        if csv.name == "calibration_judged.csv":
+            continue
+        name = csv.stem[:-len("_judged")]
+        plotter = EVAL_PLOTTERS.get(name)
+        if plotter is None:
+            continue
+        written.extend(plotter(csv, save_dir, name))
 
     return written

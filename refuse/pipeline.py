@@ -1,4 +1,5 @@
 import gc
+import shlex
 import sys
 import time
 from pathlib import Path
@@ -12,7 +13,8 @@ from llm import GPUPool, detect_template
 from .activations import cached_concept_activations
 from .baseline import generate_baseline
 from .calibration import calibration_generate, select_refusal_scale
-from .intervention import GatedSteering, make_generation_jobs, run_jobs, sample_per_concept
+from .evaluations import EVALUATIONS
+from .intervention import GatedSteering, sample_per_concept
 from .paths import Paths
 from .prompts import BASELINE_SYSTEM, refuse_system
 from .vectors import cached_diffed_vectors, cached_lda_vectors, cached_projected_vectors
@@ -98,7 +100,7 @@ def run(
     train_frac=1.0,
     test_frac=1.0,
     calibration_frac=0.10,
-    validation_frac=0.10,
+    evaluations=(),
     hf_token=None,
     plot=True,
     verbose=False,
@@ -130,6 +132,23 @@ def run(
     log_file = open(paths.root / "pipeline.log", "a", buffering=1)
     sys.stdout = _Tee(sys.stdout, log_file)
     sys.stderr = _Tee(sys.stderr, log_file)
+
+    args_log = paths.root / "arguments.log"
+    argv = " ".join(shlex.quote(a) for a in sys.argv)
+    resolved = {
+        "model": model_path, "data": str(data_root), "out": str(result_root),
+        "method": method, "gpus": list(gpu_ids),
+        "train_frac": train_frac, "test_frac": test_frac,
+        "calibration_frac": calibration_frac,
+        "evaluations": list(evaluations),
+        "judge_model": judge_model,
+        "judge_gpus": list(judge_gpu_ids) if judge_gpu_ids is not None else None,
+        "judge_max_retries": judge_max_retries,
+    }
+    with open(args_log, "a") as f:
+        f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {argv}\n")
+        f.write(f"  resolved: {resolved}\n")
+
     df_train = pd.read_csv(paths.train)
     df_test = pd.read_csv(paths.test)
     concepts = df_train["concept"].unique().tolist()
@@ -147,6 +166,26 @@ def run(
     log(f"num_layers={num_layers}  intervention_layers={intervention_layers}")
     result_metadata = {"source_layer": intervention_layers, "target_layer": intervention_layers}
 
+    evaluations = list(evaluations)
+    for name, _ in evaluations:
+        if name not in EVALUATIONS:
+            raise ValueError(f"unknown evaluation {name!r}; known: {list(EVALUATIONS)}")
+    eval_paths = {name: paths.eval_path(name) for name, _ in evaluations}
+    eval_judged_paths = {name: paths.eval_judged_path(name) for name, _ in evaluations}
+    need_eval = {name: not eval_paths[name].exists() for name, _ in evaluations}
+    need_eval_judge = {
+        name: judge_model is not None and not _judge_complete(eval_judged_paths[name])
+        for name, _ in evaluations
+    }
+    any_eval_pending = any(need_eval.values())
+    any_eval_judge_pending = any(need_eval_judge.values())
+
+    if any_eval_pending and judge_model is None and not paths.calibration_judged.exists():
+        raise ValueError(
+            "evaluations need a calibration-selected scale; "
+            "pass --judge-model or precompute calibration_judged.csv"
+        )
+
     need_baselines = not (
         _csv_complete(paths.baseline_train, "baseline_output")
         and _csv_complete(paths.baseline_test, "baseline_output")
@@ -157,17 +196,15 @@ def run(
         and paths.baseline_test_acts.exists()
     )
     need_calibration = not paths.calibration.exists()
-    need_results = not paths.results.exists()
     need_calibration_judge = (
-        (judge_model is not None) and need_results and not _judge_complete(paths.calibration_judged)
+        judge_model is not None and any_eval_pending
+        and not _judge_complete(paths.calibration_judged)
     )
-    need_final_judge = (judge_model is not None) and not _judge_complete(paths.judged)
 
     # === Block 1: main model for baselines + activations ===
     baseline_train = baseline_test = None
     baseline_acts = refuse_acts = None
     calibration_results = None
-    steering = None
 
     if need_baselines or need_acts:
         log(f"loading main on gpus={list(gpu_ids)}")
@@ -207,7 +244,7 @@ def run(
         baseline_train = pd.read_csv(paths.baseline_train)
         baseline_test = pd.read_csv(paths.baseline_test)
 
-    # === Block 2: main model for calibration generation (needs vectors → free GPU first) ===
+    # === Block 2a: main model for calibration generation ===
     if need_calibration:
         log(f"[5] vectors method={method} ({hit(paths.v_detect)})")
         v_detect, v_refuse, thresholds = _ensure_vectors(
@@ -233,9 +270,9 @@ def run(
     elif paths.calibration.exists():
         calibration_results = pd.read_csv(paths.calibration)
 
-    # === Block 2: judge for calibration scoring → select scale ===
+    # === Block 2b: judge for calibration scoring → select scale ===
     scale = None
-    if need_results:
+    if any_eval_pending:
         if calibration_results is None:
             calibration_results = pd.read_csv(paths.calibration)
 
@@ -259,53 +296,53 @@ def run(
         scale = select_refusal_scale(scored, score_col="judge_harmonic")
         log(f"  selected scale={scale}")
 
-    # === Block 3: main model for steered generation ===
-    if need_results:
+    # === Block 3: main model for all pending evaluations ===
+    if any_eval_pending:
         v_detect, v_refuse, thresholds = _ensure_vectors(
             method, concepts, paths, baseline_acts, refuse_acts,
         )
         steering = GatedSteering(intervention_layers, intervention_layers, v_detect, v_refuse, thresholds)
 
-        log(f"loading main on gpus={list(gpu_ids)} (for steered generation)")
+        log(f"loading main on gpus={list(gpu_ids)} (for evaluations)")
         pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
-        log(f"[6+7] steered generation (compute)")
-        n_per_concept = max(1, int(round(len(baseline_test) * validation_frac / len(concepts))))
-        df_gen = sample_per_concept(baseline_test, n_per_concept=n_per_concept).reset_index(drop=True)
-        prompts = [template.render(BASELINE_SYSTEM, row.question)
-                   for row in df_gen.itertuples(index=False)]
-        jobs = make_generation_jobs(df_gen, prompts, targets=concepts, scales=[scale])
-        log(f"  {len(jobs)} jobs across {len(pool)} gpus")
-        results = run_jobs(
-            pool, jobs, steering,
-            generation_kwargs={"max_new_tokens": 64, "do_sample": False, "temperature": 1.0},
-            batch_size=128,
-            trim_fn=template.trim_to_last_assistant,
-            result_metadata=result_metadata,
-        )
-        results.to_csv(paths.results, index=False)
+
+        for name, kwargs in evaluations:
+            if not need_eval[name]:
+                log(f"[6:{name}] cached")
+                continue
+            log(f"[6:{name}] running {kwargs}")
+            df = EVALUATIONS[name](
+                pool, baseline_test, steering, scale,
+                system_prompt=BASELINE_SYSTEM, template=template,
+                result_metadata=result_metadata,
+                **kwargs,
+            )
+            df.to_csv(eval_paths[name], index=False)
+
         del pool
         free("main")
-    else:
-        results = pd.read_csv(paths.results)
 
-    # === Block 4: judge for final scoring ===
-    if need_final_judge:
-        log(f"loading judge on gpus={list(judge_gpu_ids)} (for final scoring)")
+    # === Block 4: judge for all pending evaluation scoring ===
+    if any_eval_judge_pending:
+        log(f"loading judge on gpus={list(judge_gpu_ids)} (for evaluation scoring)")
         judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template, hf_token=hf_token)
-        log(f"[8] judge ({hit(paths.judged)})")
-        scored = add_judge_scores(
-            judge_pool, results, cache_path=paths.judged, max_retries=judge_max_retries,
-        )
+
+        for name, _ in evaluations:
+            if not need_eval_judge[name]:
+                log(f"[7:{name}] cached")
+                continue
+            log(f"[7:{name}] judging ({hit(eval_judged_paths[name])})")
+            results = pd.read_csv(eval_paths[name])
+            add_judge_scores(
+                judge_pool, results,
+                cache_path=eval_judged_paths[name], max_retries=judge_max_retries,
+            )
+
         del judge_pool
         free("judge")
-    elif judge_model is not None:
-        scored = pd.read_csv(paths.judged)
-    else:
-        scored = results
 
     if plot:
         log(f"[9] plots → {paths.root / 'plots'}")
         make_plots(paths.root)
 
     log(f"done in {time.perf_counter() - t0:.1f}s")
-    return scored

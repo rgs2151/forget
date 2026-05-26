@@ -8,6 +8,8 @@ A research toolkit for **per-concept refusal-vector steering** on open-weight LL
 4. calibrates the steering scale by sweeping a validation slice
 5. evaluates refusal / retention / fluency with an LLM-as-judge (binary rubric)
 
+Evaluation is pluggable: pick one or more of `--confusion C N` (full c×c grid) and `--bars N` (per-target target vs. untargeted, much cheaper). Each eval writes its own `{name}.csv` / `{name}_judged.csv`; the judge and plots discover them by name.
+
 End-to-end runnable as `python -m refuse ...` and re-renderable as `python -m plot ...`.
 
 ---
@@ -56,6 +58,7 @@ python -m refuse \
   --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B --judge-gpus 0,1 \
   --data store/inhouse \
   --out  store/llama3_inhouse \
+  --bars 20 \
   -v
 ```
 
@@ -74,9 +77,9 @@ Walks the full pipeline. Stages `[3a] … [9]` print one line each with cache-hi
 | `thresholds.pt` | per-concept per-layer LDA gating thresholds |
 | `calibration_results.csv` | steered generations across `--calibration-frac` × 30 scales |
 | `calibration_judged.csv` | calibration outputs + `judge_refusal/retention/fluency` columns |
-| `results.csv` | final steered generations at the selected scale |
-| `judged.csv` | final outputs + judge scores |
-| `plots/` | `calibration.png`, `detection_roc.png`, `heatmap_{refusal,retention,fluency}.png` |
+| `{eval}.csv` | per-eval steered generations at the selected scale (e.g. `confusion.csv`, `bars.csv`) |
+| `{eval}_judged.csv` | per-eval outputs + judge scores |
+| `plots/` | `calibration.png` plus per-eval plots (`confusion_heatmap_*.png`, `bars.png`, …) |
 | `pipeline.log` | tee'd terminal transcript |
 
 ---
@@ -95,13 +98,17 @@ main model
 
 method + sampling
   --method {lda,diffed,projected}   vector method (default lda)
-  --calibration-frac 0.10           fraction of test for calibration sweep
-  --validation-frac  0.10           fraction of test for main eval at selected scale
+  --train-frac       1.0            per-concept subsample of train (default 1.0)
+  --test-frac        1.0            per-concept subsample of test (default 1.0)
+  --calibration-frac 0.10           fraction of (kept) test for calibration sweep
+
+evaluations (any combination; none = skip eval stage)
+  --confusion C N                   subsample C concepts, sweep all C targets × N questions/concept
+  --bars      N                     per target: N target-concept + N untargeted-pool questions
 
 judge (LLM-as-judge)
   --judge-model PATH                HF model for the judge
   --judge-gpus 0,1                  GPU ids for judge (default: same as --gpus)
-  --judge-template {llama3,mistral,qwen}
   --judge-retries 25                retry budget for parse failures
 
 misc
@@ -116,13 +123,14 @@ misc
 ```python
 from refuse import run
 
-scored = run(
+run(
     model_path    = "meta-llama/Llama-3.1-8B-Instruct",
     data_root     = "store/concepts",
     result_root   = "store/llama3_concepts",
     gpu_ids       = [0, 1],
     judge_model   = "AtlaAI/Selene-1-Mini-Llama-3.1-8B",
     judge_gpu_ids = [0, 1],
+    evaluations   = [("bars", {"n": 20})],          # or ("confusion", {"c": 10, "n": 10}), or both
     verbose       = True,
 )
 ```
@@ -154,7 +162,7 @@ python -m plot --store store/llama3_concepts
 # or: python -m plot --store STORE --out OTHER_DIR
 ```
 
-Reads `calibration_judged.csv` + `judged.csv` (and nothing else), writes PNGs to `<store>/plots/`.
+Reads `calibration_judged.csv` and any `{eval}_judged.csv` files in the store, writes PNGs to `<store>/plots/`. Plots that have no source CSV are silently skipped.
 
 ---
 
@@ -179,15 +187,15 @@ EXACT_MATCHES["my-org/my-model"] = LLAMA3   # or a custom ChatTemplate(...)
 
 ## Architecture notes
 
-**Model lifecycle is sequential, not pooled.** Each pipeline phase loads → uses → `del`s its model. No CPU↔GPU swap dance, no shared-GPU branching. Trade ~30 s per disk reload for far simpler code. Five model loads in a full judged run:
+**Model lifecycle is sequential, not pooled.** Each pipeline phase loads → uses → `del`s its model. No CPU↔GPU swap dance, no shared-GPU branching. Trade ~30 s per disk reload for far simpler code. Up to five model loads in a full judged run (Blocks 3+4 share one main load and one judge load regardless of how many evals are enabled):
 
 ```
-1. load main  →  baselines + activations
-2. del main   →  LDA (no model needed)
-3. load main  →  calibration generate
-4. del main → load judge → calibration score → del judge
-5. load main  →  steered generation
-6. del main → load judge → final scoring → del judge
+1. load main  →  baselines + activations  →  del
+2. (LDA on CPU — no model needed)
+3. load main  →  calibration generate     →  del
+4. load judge →  calibration score        →  del
+5. load main  →  all pending evaluations  →  del
+6. load judge →  judge all pending evals  →  del
 ```
 
 **`GPUPool` is just `map` + `generate`.** Multi-GPU is `pool.map(fn, shards)` running `fn(llm, shard)` in a `ThreadPoolExecutor`. `pool.generate(prompts, ...)` is the only convenience method. Activation collection and steered generation are standalone functions in `refuse/` that *take* a pool — `llm/` never imports from `refuse/`.

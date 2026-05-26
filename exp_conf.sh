@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Run all 9 refusal experiments sequentially.
+# Run all refusal experiments with the CONFUSION eval (10 concepts × 10 questions × 10 targets).
 # Designed to be left in a screen/tmux session.
 #
 # Per-run log: logs/<name>.log
-# Master log:  logs/exp.log
+# Master log:  logs/exp_conf.log
 
 mkdir -p logs
-LOG=logs/exp.log
+LOG=logs/exp_conf.log
 
 run() {
     name="$1"; shift
@@ -26,25 +26,25 @@ JUDGE=AtlaAI/Selene-1-Mini-Llama-3.1-8B
 # run llama8b_inhouse python -m refuse \
 #     --model "$LLAMA" --data store/inhouse --out store/llama8b_inhouse \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run llama8b_concept10 python -m refuse \
 #     --model "$LLAMA" --data store/concept10 --out store/llama8b_concept10 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run llama8b_concept500 python -m refuse \
 #     --model "$LLAMA" --data store/concept500 --out store/llama8b_concept500 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run llama8b_rwku python -m refuse \
     --model "$LLAMA" --data store/rwku --out store/llama8b_rwku \
     --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+    --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # Mistral 7B
@@ -52,25 +52,25 @@ run llama8b_rwku python -m refuse \
 # run mistral7b_inhouse python -m refuse \
 #     --model "$MISTRAL" --data store/inhouse --out store/mistral7b_inhouse \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run mistral7b_concept10 python -m refuse \
 #     --model "$MISTRAL" --data store/concept10 --out store/mistral7b_concept10 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run mistral7b_concept500 python -m refuse \
 #     --model "$MISTRAL" --data store/concept500 --out store/mistral7b_concept500 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run mistral7b_rwku python -m refuse \
     --model "$MISTRAL" --data store/rwku --out store/mistral7b_rwku \
     --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+    --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # Qwen 2.5 7B
@@ -78,25 +78,25 @@ run mistral7b_rwku python -m refuse \
 # run qwen7b_inhouse python -m refuse \
 #     --model "$QWEN" --data store/inhouse --out store/qwen7b_inhouse \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run qwen7b_concept10 python -m refuse \
 #     --model "$QWEN" --data store/concept10 --out store/qwen7b_concept10 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 1.0 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 # run qwen7b_concept500 python -m refuse \
 #     --model "$QWEN" --data store/concept500 --out store/qwen7b_concept500 \
 #     --method lda --gpus 0,1 \
-#     --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+#     --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 run qwen7b_rwku python -m refuse \
     --model "$QWEN" --data store/rwku --out store/qwen7b_rwku \
     --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 0.01 --bars 20 \
+    --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 echo "=== [$(date '+%F %T')] ALL DONE ===" | tee -a "$LOG"

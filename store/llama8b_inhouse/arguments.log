@@ -1,0 +1,4 @@
+# backfilled 2026-05-26 — original invocation was pre-evaluations-refactor
+# (old --validation-frac is now equivalent to --confusion <all_concepts> <all_questions>)
+[historical] python -m refuse --model meta-llama/Llama-3.1-8B-Instruct --data store/inhouse --out store/llama8b_inhouse --method lda --gpus 0,1 --train-frac 1.0 --calibration-frac 1.0 --validation-frac 1.0 --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B --judge-gpus 0,1 --judge-retries 100 -v
+  resolved: {'model': 'meta-llama/Llama-3.1-8B-Instruct', 'data': 'store/inhouse', 'out': 'store/llama8b_inhouse', 'method': 'lda', 'gpus': [0, 1], 'train_frac': 1.0, 'test_frac': 1.0, 'calibration_frac': 1.0, 'evaluations': [('confusion', {'c': 10, 'n': 'all'})], 'judge_model': 'AtlaAI/Selene-1-Mini-Llama-3.1-8B', 'judge_gpus': [0, 1], 'judge_max_retries': 100}
