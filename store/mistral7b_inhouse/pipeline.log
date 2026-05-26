@@ -3113,3 +3113,11 @@
 [refuse] freed judge
 [refuse] [9] plots → store/mistral7b_inhouse/plots
 [refuse] done in 132.7s
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_inhouse/plots
+[refuse] done in 2.1s
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_inhouse/plots
+[refuse] done in 2.1s

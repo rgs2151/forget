@@ -507,3 +507,13 @@
 [refuse] freed judge
 [refuse] [9] plots → store/llama8b_rwku/plots
 [refuse] done in 777.6s
+[refuse] model='meta-llama/Llama-3.1-8B-Instruct'
+[refuse] data: train=57459 test=12455 concepts=200
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/llama8b_rwku/plots
+[refuse] done in 1.6s
+[refuse] model='meta-llama/Llama-3.1-8B-Instruct'
+[refuse] data: train=57459 test=12455 concepts=200
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/llama8b_rwku/plots
+[refuse] done in 1.6s

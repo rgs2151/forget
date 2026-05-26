@@ -829,3 +829,13 @@
 [refuse] freed judge
 [refuse] [9] plots → store/llama8b_mmlu/plots
 [refuse] done in 1359.0s
+[refuse] model='meta-llama/Llama-3.1-8B-Instruct'
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/llama8b_mmlu/plots
+[refuse] done in 1.2s
+[refuse] model='meta-llama/Llama-3.1-8B-Instruct'
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/llama8b_mmlu/plots
+[refuse] done in 1.2s

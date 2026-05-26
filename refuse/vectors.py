@@ -81,7 +81,7 @@ def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=Non
         del xx_c, layer_first, acts
 
     N = sum(counts.values())
-    reg = (1e-4 * t.eye(hidden, device=device)).unsqueeze(0)
+    reg = (1e-2 * t.eye(hidden, device=device)).unsqueeze(0)
 
     v_detect, thresholds = {}, {}
     for target in tqdm(concepts, desc="lda_vectors detect", disable=not show_progress):

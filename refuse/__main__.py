@@ -39,6 +39,10 @@ def main():
                    help="comma-separated GPU ids for the judge (defaults to --gpus)")
     p.add_argument("--judge-retries", type=int, default=25,
                    help="retry attempts for judge rows that fail to parse (default: 25)")
+    p.add_argument("--batch-size", type=int, default=64,
+                   help="batch size for main model (baseline, activations, calibration, eval)")
+    p.add_argument("--judge-batch-size", type=int, default=32,
+                   help="batch size for judge model")
     p.add_argument("--no-plot", action="store_true",
                    help="skip diagnostic plots at the end of the pipeline")
     p.add_argument("-v", "--verbose", action="store_true",
@@ -67,6 +71,8 @@ def main():
         judge_model=args.judge_model,
         judge_gpu_ids=[int(g) for g in args.judge_gpus.split(",")] if args.judge_gpus else None,
         judge_max_retries=args.judge_retries,
+        batch_size=args.batch_size,
+        judge_batch_size=args.judge_batch_size,
     )
 
 

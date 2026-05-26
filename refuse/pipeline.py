@@ -107,6 +107,8 @@ def run(
     judge_model=None,
     judge_gpu_ids=None,
     judge_max_retries=25,
+    batch_size=64,
+    judge_batch_size=32,
 ):
     def log(msg):
         if verbose:
@@ -144,6 +146,8 @@ def run(
         "judge_model": judge_model,
         "judge_gpus": list(judge_gpu_ids) if judge_gpu_ids is not None else None,
         "judge_max_retries": judge_max_retries,
+        "batch_size": batch_size,
+        "judge_batch_size": judge_batch_size,
     }
     with open(args_log, "a") as f:
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {argv}\n")
@@ -211,9 +215,9 @@ def run(
         pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
 
         log(f"[3a] baseline_train ({hit(paths.baseline_train)})")
-        baseline_train = generate_baseline(pool, df_train, paths.baseline_train, template)
+        baseline_train = generate_baseline(pool, df_train, paths.baseline_train, template, batch_size=batch_size)
         log(f"[3b] baseline_test ({hit(paths.baseline_test)})")
-        baseline_test = generate_baseline(pool, df_test, paths.baseline_test, template)
+        baseline_test = generate_baseline(pool, df_test, paths.baseline_test, template, batch_size=batch_size)
 
         if need_acts:
             log(f"[4a] baseline activations ({hit(paths.baseline_acts)})")
@@ -222,6 +226,7 @@ def run(
                 prompt_fn=lambda row, ans: template.render(BASELINE_SYSTEM, row.question, ans),
                 answer_fn=lambda row: row.baseline_output,
                 acts_path=paths.baseline_acts,
+                batch_size=batch_size,
             )
             log(f"[4b] refuse activations ({hit(paths.refuse_acts)})")
             refuse_acts = cached_concept_activations(
@@ -229,6 +234,7 @@ def run(
                 prompt_fn=lambda row, ans: template.render(refuse_system(row.concept), row.question, ans),
                 answer_fn=lambda _row: template.idk_answer,
                 acts_path=paths.refuse_acts,
+                batch_size=batch_size,
             )
             log(f"[4c] baseline_test activations ({hit(paths.baseline_test_acts)})")
             cached_concept_activations(
@@ -236,6 +242,7 @@ def run(
                 prompt_fn=lambda row, ans: template.render(BASELINE_SYSTEM, row.question, ans),
                 answer_fn=lambda row: row.baseline_output,
                 acts_path=paths.baseline_test_acts,
+                batch_size=batch_size,
             )
 
         del pool
@@ -264,6 +271,7 @@ def run(
             sample_frac=calibration_frac,
             cache_path=paths.calibration,
             result_metadata=result_metadata,
+            batch_size=batch_size,
         )
         del pool
         free("main")
@@ -283,6 +291,7 @@ def run(
             scored = add_judge_scores(
                 judge_pool, calibration_results,
                 cache_path=paths.calibration_judged, max_retries=judge_max_retries,
+                batch_size=judge_batch_size,
             )
             del judge_pool
             free("judge")
@@ -315,6 +324,7 @@ def run(
                 pool, baseline_test, steering, scale,
                 system_prompt=BASELINE_SYSTEM, template=template,
                 result_metadata=result_metadata,
+                batch_size=batch_size,
                 **kwargs,
             )
             df.to_csv(eval_paths[name], index=False)
@@ -336,6 +346,7 @@ def run(
             add_judge_scores(
                 judge_pool, results,
                 cache_path=eval_judged_paths[name], max_retries=judge_max_retries,
+                batch_size=judge_batch_size,
             )
 
         del judge_pool

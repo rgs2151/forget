@@ -57,7 +57,8 @@ run llama8b_conceptvectors python -m refuse \
     --model "$LLAMA" --data store/conceptvectors --out store/llama8b_conceptvectors \
     --method lda --gpus 0,1 \
     --train-frac 1.0 --calibration-frac 0.1 --confusion 10 10 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 \
+    --batch-size 32 --judge-batch-size 16 -v
 
 # Mistral 7B
 
@@ -95,7 +96,8 @@ run mistral7b_conceptvectors python -m refuse \
     --model "$MISTRAL" --data store/conceptvectors --out store/mistral7b_conceptvectors \
     --method lda --gpus 0,1 \
     --train-frac 1.0 --calibration-frac 0.1 --confusion 10 10 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 \
+    --batch-size 32 --judge-batch-size 16 -v
 
 # Qwen 2.5 7B
 
@@ -117,22 +119,22 @@ run mistral7b_conceptvectors python -m refuse \
 #     --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
 #     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
-run qwen7b_rwku python -m refuse \
-    --model "$QWEN" --data store/rwku --out store/qwen7b_rwku \
-    --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run qwen7b_rwku python -m refuse \
+#     --model "$QWEN" --data store/rwku --out store/qwen7b_rwku \
+#     --method lda --gpus 0,1 \
+#     --train-frac 1.0 --calibration-frac 0.01 --confusion 10 10 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
-run qwen7b_mmlu python -m refuse \
-    --model "$QWEN" --data store/mmlu --out store/qwen7b_mmlu \
-    --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run qwen7b_mmlu python -m refuse \
+#     --model "$QWEN" --data store/mmlu --out store/qwen7b_mmlu \
+#     --method lda --gpus 0,1 \
+#     --train-frac 1.0 --calibration-frac 1.0 --confusion 10 10 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
-run qwen7b_conceptvectors python -m refuse \
-    --model "$QWEN" --data store/conceptvectors --out store/qwen7b_conceptvectors \
-    --method lda --gpus 0,1 \
-    --train-frac 1.0 --calibration-frac 0.1 --confusion 10 10 \
-    --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
+# run qwen7b_conceptvectors python -m refuse \
+#     --model "$QWEN" --data store/conceptvectors --out store/qwen7b_conceptvectors \
+#     --method lda --gpus 0,1 \
+#     --train-frac 1.0 --calibration-frac 0.1 --confusion 10 10 \
+#     --judge-model "$JUDGE" --judge-gpus 0,1 --judge-retries 100 -v
 
 echo "=== [$(date '+%F %T')] ALL DONE ===" | tee -a "$LOG"

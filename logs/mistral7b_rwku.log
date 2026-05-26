@@ -3102,3 +3102,13 @@
 [refuse] freed judge
 [refuse] [9] plots → store/mistral7b_rwku/plots
 [refuse] done in 5073.9s
+[refuse] model='mistralai/Mistral-7B-Instruct-v0.3'
+[refuse] data: train=57459 test=12455 concepts=200
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_rwku/plots
+[refuse] done in 1.5s
+[refuse] model='mistralai/Mistral-7B-Instruct-v0.3'
+[refuse] data: train=57459 test=12455 concepts=200
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_rwku/plots
+[refuse] done in 1.5s

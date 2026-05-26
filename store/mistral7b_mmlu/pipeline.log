@@ -935,3 +935,11 @@
 [refuse] freed judge
 [refuse] [9] plots → store/mistral7b_mmlu/plots
 [refuse] done in 1543.0s
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_mmlu/plots
+[refuse] done in 1.2s
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse] [9] plots → store/mistral7b_mmlu/plots
+[refuse] done in 1.2s
