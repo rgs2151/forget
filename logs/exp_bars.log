@@ -1,0 +1,25 @@
+=== [2026-05-26 00:40:31] START llama8b_inhouse ===
+=== [2026-05-26 00:42:43] END   llama8b_inhouse (exit=0) ===
+=== [2026-05-26 00:42:43] START llama8b_rwku ===
+=== [2026-05-26 00:55:45] END   llama8b_rwku (exit=0) ===
+=== [2026-05-26 00:55:45] START llama8b_mmlu ===
+=== [2026-05-26 01:18:28] END   llama8b_mmlu (exit=0) ===
+=== [2026-05-26 01:18:28] START llama8b_conceptvectors ===
+=== [2026-05-26 01:19:36] END   llama8b_conceptvectors (exit=1) ===
+=== [2026-05-26 01:19:36] START mistral7b_inhouse ===
+=== [2026-05-26 01:21:52] END   mistral7b_inhouse (exit=0) ===
+=== [2026-05-26 01:21:52] START mistral7b_rwku ===
+=== [2026-05-26 02:46:30] END   mistral7b_rwku (exit=0) ===
+=== [2026-05-26 02:46:30] START mistral7b_mmlu ===
+=== [2026-05-26 03:12:17] END   mistral7b_mmlu (exit=0) ===
+=== [2026-05-26 03:12:17] START mistral7b_conceptvectors ===
+=== [2026-05-26 03:13:31] END   mistral7b_conceptvectors (exit=1) ===
+=== [2026-05-26 03:13:31] START qwen7b_inhouse ===
+=== [2026-05-26 03:15:34] END   qwen7b_inhouse (exit=1) ===
+=== [2026-05-26 03:15:34] START qwen7b_rwku ===
+=== [2026-05-26 04:04:28] END   qwen7b_rwku (exit=1) ===
+=== [2026-05-26 04:04:28] START qwen7b_mmlu ===
+=== [2026-05-26 04:05:48] END   qwen7b_mmlu (exit=1) ===
+=== [2026-05-26 04:05:48] START qwen7b_conceptvectors ===
+=== [2026-05-26 04:06:54] END   qwen7b_conceptvectors (exit=1) ===
+=== [2026-05-26 04:06:54] ALL DONE ===

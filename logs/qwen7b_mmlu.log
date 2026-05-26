@@ -1,0 +1,67 @@
+[refuse] model='Qwen/Qwen2.5-7B-Instruct'
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=28  intervention_layers=[13, 16, 18, 21]
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|##########| 339/339 [00:00<00:00, 22003.20it/s]
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|##########| 339/339 [00:00<00:00, 15763.52it/s]
+[refuse] [3a] baseline_train (compute)
+baseline_train:   0%|          | 0/8 [00:00<?, ?it/s]baseline_train:  12%|#2        | 1/8 [00:01<00:09,  1.37s/it]baseline_train:  25%|##5       | 2/8 [00:02<00:08,  1.44s/it]baseline_train:  38%|###7      | 3/8 [00:04<00:06,  1.36s/it]baseline_train:  50%|#####     | 4/8 [00:05<00:05,  1.27s/it]baseline_train:  62%|######2   | 5/8 [00:06<00:03,  1.25s/it]baseline_train:  75%|#######5  | 6/8 [00:07<00:02,  1.17s/it]baseline_train:  88%|########7 | 7/8 [00:09<00:01,  1.30s/it]baseline_train: 100%|##########| 8/8 [00:09<00:00,  1.04s/it]baseline_train: 100%|##########| 8/8 [00:09<00:00,  1.19s/it]
+[refuse] [3b] baseline_test (compute)
+baseline_test:   0%|          | 0/2 [00:00<?, ?it/s]baseline_test:  50%|#####     | 1/2 [00:00<00:00,  1.00it/s]baseline_test: 100%|##########| 2/2 [00:02<00:00,  1.41s/it]baseline_test: 100%|##########| 2/2 [00:02<00:00,  1.35s/it]
+[refuse] [4a] baseline activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:01<00:07,  1.81s/it]
+activations:  20%|##        | 1/5 [00:01<00:07,  1.88s/it][Aactivations:  40%|####      | 2/5 [00:03<00:05,  1.75s/it]
+activations:  40%|####      | 2/5 [00:03<00:05,  1.77s/it][A
+activations:  60%|######    | 3/5 [00:04<00:02,  1.47s/it][Aactivations:  60%|######    | 3/5 [00:04<00:03,  1.53s/it]
+activations:  80%|########  | 4/5 [00:06<00:01,  1.51s/it][Aactivations:  80%|########  | 4/5 [00:07<00:02,  2.04s/it]
+activations: 100%|##########| 5/5 [00:07<00:00,  1.52s/it][Aactivations: 100%|##########| 5/5 [00:07<00:00,  1.56s/it]
+activations: 100%|##########| 5/5 [00:09<00:00,  1.83s/it]activations: 100%|##########| 5/5 [00:09<00:00,  1.81s/it]
+[refuse] [4b] refuse activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:01<00:06,  1.58s/it]
+activations:  20%|##        | 1/5 [00:01<00:07,  1.75s/it][A
+activations:  40%|####      | 2/5 [00:03<00:04,  1.49s/it][Aactivations:  40%|####      | 2/5 [00:03<00:04,  1.61s/it]
+activations:  60%|######    | 3/5 [00:04<00:02,  1.27s/it][Aactivations:  60%|######    | 3/5 [00:04<00:02,  1.35s/it]
+activations:  80%|########  | 4/5 [00:05<00:01,  1.31s/it][A
+activations: 100%|##########| 5/5 [00:06<00:00,  1.30s/it][Aactivations: 100%|##########| 5/5 [00:06<00:00,  1.35s/it]
+activations:  80%|########  | 4/5 [00:07<00:01,  1.93s/it]activations: 100%|##########| 5/5 [00:08<00:00,  1.69s/it]activations: 100%|##########| 5/5 [00:08<00:00,  1.67s/it]
+[refuse] [4c] baseline_test activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][A
+activations:  20%|##        | 1/5 [00:00<00:01,  2.59it/s][Aactivations:  20%|##        | 1/5 [00:00<00:01,  2.15it/s]
+activations:  40%|####      | 2/5 [00:00<00:00,  3.37it/s][Aactivations:  40%|####      | 2/5 [00:00<00:01,  2.34it/s]
+activations:  60%|######    | 3/5 [00:00<00:00,  3.20it/s][Aactivations:  60%|######    | 3/5 [00:01<00:00,  2.34it/s]
+activations:  80%|########  | 4/5 [00:01<00:00,  2.70it/s][Aactivations:  80%|########  | 4/5 [00:01<00:00,  2.03it/s]
+activations: 100%|##########| 5/5 [00:02<00:00,  2.19it/s][Aactivations: 100%|##########| 5/5 [00:02<00:00,  2.47it/s]
+activations: 100%|##########| 5/5 [00:02<00:00,  2.46it/s]activations: 100%|##########| 5/5 [00:02<00:00,  2.34it/s]
+[refuse] freed main
+[refuse] [5] vectors method=lda (compute)
+lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors totals: 100%|##########| 10/10 [00:00<00:00, 209.23it/s]
+lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dev/forget/refuse/__main__.py", line 74, in <module>
+    main()
+  File "/home/dev/forget/refuse/__main__.py", line 55, in main
+    run(
+  File "/home/dev/forget/refuse/pipeline.py", line 250, in run
+    v_detect, v_refuse, thresholds = _ensure_vectors(
+                                     ^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/pipeline.py", line 82, in _ensure_vectors
+    out = VECTOR_METHODS[method](baseline_acts, refuse_acts, concepts, paths, device=device)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 136, in cached_lda_vectors
+    loaded = cached_pt(paths_dict, compute)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/paths.py", line 61, in cached_pt
+    computed = compute_fn()
+               ^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 134, in compute
+    v_detect, v_refuse, thresholds = lda_vectors(know_acts, forget_acts, concepts, device=device)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 104, in lda_vectors
+    chol = t.linalg.cholesky(scatter)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch._C._LinAlgError: linalg.cholesky: (Batch element 22): The factorization could not be completed because the input is not positive-definite (the leading minor of order 3198 is not positive-definite).

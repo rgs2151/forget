@@ -3042,3 +3042,74 @@
 [refuse] freed judge
 [refuse] [9] plots → store/mistral7b_inhouse/plots
 [refuse] done in 6526.5s
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse]   selected scale=4.0
+[refuse] loading main on gpus=[0, 1] (for evaluations)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 21105.70it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 19151.77it/s]
+[refuse] [6:bars] running {'n': 10}
+Generation runs:   0%|          | 0/10 [00:00<?, ?it/s]
+Generation runs:   0%|          | 0/10 [00:00<?, ?it/s][AGeneration runs:  10%|#         | 1/10 [00:01<00:12,  1.33s/it]
+Generation runs:  10%|#         | 1/10 [00:01<00:12,  1.37s/it][AGeneration runs:  20%|##        | 2/10 [00:02<00:09,  1.14s/it]
+Generation runs:  20%|##        | 2/10 [00:02<00:09,  1.17s/it][AGeneration runs:  30%|###       | 3/10 [00:03<00:07,  1.08s/it]
+Generation runs:  30%|###       | 3/10 [00:03<00:07,  1.10s/it][AGeneration runs:  40%|####      | 4/10 [00:04<00:06,  1.05s/it]
+Generation runs:  40%|####      | 4/10 [00:04<00:06,  1.07s/it][AGeneration runs:  50%|#####     | 5/10 [00:05<00:05,  1.04s/it]
+Generation runs:  50%|#####     | 5/10 [00:05<00:05,  1.06s/it][AGeneration runs:  60%|######    | 6/10 [00:06<00:04,  1.03s/it]
+Generation runs:  60%|######    | 6/10 [00:06<00:04,  1.05s/it][AGeneration runs:  70%|#######   | 7/10 [00:07<00:03,  1.02s/it]
+Generation runs:  70%|#######   | 7/10 [00:07<00:03,  1.05s/it][AGeneration runs:  80%|########  | 8/10 [00:08<00:02,  1.02s/it]
+Generation runs:  80%|########  | 8/10 [00:08<00:02,  1.04s/it][AGeneration runs:  90%|######### | 9/10 [00:09<00:01,  1.02s/it]
+Generation runs:  90%|######### | 9/10 [00:09<00:01,  1.04s/it][AGeneration runs: 100%|##########| 10/10 [00:10<00:00,  1.01s/it]Generation runs: 100%|##########| 10/10 [00:10<00:00,  1.04s/it]
+
+Generation runs: 100%|##########| 10/10 [00:10<00:00,  1.03s/it][AGeneration runs: 100%|##########| 10/10 [00:10<00:00,  1.06s/it]
+[refuse] freed main
+[refuse] loading judge on gpus=[0, 1] (for evaluation scoring)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15819.15it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 16247.25it/s]
+[refuse] [7:bars] judging (compute)
+[judge:refusal] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][Agenerate:  25%|##5       | 1/4 [00:02<00:07,  2.37s/it]
+generate:  25%|##5       | 1/4 [00:03<00:09,  3.05s/it][Agenerate:  50%|#####     | 2/4 [00:04<00:04,  2.36s/it]
+generate:  50%|#####     | 2/4 [00:05<00:05,  2.75s/it][Agenerate:  75%|#######5  | 3/4 [00:07<00:02,  2.36s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.77s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.98s/it]
+
+generate:  75%|#######5  | 3/4 [00:07<00:02,  2.57s/it][A
+generate: 100%|##########| 4/4 [00:08<00:00,  1.81s/it][Agenerate: 100%|##########| 4/4 [00:08<00:00,  2.15s/it]
+[judge:retention] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][Agenerate:  25%|##5       | 1/4 [00:02<00:07,  2.42s/it]
+generate:  25%|##5       | 1/4 [00:03<00:10,  3.34s/it][Agenerate:  50%|#####     | 2/4 [00:04<00:04,  2.46s/it]
+generate:  50%|#####     | 2/4 [00:05<00:05,  2.84s/it][Agenerate:  75%|#######5  | 3/4 [00:07<00:02,  2.44s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.72s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.98s/it]
+
+generate:  75%|#######5  | 3/4 [00:08<00:02,  2.65s/it][A
+generate: 100%|##########| 4/4 [00:08<00:00,  1.87s/it][Agenerate: 100%|##########| 4/4 [00:08<00:00,  2.23s/it]
+[judge:retention] retry 1/100: 6 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]
+generate:   0%|          | 0/1 [00:00<?, ?it/s][Agenerate: 100%|##########| 1/1 [00:00<00:00,  1.16it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.16it/s]
+
+generate: 100%|##########| 1/1 [00:00<00:00,  1.03it/s][Agenerate: 100%|##########| 1/1 [00:00<00:00,  1.03it/s]
+[judge:retention] retry 2/100: 4 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]
+generate:   0%|          | 0/1 [00:00<?, ?it/s][Agenerate: 100%|##########| 1/1 [00:00<00:00,  1.42it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.42it/s]
+
+generate: 100%|##########| 1/1 [00:01<00:00,  1.01s/it][Agenerate: 100%|##########| 1/1 [00:01<00:00,  1.01s/it]
+[judge:retention] retry 3/100: 2 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]
+generate:   0%|          | 0/1 [00:00<?, ?it/s][A
+generate: 100%|##########| 1/1 [00:00<00:00,  1.77it/s][Agenerate: 100%|##########| 1/1 [00:00<00:00,  1.77it/s]
+generate: 100%|##########| 1/1 [00:00<00:00,  1.57it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.57it/s]
+[judge:retention] retry 4/100: 1 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.59it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.59it/s]
+[judge:fluency] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][Agenerate:  25%|##5       | 1/4 [00:02<00:06,  2.18s/it]
+generate:  25%|##5       | 1/4 [00:02<00:08,  2.88s/it][Agenerate:  50%|#####     | 2/4 [00:04<00:04,  2.22s/it]
+generate:  50%|#####     | 2/4 [00:05<00:05,  2.64s/it][Agenerate:  75%|#######5  | 3/4 [00:07<00:02,  2.42s/it]
+generate:  75%|#######5  | 3/4 [00:07<00:02,  2.49s/it][Agenerate: 100%|##########| 4/4 [00:07<00:00,  1.74s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.95s/it]
+
+generate: 100%|##########| 4/4 [00:08<00:00,  1.75s/it][Agenerate: 100%|##########| 4/4 [00:08<00:00,  2.07s/it]
+[judge:fluency] retry 1/100: 1 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]generate: 100%|##########| 1/1 [00:00<00:00,  2.21it/s]generate: 100%|##########| 1/1 [00:00<00:00,  2.21it/s]
+[refuse] freed judge
+[refuse] [9] plots → store/mistral7b_inhouse/plots
+[refuse] done in 132.7s

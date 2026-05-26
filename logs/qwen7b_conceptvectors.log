@@ -1,0 +1,111 @@
+[refuse] model='Qwen/Qwen2.5-7B-Instruct'
+[refuse] data: train=7644 test=1911 concepts=91
+[refuse] num_layers=28  intervention_layers=[13, 16, 18, 21]
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|##########| 339/339 [00:00<00:00, 15801.53it/s]
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|##########| 339/339 [00:00<00:00, 20416.25it/s]
+[refuse] [3a] baseline_train (compute)
+baseline_train:   0%|          | 0/60 [00:00<?, ?it/s]baseline_train:   2%|1         | 1/60 [00:02<02:43,  2.77s/it]baseline_train:   3%|3         | 2/60 [00:05<02:23,  2.47s/it]baseline_train:   5%|5         | 3/60 [00:06<02:01,  2.14s/it]baseline_train:   7%|6         | 4/60 [00:08<02:00,  2.14s/it]baseline_train:   8%|8         | 5/60 [00:10<01:51,  2.02s/it]baseline_train:  10%|#         | 6/60 [00:12<01:51,  2.06s/it]baseline_train:  12%|#1        | 7/60 [00:15<02:02,  2.31s/it]baseline_train:  12%|#1        | 7/60 [00:17<02:13,  2.53s/it]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dev/forget/refuse/__main__.py", line 74, in <module>
+    main()
+  File "/home/dev/forget/refuse/__main__.py", line 55, in main
+    run(
+  File "/home/dev/forget/refuse/pipeline.py", line 214, in run
+    baseline_train = generate_baseline(pool, df_train, paths.baseline_train, template)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/baseline.py", line 31, in generate_baseline
+    return cached_csv_rows(
+           ^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/paths.py", line 82, in cached_csv_rows
+    outputs = compute_missing_fn(df.loc[batch_idx])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/baseline.py", line 19, in compute_missing
+    return pool.generate(
+           ^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 66, in generate
+    results = self.map(run, shards)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 39, in map
+    return [future.result() for future in futures]
+            ^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 59, in run
+    batch_outputs = llm.batch_generate(batch, **gen_kwargs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/steering/base.py", line 139, in batch_generate
+    generated = self.model.generate(
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/generation/utils.py", line 2560, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/generation/utils.py", line 2753, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/generation/utils.py", line 3799, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/utils/generic.py", line 900, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 462, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/utils/generic.py", line 976, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 248, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 399, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/modeling_layers.py", line 93, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1885, in _call_impl
+    return inner()
+           ^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1833, in inner
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 307, in forward
+    hidden_states = self.mlp(hidden_states)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 47, in forward
+    down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.41 GiB. GPU 1 has a total capacity of 31.36 GiB of which 464.69 MiB is free. Including non-PyTorch memory, this process has 30.88 GiB memory in use. Of the allocated memory 29.16 GiB is allocated by PyTorch, and 1.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

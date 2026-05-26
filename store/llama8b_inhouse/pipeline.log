@@ -2748,3 +2748,62 @@
 [refuse] freed judge
 [refuse] [9] plots → store/llama8b_inhouse/plots
 [refuse] done in 5905.9s
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse]   selected scale=5.5
+[refuse] loading main on gpus=[0, 1] (for evaluations)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15486.17it/s]
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=32  intervention_layers=[15, 18, 21, 24]
+[refuse]   selected scale=5.5
+[refuse] loading main on gpus=[0, 1] (for evaluations)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 16143.03it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15552.47it/s]
+[refuse] [6:bars] running {'n': 10}
+Generation runs:   0%|          | 0/10 [00:00<?, ?it/s]
+Generation runs:   0%|          | 0/10 [00:00<?, ?it/s][AGeneration runs:  10%|#         | 1/10 [00:00<00:06,  1.48it/s]Generation runs:  20%|##        | 2/10 [00:01<00:03,  2.05it/s]Generation runs:  30%|###       | 3/10 [00:01<00:02,  2.36it/s]
+Generation runs:  10%|#         | 1/10 [00:01<00:12,  1.38s/it][A
+Generation runs:  20%|##        | 2/10 [00:01<00:05,  1.45it/s][AGeneration runs:  40%|####      | 4/10 [00:01<00:02,  2.45it/s]Generation runs:  50%|#####     | 5/10 [00:02<00:02,  2.46it/s]Generation runs:  60%|######    | 6/10 [00:02<00:01,  2.61it/s]
+Generation runs:  30%|###       | 3/10 [00:02<00:05,  1.17it/s][AGeneration runs:  70%|#######   | 7/10 [00:02<00:01,  2.49it/s]Generation runs:  80%|########  | 8/10 [00:03<00:00,  2.37it/s]
+Generation runs:  40%|####      | 4/10 [00:03<00:05,  1.07it/s][AGeneration runs:  90%|######### | 9/10 [00:03<00:00,  2.52it/s]
+Generation runs:  50%|#####     | 5/10 [00:04<00:04,  1.03it/s][AGeneration runs: 100%|##########| 10/10 [00:04<00:00,  1.68it/s]Generation runs: 100%|##########| 10/10 [00:04<00:00,  2.09it/s]
+
+Generation runs:  60%|######    | 6/10 [00:05<00:03,  1.32it/s][A
+Generation runs:  70%|#######   | 7/10 [00:05<00:01,  1.58it/s][A
+Generation runs:  80%|########  | 8/10 [00:05<00:01,  1.88it/s][A
+Generation runs:  90%|######### | 9/10 [00:06<00:00,  1.48it/s][A
+Generation runs: 100%|##########| 10/10 [00:07<00:00,  1.29it/s][AGeneration runs: 100%|##########| 10/10 [00:07<00:00,  1.29it/s]
+[refuse] freed main
+[refuse] loading judge on gpus=[0, 1] (for evaluation scoring)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15130.25it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|##########| 291/291 [00:00<00:00, 15313.63it/s]
+[refuse] [7:bars] judging (compute)
+[judge:refusal] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][A
+generate:  25%|##5       | 1/4 [00:02<00:06,  2.04s/it][Agenerate:  25%|##5       | 1/4 [00:02<00:08,  2.72s/it]
+generate:  50%|#####     | 2/4 [00:04<00:04,  2.07s/it][Agenerate:  50%|#####     | 2/4 [00:04<00:04,  2.46s/it]
+generate:  75%|#######5  | 3/4 [00:06<00:02,  2.11s/it][A
+generate: 100%|##########| 4/4 [00:06<00:00,  1.55s/it][Agenerate: 100%|##########| 4/4 [00:06<00:00,  1.74s/it]
+generate:  75%|#######5  | 3/4 [00:07<00:02,  2.37s/it]generate: 100%|##########| 4/4 [00:08<00:00,  1.73s/it]generate: 100%|##########| 4/4 [00:08<00:00,  2.00s/it]
+[judge:retention] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][A
+generate:  25%|##5       | 1/4 [00:02<00:06,  2.15s/it][Agenerate:  25%|##5       | 1/4 [00:02<00:08,  2.82s/it]
+generate:  50%|#####     | 2/4 [00:04<00:04,  2.35s/it][Agenerate:  50%|#####     | 2/4 [00:05<00:05,  2.77s/it]
+generate:  75%|#######5  | 3/4 [00:06<00:02,  2.30s/it][A
+generate: 100%|##########| 4/4 [00:07<00:00,  1.76s/it][Agenerate: 100%|##########| 4/4 [00:07<00:00,  1.95s/it]
+generate:  75%|#######5  | 3/4 [00:07<00:02,  2.55s/it]generate: 100%|##########| 4/4 [00:08<00:00,  1.77s/it]generate: 100%|##########| 4/4 [00:08<00:00,  2.10s/it]
+[judge:retention] retry 1/100: 1 rows
+generate:   0%|          | 0/1 [00:00<?, ?it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.68it/s]generate: 100%|##########| 1/1 [00:00<00:00,  1.68it/s]
+[judge:fluency] first pass: 200 rows
+generate:   0%|          | 0/4 [00:00<?, ?it/s]
+generate:   0%|          | 0/4 [00:00<?, ?it/s][Agenerate:  25%|##5       | 1/4 [00:02<00:06,  2.13s/it]
+generate:  25%|##5       | 1/4 [00:02<00:08,  2.99s/it][Agenerate:  50%|#####     | 2/4 [00:04<00:04,  2.15s/it]
+generate:  50%|#####     | 2/4 [00:05<00:05,  2.54s/it][Agenerate:  75%|#######5  | 3/4 [00:06<00:02,  2.13s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.57s/it]generate: 100%|##########| 4/4 [00:07<00:00,  1.78s/it]
+
+generate:  75%|#######5  | 3/4 [00:07<00:02,  2.49s/it][A
+generate: 100%|##########| 4/4 [00:08<00:00,  1.74s/it][Agenerate: 100%|##########| 4/4 [00:08<00:00,  2.06s/it]
+[refuse] freed judge
+[refuse] [9] plots → store/llama8b_inhouse/plots
+[refuse] done in 128.0s
