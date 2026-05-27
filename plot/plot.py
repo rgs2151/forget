@@ -96,7 +96,6 @@ def plot_calibration(calibration_judged_csv, save_path=None):
     plt.ylabel("Score")
     plt.ylim(-0.05, 1.05)
     plt.yticks([0, 1])
-    plt.xticks([0, 5, 10, 15])
     plt.legend(loc="best", fontsize=8)
     sns.despine(trim=True, offset=10)
     if save_path is not None:

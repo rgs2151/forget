@@ -29,6 +29,8 @@ def main():
                    help="fraction of test set to keep for baseline/calibration/evaluation")
     p.add_argument("--calibration-frac", type=float, default=0.10,
                    help="fraction of (kept) test set to sweep over in calibration")
+    p.add_argument("--sweep-type", default="mid", choices=["small", "mid", "large"],
+                   help="calibration scale range: small=0-5, mid=0-15, large=0-100 (each 30 steps)")
     p.add_argument("--confusion", nargs=2, type=int, metavar=("C", "N"), default=None,
                    help="run confusion eval on C subsampled concepts × C targets × N questions per concept")
     p.add_argument("--bars", type=int, default=None, metavar="N",
@@ -65,6 +67,7 @@ def main():
         train_frac=args.train_frac,
         test_frac=args.test_frac,
         calibration_frac=args.calibration_frac,
+        sweep_type=args.sweep_type,
         evaluations=evaluations,
         plot=not args.no_plot,
         verbose=args.verbose,

@@ -34,7 +34,16 @@ class _Tee:
             s.flush()
 
 
-CALIBRATION_SCALES = [round(i * 0.5, 1) for i in range(1, 31)]
+def _make_sweep(max_scale, n=30):
+    return [round(i * max_scale / n, 2) for i in range(1, n + 1)]
+
+
+SWEEPS = {
+    "small": _make_sweep(5),
+    "mid":   _make_sweep(15),
+    "large": _make_sweep(100),
+}
+CALIBRATION_SCALES = SWEEPS["mid"]
 JUDGE_AXES = ("refusal", "retention", "fluency")
 EPS = 1e-9
 
@@ -96,7 +105,7 @@ def run(
     method="lda",
     gpu_ids=(0,),
     intervention_layers=None,
-    calibration_scales=CALIBRATION_SCALES,
+    sweep_type="mid",
     train_frac=1.0,
     test_frac=1.0,
     calibration_frac=0.10,
@@ -110,6 +119,9 @@ def run(
     batch_size=64,
     judge_batch_size=32,
 ):
+    if sweep_type not in SWEEPS:
+        raise ValueError(f"unknown sweep_type {sweep_type!r}; choose from {list(SWEEPS)}")
+    calibration_scales = SWEEPS[sweep_type]
     def log(msg):
         if verbose:
             print(f"[refuse] {msg}", flush=True)
@@ -142,6 +154,7 @@ def run(
         "method": method, "gpus": list(gpu_ids),
         "train_frac": train_frac, "test_frac": test_frac,
         "calibration_frac": calibration_frac,
+        "sweep_type": sweep_type,
         "evaluations": list(evaluations),
         "judge_model": judge_model,
         "judge_gpus": list(judge_gpu_ids) if judge_gpu_ids is not None else None,
@@ -201,7 +214,7 @@ def run(
     )
     need_calibration = not paths.calibration.exists()
     need_calibration_judge = (
-        judge_model is not None and any_eval_pending
+        judge_model is not None
         and not _judge_complete(paths.calibration_judged)
     )
 
@@ -278,26 +291,32 @@ def run(
     elif paths.calibration.exists():
         calibration_results = pd.read_csv(paths.calibration)
 
-    # === Block 2b: judge for calibration scoring → select scale ===
-    scale = None
-    if any_eval_pending:
+    # === Block 2b: judge for calibration scoring ===
+    scored = None
+    if need_calibration_judge:
         if calibration_results is None:
             calibration_results = pd.read_csv(paths.calibration)
+        log(f"loading judge on gpus={list(judge_gpu_ids)}")
+        judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template, hf_token=hf_token)
+        log(f"[5.5b] calibration judge ({hit(paths.calibration_judged)})")
+        scored = add_judge_scores(
+            judge_pool, calibration_results,
+            cache_path=paths.calibration_judged, max_retries=judge_max_retries,
+            batch_size=judge_batch_size,
+        )
+        del judge_pool
+        free("judge")
+    elif paths.calibration_judged.exists():
+        scored = pd.read_csv(paths.calibration_judged)
 
-        if need_calibration_judge:
-            log(f"loading judge on gpus={list(judge_gpu_ids)}")
-            judge_pool = GPUPool.from_model_path(judge_model, judge_gpu_ids, template=judge_template, hf_token=hf_token)
-            log(f"[5.5b] calibration judge ({hit(paths.calibration_judged)})")
-            scored = add_judge_scores(
-                judge_pool, calibration_results,
-                cache_path=paths.calibration_judged, max_retries=judge_max_retries,
-                batch_size=judge_batch_size,
+    # === Scale selection: only if an eval needs it ===
+    scale = None
+    if any_eval_pending:
+        if scored is None:
+            raise ValueError(
+                "evaluations need a scale but calibration_judged.csv is unavailable "
+                "(pass --judge-model to compute it)"
             )
-            del judge_pool
-            free("judge")
-        else:
-            scored = pd.read_csv(paths.calibration_judged)
-
         scored = scored.assign(
             judge_harmonic=2 * scored["judge_refusal"] * scored["judge_fluency"]
             / (scored["judge_refusal"] + scored["judge_fluency"] + EPS)
