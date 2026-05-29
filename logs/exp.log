@@ -1,0 +1,18 @@
+=== [2026-05-27 19:26:25] START qwen7b_inhouse (evals: none) ===
+=== [2026-05-27 23:13:14] END   qwen7b_inhouse (exit=0) ===
+=== [2026-05-27 23:13:14] START qwen7b_rwku (evals: none) ===
+=== [2026-05-28 00:05:41] END   qwen7b_rwku (exit=0) ===
+=== [2026-05-28 00:05:41] START qwen7b_mmlu (evals: none) ===
+=== [2026-05-28 01:26:11] END   qwen7b_mmlu (exit=0) ===
+=== [2026-05-28 01:26:11] START qwen7b_conceptvectors (evals: none) ===
+=== [2026-05-28 02:17:51] END   qwen7b_conceptvectors (exit=0) ===
+=== [2026-05-28 02:17:51] ALL DONE ===
+=== [2026-05-28 06:51:01] START qwen7b_inhouse (evals: --bars 10 --confusion 10 10) ===
+=== [2026-05-28 07:03:32] END   qwen7b_inhouse (exit=0) ===
+=== [2026-05-28 07:03:32] START qwen7b_rwku (evals: --bars 10 --confusion 10 10) ===
+=== [2026-05-28 07:51:04] END   qwen7b_rwku (exit=0) ===
+=== [2026-05-28 07:51:04] START qwen7b_mmlu (evals: --bars 10 --confusion 10 10) ===
+=== [2026-05-28 08:11:51] END   qwen7b_mmlu (exit=0) ===
+=== [2026-05-28 08:11:51] START qwen7b_conceptvectors (evals: --bars 10 --confusion 10 10) ===
+=== [2026-05-28 08:35:51] END   qwen7b_conceptvectors (exit=0) ===
+=== [2026-05-28 08:35:51] ALL DONE ===

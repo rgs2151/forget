@@ -13,8 +13,8 @@
 # Per-run log: logs/<name>.log
 # Master log:  logs/exp.log
 
-RUN_BARS=0
-RUN_CONFUSION=0
+RUN_BARS=1
+RUN_CONFUSION=1
 
 mkdir -p logs
 LOG=logs/exp.log
