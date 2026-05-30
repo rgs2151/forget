@@ -6,3 +6,4 @@
 - Keep code simple and direct. No over-engineering or premature abstraction.
 - No extra print statements in notebook cells. Keep cells clean.
 - Use code comments for step explanations, not markdown cells.
+- Don't do tests with github actions or CI/CD pipelines.

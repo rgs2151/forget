@@ -26,9 +26,8 @@ df_test (full)
   │
   └─ baseline_test (kept set)
        │
-       ├─ [--calibration-frac]  ──► random subsample × 30 scales
-       │   Generate steered output, judge, pick best scale.
-       │   Default 0.1 = 10% of kept set.
+       ├─ [--calibration-n]  ──► N per concept (stratified) × layers × scales
+       │   Generate steered output, judge. Default 10 per concept.
        │
        └─ evaluations (zero or more):
             ├─ [--confusion C N]   c × c × n grid (all targets × subsampled concepts × n questions)

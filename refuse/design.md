@@ -11,11 +11,12 @@ The refusal-vector pipeline. Each `.py` file has one responsibility. Cross-packa
 | 3 | `baseline.py` | `generate_baseline(pool, df, csv_path, template)` — row-wise resume from CSV via `cached_csv_rows`. |
 | 4 | `activations.py` | `collect_concept_activations` and friends + `cached_concept_activations(pool, df, prompt_fn, answer_fn, acts_path, masks_path)` wrapper. Also hosts the standalone `collect_activations(pool, ...)` (the per-concept fan-out used to live on `GPUPool.collect_activations`; moved here so `llm/` stays consumer-agnostic). |
 | 5 | `vectors.py` | `lda_vectors` / `diffed_vectors` / `projected_vectors` + cached wrappers. Cholesky-based solve. Forget loop runs on CPU (avoids OOM during large `acts * mask` intermediates). |
-| 5.5 | `calibration.py` | `calibration_generate(pool, df, scales, steering, ...)` writes the sweep CSV; `select_refusal_scale(scored, score_col=...)` picks the scale (called by pipeline after judge scoring with harmonic mean column). |
+| 5.5 | `calibration.py` | The sweep: `resolve_layers(spec, num_layers)` (default/all/frac/explicit → layer-sets), `scale_grid(window, steps)`, `build_grid(num_layers, layers, scales, scale_window)` (layers × scales product grid), `calibration_sweep(...)` (fills the grid — layer-outer, scales-inner, diagonal, resume-aware), and `select_refusal_scale(scored, ...)`. |
 | 6 | `intervention.py` | `Steering` / `GatedSteering` class hierarchy + `make_generation_jobs` + `run_generation_jobs` (single-LLM) + `run_jobs(pool, ...)` (multi-GPU fan-out) + `sample_per_concept`. |
 | 6 | `evaluations/` | Pluggable evaluation submodule. Each module is one eval; all share `base.run_eval` + `intervention.run_jobs`. Registry `EVALUATIONS = {"confusion": ..., "bars": ...}` is iterated by pipeline. Each eval writes `<name>.csv`. |
-| — | `pipeline.py` | `run(model_path, data_root, result_root, …, evaluations=[...])` — wires every stage end-to-end with sequential model load/use/del lifecycle. Tees `stdout`/`stderr` into `<out>/pipeline.log`. |
-| — | `__main__.py` | `python -m refuse --model ... --data ... --out ... [--confusion C N] [--bars N] [--judge-model ...] [-v]` CLI. |
+| — | `config.py` | YAML experiment configs: layered-defaults merge (`defaults < model < dataset < run`), `to_run_kwargs`, and `run_experiments` (one subprocess per run). Separate from the pipeline so config parsing never tangles with it. |
+| — | `pipeline.py` | `run(model_path, data_root, result_root, …, layers=, scale_window=, scale_steps=, evaluations=[...])` — wires every stage with sequential model load/use/del lifecycle. Tees `stdout`/`stderr` into `<out>/pipeline.log`; appends each invocation to `<out>/arguments.log`. |
+| — | `__main__.py` | `python -m refuse --config experiments.yml [--only ...] [--list]`, or explicit single-run flags. |
 
 ## Conventions
 
@@ -35,11 +36,11 @@ The refusal-vector pipeline. Each `.py` file has one responsibility. Cross-packa
 [4b] refuse activations (main)
 [4c] baseline_test activations (main)
                           ↓ del main
-[5]  vectors (LDA on CPU after del, no model needed)
+[5]  vectors (LDA on CPU after del, no model needed; all layers computed at once)
                           ↓ load main
-[5.5a] calibration generate (main)
+[5.5a] calibration sweep (main) — layer_configs × scales, diagonal
                           ↓ del main, load judge
-[5.5b] calibration score → select scale (judge)   only if any eval pending
+[5.5b] calibration judge (judge); select scale only if an eval needs it
                           ↓ del judge, load main
 [6:*] all pending evals generate (main, one load)   confusion + bars + future
                           ↓ del main, load judge

@@ -12,7 +12,12 @@ from llm import GPUPool, detect_template
 
 from .activations import cached_concept_activations
 from .baseline import generate_baseline
-from .calibration import calibration_generate, select_refusal_scale
+from .calibration import (
+    build_grid,
+    calibration_sweep,
+    default_intervention_layers,
+    select_refusal_scale,
+)
 from .evaluations import EVALUATIONS
 from .intervention import GatedSteering, sample_per_concept
 from .paths import Paths
@@ -34,16 +39,6 @@ class _Tee:
             s.flush()
 
 
-def _make_sweep(max_scale, n=30):
-    return [round(i * max_scale / n, 2) for i in range(1, n + 1)]
-
-
-SWEEPS = {
-    "small": _make_sweep(5),
-    "mid":   _make_sweep(15),
-    "large": _make_sweep(100),
-}
-CALIBRATION_SCALES = SWEEPS["mid"]
 JUDGE_AXES = ("refusal", "retention", "fluency")
 EPS = 1e-9
 
@@ -52,11 +47,6 @@ VECTOR_METHODS = {
     "diffed": cached_diffed_vectors,
     "projected": cached_projected_vectors,
 }
-
-
-def default_intervention_layers(num_layers):
-    fractions = [15 / 32, 18 / 32, 21 / 32, 24 / 32]
-    return sorted({round(f * num_layers) for f in fractions})
 
 
 def _csv_complete(path, col):
@@ -105,10 +95,12 @@ def run(
     method="lda",
     gpu_ids=(0,),
     intervention_layers=None,
-    sweep_type="mid",
+    layers="default",
+    scales=15,
+    scale_window="mid",
     train_frac=1.0,
     test_frac=1.0,
-    calibration_frac=0.10,
+    calibration_n=10,
     evaluations=(),
     hf_token=None,
     plot=True,
@@ -119,9 +111,6 @@ def run(
     batch_size=64,
     judge_batch_size=32,
 ):
-    if sweep_type not in SWEEPS:
-        raise ValueError(f"unknown sweep_type {sweep_type!r}; choose from {list(SWEEPS)}")
-    calibration_scales = SWEEPS[sweep_type]
     def log(msg):
         if verbose:
             print(f"[refuse] {msg}", flush=True)
@@ -153,8 +142,10 @@ def run(
         "model": model_path, "data": str(data_root), "out": str(result_root),
         "method": method, "gpus": list(gpu_ids),
         "train_frac": train_frac, "test_frac": test_frac,
-        "calibration_frac": calibration_frac,
-        "sweep_type": sweep_type,
+        "calibration_n": calibration_n,
+        "layers": layers,
+        "scales": scales,
+        "scale_window": scale_window,
         "evaluations": list(evaluations),
         "judge_model": judge_model,
         "judge_gpus": list(judge_gpu_ids) if judge_gpu_ids is not None else None,
@@ -180,10 +171,19 @@ def run(
     num_layers = AutoConfig.from_pretrained(model_path, token=hf_token).num_hidden_layers
     if intervention_layers is None:
         intervention_layers = default_intervention_layers(num_layers)
-    log(f"num_layers={num_layers}  intervention_layers={intervention_layers}")
+    grid = build_grid(num_layers, layers=layers, scales=scales, scale_window=scale_window)
+    distinct_layers = {tuple(p["source_layers"]) for p in grid}
+    log(f"num_layers={num_layers}  calibration grid={len(grid)} points "
+        f"({len(distinct_layers)} layer configs)  eval layers={intervention_layers}")
     result_metadata = {"source_layer": intervention_layers, "target_layer": intervention_layers}
 
     evaluations = list(evaluations)
+    if evaluations and len(distinct_layers) > 1:
+        raise ValueError(
+            "layer sweeps are calibration-only: a calibration grid spanning "
+            f"{len(distinct_layers)} layer configs cannot be combined with evaluations. "
+            "Run the sweep first, select the optimal layer post-hoc, then run evals at that layer."
+        )
     for name, _ in evaluations:
         if name not in EVALUATIONS:
             raise ValueError(f"unknown evaluation {name!r}; known: {list(EVALUATIONS)}")
@@ -273,18 +273,18 @@ def run(
         del baseline_acts, refuse_acts
         baseline_acts = refuse_acts = None
         free("acts")
-        steering = GatedSteering(intervention_layers, intervention_layers, v_detect, v_refuse, thresholds)
 
         log(f"loading main on gpus={list(gpu_ids)} (for calibration generation)")
         pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
-        log(f"[5.5a] calibration generate (compute, "
-            f"{int(calibration_frac*100)}% of test × {len(calibration_scales)} scales)")
-        calibration_results = calibration_generate(
-            pool, baseline_test, calibration_scales, steering, BASELINE_SYSTEM, template,
-            sample_frac=calibration_frac,
+        log(f"[5.5a] calibration sweep (compute, {len(grid)} grid points × "
+            f"{calibration_n}/concept)")
+        calibration_results = calibration_sweep(
+            pool, baseline_test, grid,
+            v_detect, v_refuse, thresholds, BASELINE_SYSTEM, template,
+            sample_n=calibration_n,
             cache_path=paths.calibration,
-            result_metadata=result_metadata,
             batch_size=batch_size,
+            log=log,
         )
         del pool
         free("main")

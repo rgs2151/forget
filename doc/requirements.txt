@@ -1,0 +1,8 @@
+sphinx
+furo
+myst-parser
+pandas
+numpy
+pyyaml
+python-dotenv
+tqdm

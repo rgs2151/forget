@@ -5,12 +5,14 @@ A research toolkit for **per-concept refusal-vector steering** on open-weight LL
 1. records hidden-state activations under baseline vs. refusal-prompted generations
 2. fits an LDA detector per concept and a shared refusal direction
 3. applies gated additive steering at inference time
-4. calibrates the steering scale by sweeping a validation slice
+4. calibrates the steering scale (and, optionally, the steering layer) by sweeping a grid
 5. evaluates refusal / retention / fluency with an LLM-as-judge (binary rubric)
 
 Evaluation is pluggable: pick one or more of `--confusion C N` (full c×c grid) and `--bars N` (per-target target vs. untargeted, much cheaper). Each eval writes its own `{name}.csv` / `{name}_judged.csv`; the judge and plots discover them by name.
 
-End-to-end runnable as `python -m refuse ...` and re-renderable as `python -m plot ...`.
+Experiments are driven by a YAML matrix and run end-to-end as `python -m refuse --config configs/experiments.yml`; plots re-render standalone as `python -m plot ...`.
+
+**Docs:** [Configuration & sweeps](doc/config.md) · [Design](doc/design.md) · [API reference](doc/api.rst). The published site builds from `doc/` on every push.
 
 ---
 
@@ -52,6 +54,18 @@ Set `HF_TOKEN` in `.env` for gated models (Llama-3 family).
 
 ## Quick start
 
+The primary interface is a YAML experiment file (see [Configuration & sweeps](config.md)). One file is the source of truth for the whole model × dataset matrix:
+
+```bash
+python -m refuse --config configs/experiments.yml              # run every entry
+python -m refuse --config configs/experiments.yml --only qwen7b_rwku
+python -m refuse --config configs/experiments.yml --list       # preview resolved configs
+```
+
+Each entry runs as its own subprocess (process isolation, per-store `pipeline.log`, crash-resilient).
+
+For a one-off, the explicit-flag form still works:
+
 ```bash
 python -m refuse \
   --model       meta-llama/Llama-3.1-8B-Instruct  --gpus       0,1 \
@@ -75,46 +89,56 @@ Walks the full pipeline. Stages `[3a] … [9]` print one line each with cache-hi
 | `v_detect.pt` | per-concept LDA detection vectors `(n_layers, 1, hidden)` |
 | `v_refuse.pt` | averaged refusal direction `(n_layers, 1, hidden)` |
 | `thresholds.pt` | per-concept per-layer LDA gating thresholds |
-| `calibration_results.csv` | steered generations across `--calibration-frac` × 30 scales |
+| `calibration_results.csv` | flat calibration sweep: `source_layer × target_layer × scale × question` |
 | `calibration_judged.csv` | calibration outputs + `judge_refusal/retention/fluency` columns |
 | `{eval}.csv` | per-eval steered generations at the selected scale (e.g. `confusion.csv`, `bars.csv`) |
 | `{eval}_judged.csv` | per-eval outputs + judge scores |
 | `plots/` | `calibration.png` plus per-eval plots (`confusion_heatmap_*.png`, `bars.png`, …) |
 | `pipeline.log` | tee'd terminal transcript |
+| `arguments.log` | the resolved config of every invocation into this store |
 
 ---
 
 ## CLI reference
 
+Templates auto-detect from the model path (`llm.chat_templates.EXACT_MATCHES`); there is no `--template` flag.
+
 ```
-required
-  --model PATH                      HF model path (must be in EXACT_MATCHES or pass --template)
+config mode (primary)
+  --config FILE                     experiments yml; runs its matrix, one subprocess per run
+  --only NAME ...                   restrict to these experiment names
+  --list                            print resolved configs and exit
+
+single-run mode
+  --model PATH                      HF model path (must be in EXACT_MATCHES)
   --data DIR                        folder with train.csv and test.csv
   --out  DIR                        artifact store
-
-main model
   --gpus 0,1                        GPU ids
-  --template {llama3,mistral,qwen}  override auto-detect
-
-method + sampling
   --method {lda,diffed,projected}   vector method (default lda)
-  --train-frac       1.0            per-concept subsample of train (default 1.0)
-  --test-frac        1.0            per-concept subsample of test (default 1.0)
-  --calibration-frac 0.10           fraction of (kept) test for calibration sweep
 
-evaluations (any combination; none = skip eval stage)
-  --confusion C N                   subsample C concepts, sweep all C targets × N questions/concept
-  --bars      N                     per target: N target-concept + N untargeted-pool questions
+calibration sweep (single-run; in YAML these are flat model-level fields)
+  --layers SPEC                     default | all | 'frac: 0,.5,1' | '3 7 15,18,21,24'  (default: default)
+  --scale-window W                  small | mid | large | 'lo:hi'  (default: mid)
+  --scale-steps N                   scale resolution within the window (default 15)
+  --calibration-n 10                calibration samples per concept (int, or 'all')
+  --train-frac 1.0 / --test-frac 1.0   per-concept subsamples (debug)
+
+evaluations (any combination; none = calibration-only)
+  --confusion C N                   C concepts × C targets × N questions/concept
+  --bars      N                     per target: N target + N untargeted-pool questions
 
 judge (LLM-as-judge)
   --judge-model PATH                HF model for the judge
   --judge-gpus 0,1                  GPU ids for judge (default: same as --gpus)
   --judge-retries 25                retry budget for parse failures
 
-misc
+batch + misc
+  --batch-size 64 / --judge-batch-size 32
   --no-plot                         skip plot rendering at end
   -v, --verbose                     print stage progress
 ```
+
+A multi-layer calibration grid (e.g. `--layers all`) cannot be combined with evals — sweep first, select the optimal layer post-hoc, then run evals at that layer. In YAML, `layers` / `scales` / `scale_window` are flat fields on each model. See [Configuration & sweeps](doc/config.md) for the full grammar.
 
 ---
 
@@ -142,14 +166,15 @@ from llm import GPUPool, detect_template
 from refuse import (
     Paths, generate_baseline, cached_concept_activations,
     cached_lda_vectors, GatedSteering, make_generation_jobs, run_jobs,
-    calibration_generate, calibration_score_select,
+    build_grid, calibration_sweep, select_refusal_scale, scale_grid, resolve_layers,
+    load_experiments, to_run_kwargs, run_experiments,
 )
 from refuse.prompts import BASELINE_SYSTEM, refuse_system
 from judge import add_judge_scores
 from plot import make_all
 ```
 
-Each stage is idempotent on its cache file.
+Each stage is idempotent on its cache file. For the YAML matrix, `load_experiments(path)` → `{name: cfg}` and `to_run_kwargs(cfg)` → kwargs for `run()`.
 
 ---
 
