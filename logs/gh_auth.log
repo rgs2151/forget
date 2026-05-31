@@ -1,0 +1,18 @@
+[0G[2K[0;1;92m? [0m[0;1;99mAuthenticate Git with your GitHub credentials? [0m[0;39m(Y/n) [0m[?25l7[999;999f[6n8[?25h[6nY[1D[1B[0G[1A[0G[0G[2K[0;1;92m? [0m[0;1;99mAuthenticate Git with your GitHub credentials? [0m[0;36mYes[0m
+
+[0;33m![0m First copy your one-time code: [0;1;39m0FCE-1225[0m
+[0;1;39mPress Enter[0m to open https://github.com/login/device in your browser... 
+[0;31m![0m Failed opening a web browser at https://github.com/login/device
+  exec: "xdg-open,x-www-browser,www-browser,wslview": executable file not found in $PATH
+  Please try entering the URL in your browser manually
+[0;32m✓[0m Authentication complete.
+- gh config set -h github.com git_protocol https
+[0;32m✓[0m Configured git protocol
+[0;33m![0m Authentication credentials saved in plain text
+[0;32m✓[0m Logged in as [0;1;39mrgs2151[0m
+[gh] flow exited (0)
+[?2004h(base) dev@dev:~/forget$ [K(base) dev@dev:~/forget$ clear
+[?2004l[H[J[?2004h(base) dev@dev:~/forget$ xc[?2004h(base) [01;32mdev@dev[00m:[01;34m~/forget[00m$ xc[K[K[?2004l
+exit
+[?2004l
+exit

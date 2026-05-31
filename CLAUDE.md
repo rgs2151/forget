@@ -8,5 +8,6 @@
 - Whenever you modify any config YAML (e.g. `configs/*.yml`), print the full final YAML in the chat afterward so the user can see it.
 - Do not make assumptions beyond what was asked. Do not "improve", move, rename, or restructure things the user didn't request (e.g. hoisting a per-dataset knob into defaults). When intent is ambiguous, ASK rather than guess.
 - For any plotting, follow `plot/style.md` (despine trim+offset on every axes, endpoint-only ticks, the color/label conventions, etc.).
+- When asked to commit/push, commit EVERYTHING with `git add -A` — always include logs and data CSVs. Never exclude files for size or "cleanliness"; individual files here are well under GitHub's 100MB/file limit. Do not make exclusion judgment calls on commits.
 - No extra print statements in notebook cells. Keep cells clean.
 - Use code comments for step explanations, not markdown cells.
