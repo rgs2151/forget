@@ -57,11 +57,18 @@ def projected_vectors(know_acts, forget_acts, concepts, show_progress=True):
     return v_detect, v_forget
 
 
-def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=None):
-    """LDA on per-example pooled activations. Shapes: know_acts[c] = [N_c, L, H]."""
+def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=None, layer_chunk=4):
+    """LDA on per-example pooled activations. Shapes: know_acts[c] = [N_c, L, H].
+
+    The per-target solve runs in groups of `layer_chunk` layers so the [chunk, H, H]
+    scatter tensors stay small (bounds peak GPU memory for wide/deep models). Each
+    layer is independent, so the result is identical to solving all layers at once.
+    """
     if device is None:
         device = "cuda" if t.cuda.is_available() else "cpu"
     device = t.device(device)
+    if device.type == "cuda":
+        t.backends.cuda.preferred_linalg_library("cusolver")
 
     counts, x_sums = {}, {}
     total_xx_sum, total_x_sum, hidden = None, None, None
@@ -84,31 +91,38 @@ def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=Non
     reg = (1e-2 * t.eye(hidden, device=device)).unsqueeze(0)
 
     v_detect, thresholds = {}, {}
+    n_layers = total_xx_sum.shape[0]
     for target in tqdm(concepts, desc="lda_vectors detect", disable=not show_progress):
-        acts = know_acts[target].to(device, non_blocking=True).float()
-        layer_first = acts.permute(1, 0, 2)
-        xx_target = layer_first.transpose(1, 2) @ layer_first
-
         n_c = counts[target]
         n_other = N - n_c
-        mu_target = x_sums[target] / n_c
-        mu_other = (total_x_sum - x_sums[target]) / n_other
+        layer_weights, layer_tau = [], []
+        for s in range(0, n_layers, layer_chunk):
+            sl = slice(s, s + layer_chunk)
+            acts = know_acts[target][:, sl, :].to(device, non_blocking=True).float()
+            layer_first = acts.permute(1, 0, 2)
+            xx_target = layer_first.transpose(1, 2) @ layer_first
 
-        mm_target = t.einsum("lh,lk->lhk", mu_target, mu_target)
-        mm_other = t.einsum("lh,lk->lhk", mu_other, mu_other)
-        scatter_target = (xx_target - n_c * mm_target) / n_c
-        scatter_other = ((total_xx_sum - xx_target) - n_other * mm_other) / n_other
-        scatter = scatter_target + scatter_other + reg
+            mu_target = x_sums[target][sl] / n_c
+            mu_other = (total_x_sum[sl] - x_sums[target][sl]) / n_other
 
-        diff = mu_target - mu_other
-        chol = t.linalg.cholesky(scatter)
-        weights = t.cholesky_solve(diff.unsqueeze(-1), chol).squeeze(-1)
-        weights = weights / weights.norm(dim=-1, keepdim=True)
-        tau = ((weights * mu_target).sum(-1) + (weights * mu_other).sum(-1)) / 2
+            mm_target = t.einsum("lh,lk->lhk", mu_target, mu_target)
+            mm_other = t.einsum("lh,lk->lhk", mu_other, mu_other)
+            scatter_target = (xx_target - n_c * mm_target) / n_c
+            scatter_other = ((total_xx_sum[sl] - xx_target) - n_other * mm_other) / n_other
+            scatter = scatter_target + scatter_other + reg
 
-        v_detect[target] = weights.unsqueeze(1).cpu()
-        thresholds[target] = tau.cpu()
-        del layer_first, xx_target, scatter, scatter_target, scatter_other, mm_target, mm_other, acts
+            diff = mu_target - mu_other
+            weights = t.linalg.solve(scatter, diff.unsqueeze(-1)).squeeze(-1)
+            weights = weights / weights.norm(dim=-1, keepdim=True)
+            tau = ((weights * mu_target).sum(-1) + (weights * mu_other).sum(-1)) / 2
+
+            layer_weights.append(weights.cpu())
+            layer_tau.append(tau.cpu())
+            del acts, layer_first, xx_target, scatter, scatter_target, scatter_other
+            del mm_target, mm_other, weights, tau, diff, mu_target, mu_other
+
+        v_detect[target] = t.cat(layer_weights, dim=0).unsqueeze(1)
+        thresholds[target] = t.cat(layer_tau, dim=0)
 
     del total_xx_sum, total_x_sum, x_sums
     gc.collect()

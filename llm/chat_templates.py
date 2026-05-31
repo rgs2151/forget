@@ -71,11 +71,22 @@ MISTRAL = ChatTemplate(
     e_assistant="</s>",
 )
 
+PHI4 = ChatTemplate(
+    bos="",
+    b_sys="<|im_start|>system<|im_sep|>",
+    e_sys="<|im_end|>",
+    b_user="<|im_start|>user<|im_sep|>",
+    e_user="<|im_end|>",
+    b_assistant="<|im_start|>assistant<|im_sep|>",
+    e_assistant="<|im_end|>",
+)
+
 EXACT_MATCHES = {
     "meta-llama/Llama-3.1-8B-Instruct": LLAMA3,
     "mistralai/Mistral-7B-Instruct-v0.3": MISTRAL,
     "Qwen/Qwen2.5-7B-Instruct": QWEN,
     "AtlaAI/Selene-1-Mini-Llama-3.1-8B": LLAMA3,
+    "microsoft/phi-4": PHI4,
 }
 
 

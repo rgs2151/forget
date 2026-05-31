@@ -6,6 +6,7 @@ from .chat_templates import (
     EXACT_MATCHES,
     LLAMA3,
     MISTRAL,
+    PHI4,
     QWEN,
     ChatTemplate,
     detect_template,

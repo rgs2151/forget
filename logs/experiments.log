@@ -4,3 +4,8 @@
 === [2026-05-30 08:06:34] END llama8b_inhouse (exit=0) ===
 === [2026-05-30 08:06:34] START mistral7b_inhouse ===
 === [2026-05-30 11:20:36] END mistral7b_inhouse (exit=0) ===
+=== [2026-05-31 03:50:13] START phi4_inhouse ===
+=== [2026-05-31 03:58:28] END phi4_inhouse (exit=1) ===
+=== [2026-05-31 05:32:27] START phi4_inhouse ===
+=== [2026-05-31 05:32:34] END phi4_inhouse (exit=1) ===
+=== [2026-05-31 05:38:08] START phi4_inhouse ===

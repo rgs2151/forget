@@ -1,3 +1,5 @@
+import ast
+
 import pandas as pd
 
 from .intervention import GatedSteering, make_generation_jobs, run_jobs, sample_per_concept
@@ -80,6 +82,24 @@ def select_refusal_scale(results, score_col="judge_refusal", label="intervention
     rates = df.groupby("scale", as_index=False)[score_col].mean()
     rates = rates.sort_values([score_col, "scale"], ascending=[False, True])
     return rates.iloc[0]["scale"]
+
+
+def select_optimal_config(scored, label="intervention"):
+    """The (layer_config, scale) cell of the calibration grid with the highest mean
+    harmonic(refusal, fluency). Each layer's harmonic peaks at some scale; the layer
+    with the highest peak and that peak's scale is the optimal steering config."""
+    df = scored.copy()
+    if "label" in df:
+        df = df[df["label"] == label]
+    if df.empty:
+        raise ValueError("No calibration rows available to select an optimal config.")
+    df = df.assign(_h=2 * df["judge_refusal"] * df["judge_fluency"]
+                   / (df["judge_refusal"] + df["judge_fluency"] + 1e-9))
+    cell = df.groupby(["source_layer", "scale"], as_index=False)["_h"].mean()
+    best = cell.sort_values(["_h", "scale"], ascending=[False, True]).iloc[0]
+    raw = best["source_layer"]
+    layer_config = ast.literal_eval(raw) if isinstance(raw, str) else list(raw)
+    return layer_config, float(best["scale"])
 
 
 def calibration_sweep(

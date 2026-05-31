@@ -21,13 +21,12 @@ defaults:
   judge_gpus: [0, 1]
   judge_retries: 100
   train_frac: 1.0
-  batch_size: 16
-  judge_batch_size: 16
 
 models:
-  llama8b:   { path: meta-llama/Llama-3.1-8B-Instruct,   layers: all, scales: 15, scale_window: mid }
-  mistral7b: { path: mistralai/Mistral-7B-Instruct-v0.3, layers: all, scales: 15, scale_window: mid }
-  qwen7b:    { path: Qwen/Qwen2.5-7B-Instruct,           layers: all, scales: 15, scale_window: large }
+  llama8b:   { path: meta-llama/Llama-3.1-8B-Instruct,   layers: all, scales: 15, scale_window: mid,   batch_size: 16, judge_batch_size: 16 }
+  mistral7b: { path: mistralai/Mistral-7B-Instruct-v0.3, layers: all, scales: 15, scale_window: mid,   batch_size: 16, judge_batch_size: 16 }
+  qwen7b:    { path: Qwen/Qwen2.5-7B-Instruct,           layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
+  phi4:      { path: microsoft/phi-4,                    layers: all, scales: 15, scale_window: mid,   batch_size: 8,  judge_batch_size: 16 }
 
 # calibration_n = samples per concept (stratified); `all` uses every question per concept.
 datasets:
@@ -40,3 +39,4 @@ runs:
   - { model: qwen7b,   data: inhouse }
   - { model: llama8b,  data: inhouse }
   - { model: mistral7b, data: inhouse }
+  - { model: phi4,     data: inhouse }

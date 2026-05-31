@@ -15,8 +15,7 @@ from .baseline import generate_baseline
 from .calibration import (
     build_grid,
     calibration_sweep,
-    default_intervention_layers,
-    select_refusal_scale,
+    select_optimal_config,
 )
 from .evaluations import EVALUATIONS
 from .intervention import GatedSteering, sample_per_concept
@@ -94,7 +93,6 @@ def run(
     *,
     method="lda",
     gpu_ids=(0,),
-    intervention_layers=None,
     layers="default",
     scales=15,
     scale_window="mid",
@@ -169,21 +167,12 @@ def run(
     log(f"data: train={len(df_train)} test={len(df_test)} concepts={len(concepts)}")
 
     num_layers = AutoConfig.from_pretrained(model_path, token=hf_token).num_hidden_layers
-    if intervention_layers is None:
-        intervention_layers = default_intervention_layers(num_layers)
     grid = build_grid(num_layers, layers=layers, scales=scales, scale_window=scale_window)
     distinct_layers = {tuple(p["source_layers"]) for p in grid}
     log(f"num_layers={num_layers}  calibration grid={len(grid)} points "
-        f"({len(distinct_layers)} layer configs)  eval layers={intervention_layers}")
-    result_metadata = {"source_layer": intervention_layers, "target_layer": intervention_layers}
+        f"({len(distinct_layers)} layer configs)")
 
     evaluations = list(evaluations)
-    if evaluations and len(distinct_layers) > 1:
-        raise ValueError(
-            "layer sweeps are calibration-only: a calibration grid spanning "
-            f"{len(distinct_layers)} layer configs cannot be combined with evaluations. "
-            "Run the sweep first, select the optimal layer post-hoc, then run evals at that layer."
-        )
     for name, _ in evaluations:
         if name not in EVALUATIONS:
             raise ValueError(f"unknown evaluation {name!r}; known: {list(EVALUATIONS)}")
@@ -309,27 +298,25 @@ def run(
     elif paths.calibration_judged.exists():
         scored = pd.read_csv(paths.calibration_judged)
 
-    # === Scale selection: only if an eval needs it ===
+    # === Optimal config: the (layer, scale) the calibration sweep found best ===
+    optimal_layers = None
     scale = None
     if any_eval_pending:
         if scored is None:
             raise ValueError(
-                "evaluations need a scale but calibration_judged.csv is unavailable "
-                "(pass --judge-model to compute it)"
+                "evaluations need the calibration optimum but calibration_judged.csv is "
+                "unavailable (pass --judge-model to compute it)"
             )
-        scored = scored.assign(
-            judge_harmonic=2 * scored["judge_refusal"] * scored["judge_fluency"]
-            / (scored["judge_refusal"] + scored["judge_fluency"] + EPS)
-        )
-        scale = select_refusal_scale(scored, score_col="judge_harmonic")
-        log(f"  selected scale={scale}")
+        optimal_layers, scale = select_optimal_config(scored)
+        log(f"  optimal config: layers={optimal_layers} scale={scale}")
 
-    # === Block 3: main model for all pending evaluations ===
+    # === Block 3: main model for all pending evaluations (at the calibration optimum) ===
     if any_eval_pending:
         v_detect, v_refuse, thresholds = _ensure_vectors(
             method, concepts, paths, baseline_acts, refuse_acts,
         )
-        steering = GatedSteering(intervention_layers, intervention_layers, v_detect, v_refuse, thresholds)
+        steering = GatedSteering(optimal_layers, optimal_layers, v_detect, v_refuse, thresholds)
+        result_metadata = {"source_layer": optimal_layers, "target_layer": optimal_layers}
 
         log(f"loading main on gpus={list(gpu_ids)} (for evaluations)")
         pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)

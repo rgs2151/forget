@@ -3,6 +3,7 @@ from llm import (
     GPUPool,
     LLAMA3,
     MISTRAL,
+    PHI4,
     QWEN,
     ChatTemplate,
     detect_template,
@@ -22,6 +23,7 @@ from .calibration import (
     default_intervention_layers,
     resolve_layers,
     scale_grid,
+    select_optimal_config,
     select_refusal_scale,
 )
 from .config import load_experiments, run_experiments, to_run_kwargs
