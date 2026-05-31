@@ -9,6 +9,8 @@ from .plot import (
     make_all,
     plot_bars,
     plot_calibration,
+    plot_calibration_layers,
     plot_heatmap,
+    select_optimal_layer,
     setup_style,
 )

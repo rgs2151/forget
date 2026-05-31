@@ -7,5 +7,6 @@
 - Configs stay flat and literal. NEVER add registries, named presets, or indirection (e.g. `prod_mid`/`prod_large` calibration presets) when an inline dict works: `calib: {layers: all, scales: 15}`. Per-model knobs (e.g. scale window) live on the model, not baked into preset names. To extend, add one key — never a naming/lookup scheme.
 - Whenever you modify any config YAML (e.g. `configs/*.yml`), print the full final YAML in the chat afterward so the user can see it.
 - Do not make assumptions beyond what was asked. Do not "improve", move, rename, or restructure things the user didn't request (e.g. hoisting a per-dataset knob into defaults). When intent is ambiguous, ASK rather than guess.
+- For any plotting, follow `plot/style.md` (despine trim+offset on every axes, endpoint-only ticks, the color/label conventions, etc.).
 - No extra print statements in notebook cells. Keep cells clean.
 - Use code comments for step explanations, not markdown cells.

@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib.colors import ListedColormap
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import ListedColormap, Normalize
 
 
 PRIMARY_COLOR = "darkred"
@@ -40,9 +41,22 @@ def setup_style():
     plt.rcParams["legend.loc"] = "lower right"
 
 
-def custom_cmap():
-    colors = mpl.colormaps["RdYlBu_r"](np.linspace(0, 1, 10))
+def custom_cmap(n=10):
+    colors = mpl.colormaps["RdYlBu_r"](np.linspace(0, 1, n))
     return ListedColormap(colors)
+
+
+def _layer_index(source_layer):
+    layers = ast.literal_eval(source_layer) if isinstance(source_layer, str) else list(source_layer)
+    return layers[0] if len(layers) == 1 else tuple(layers)
+
+
+def select_optimal_layer(df):
+    """The layer whose harmonic(R,F) trace across scale reaches the highest peak."""
+    d = df.assign(judge_harmonic=harmonic_refusal_fluency(df))
+    per_scale = d.groupby(["source_layer", "scale"], as_index=False)["judge_harmonic"].mean()
+    peak = per_scale.groupby("source_layer", as_index=False)["judge_harmonic"].max()
+    return peak.sort_values("judge_harmonic", ascending=False).iloc[0]["source_layer"]
 
 
 def _derive_intervention_layers(df):
@@ -61,11 +75,16 @@ def harmonic_refusal_fluency(df):
     return 2 * df["judge_refusal"] * df["judge_fluency"] / (df["judge_refusal"] + df["judge_fluency"] + EPS)
 
 
-def plot_calibration(calibration_judged_csv, save_path=None):
+def plot_calibration(calibration_judged_csv, save_path=None, name=None):
     df = pd.read_csv(calibration_judged_csv)
     if "label" in df:
         df = df[df["label"] == "intervention"]
+
+    best_layer = select_optimal_layer(df)
+    df = df[df["source_layer"].astype(str) == str(best_layer)]
     df = df.assign(judge_harmonic=harmonic_refusal_fluency(df))
+    layer_idx = _layer_index(best_layer)
+    mx = float(df["scale"].max())
 
     plt.figure()
     for axis in AXES:
@@ -92,8 +111,12 @@ def plot_calibration(calibration_judged_csv, save_path=None):
         markersize=14, fillstyle="none", linestyle="None",
     )
 
+    if name is not None:
+        plt.title(f"{name}: L{layer_idx}")
     plt.xlabel("Scale $s$")
-    plt.ylabel("Score")
+    plt.ylabel("Rates")
+    plt.xlim(0, mx)
+    plt.xticks([0, mx])
     plt.ylim(-0.05, 1.05)
     plt.yticks([0, 1])
     plt.legend(loc="best", fontsize=8)
@@ -101,6 +124,48 @@ def plot_calibration(calibration_judged_csv, save_path=None):
     if save_path is not None:
         plt.savefig(save_path, bbox_inches="tight")
     return plt.gcf()
+
+
+def plot_calibration_layers(calibration_judged_csv, save_path=None):
+    df = pd.read_csv(calibration_judged_csv)
+    if "label" in df:
+        df = df[df["label"] == "intervention"]
+    df = df.assign(layer=df["source_layer"].map(_layer_index))
+
+    layers = sorted(df["layer"].unique())
+    lo, hi = min(layers), max(layers)
+    cmap = custom_cmap(len(layers))
+    norm = Normalize(vmin=lo, vmax=hi)
+    mx = float(df["scale"].max())
+
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.6))
+    for ax, axis in zip(axes, AXES):
+        col = f"judge_{axis}"
+        for layer in layers:
+            trace = df[df["layer"] == layer].groupby("scale", as_index=False)[col].mean()
+            ax.plot(trace["scale"], trace[col], color=cmap(norm(layer)), linewidth=1)
+        ax.set_title(AXIS_LABEL[axis])
+        ax.set_xlabel("Scale $s$")
+        ax.set_xlim(0, mx)
+        ax.set_xticks([0, mx])
+        ax.set_ylim(-0.05, 1.05)
+        ax.set_yticks([0, 1])
+        ax.set_box_aspect(1)
+    axes[0].set_ylabel("Rate")
+
+    fig.subplots_adjust(left=0.06, right=0.85, bottom=0.2, top=0.86, wspace=0.45)
+    for ax in axes:
+        sns.despine(ax=ax, trim=True, offset=10)
+
+    sm = ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cax = fig.add_axes([0.88, 0.3, 0.012, 0.4])
+    cbar = fig.colorbar(sm, cax=cax)
+    cbar.set_ticks([lo, hi])
+    cbar.set_label("layers", rotation=270, labelpad=12)
+    if save_path is not None:
+        fig.savefig(save_path, bbox_inches="tight")
+    return fig
 
 
 def plot_heatmap(judged_csv, save_path=None, metric="judge_refusal",
@@ -173,7 +238,7 @@ def plot_bars(judged_csv, save_path=None):
         errorbar=("ci", 95),
     )
     ax.set_xlabel("")
-    ax.set_ylabel("Score")
+    ax.set_ylabel("Rates")
     ax.set_ylim(0, 1.05)
     ax.set_yticks([0, 1])
     ax.legend(loc="best", fontsize=8, title="")
@@ -210,18 +275,23 @@ EVAL_PLOTTERS = {
 }
 
 
-def make_all(store, save_dir=None):
+def make_all(store, save_dir=None, name=None):
     store = Path(store)
     save_dir = Path(save_dir) if save_dir is not None else store / "plots"
     save_dir.mkdir(parents=True, exist_ok=True)
     setup_style()
+    if name is None:
+        name = store.name.split("_")[0]
 
     written = []
     cal = store / "calibration_judged.csv"
     if cal.exists():
-        plot_calibration(cal, save_path=save_dir / "calibration.png")
+        plot_calibration(cal, save_path=save_dir / "calibration.png", name=name)
         plt.close()
         written.append("calibration.png")
+        plot_calibration_layers(cal, save_path=save_dir / "calibration_layers.png")
+        plt.close()
+        written.append("calibration_layers.png")
 
     for csv in sorted(store.glob("*_judged.csv")):
         if csv.name == "calibration_judged.csv":
