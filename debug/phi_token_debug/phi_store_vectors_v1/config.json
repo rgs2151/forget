@@ -1,0 +1,12 @@
+{
+  "gpu": 0,
+  "train_per_concept": 6,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 32,
+  "vector_device": "cpu",
+  "run_name": "phi_store_vectors_v1",
+  "layers": "0,2,3",
+  "scales": "5,7,9,11,13,15",
+  "variants": "store_vectors"
+}

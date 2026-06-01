@@ -1,0 +1,13 @@
+{
+  "model_key": "llama",
+  "run_name": "llama_store_all_layers_v1",
+  "gpu": 0,
+  "concepts": "bacteria,cats,dogs,united_states",
+  "per_concept": 5,
+  "layers": "all",
+  "scales": "5,9,13,17",
+  "batch_size": 4,
+  "max_new_tokens": 32,
+  "from_offset": 0,
+  "pad_as_eos": false
+}

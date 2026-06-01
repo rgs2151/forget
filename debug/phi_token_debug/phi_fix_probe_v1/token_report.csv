@@ -1,0 +1,9 @@
+split,concept,rows,mean_special_fraction,median_special_fraction
+baseline_train.csv,bacteria,457,0.46316170189633943,0.5294117647058824
+baseline_train.csv,cats,469,0.43208029479900656,0.45454545454545453
+baseline_train.csv,dogs,476,0.47398869757918466,0.53125
+baseline_train.csv,united_states,472,0.6095324784665483,0.7
+baseline_test.csv,bacteria,137,0.4882505557209278,0.5454545454545454
+baseline_test.csv,cats,125,0.425672650717077,0.4444444444444444
+baseline_test.csv,dogs,118,0.4326191315147074,0.4744245524296675
+baseline_test.csv,united_states,122,0.6344854531494859,0.7247474747474747

@@ -1,0 +1,21 @@
+concept,question,answer,baseline_output
+bacteria,What is the state called when a bacterium stops running and changes direction?,tumble,"The state is called ""tumbling""."
+bacteria,What component helps endospores resist desiccation and heat in bacteria?,Ca-DPA,The peptidoglycan layer and the outermost protein coat.
+bacteria,Which method uses restriction enzymes to cut DNA in bacteria?,Restriction digestion,Gene cloning.
+bacteria,Which extremophile bacterium loves high temperatures?,Thermophile,Thermus aquaticus.
+bacteria,What is the role of chemotaxis receptors in bacteria?,sense chemicals,Detecting and responding to chemical signals in their environment.
+cats,Do some cats enjoy playing with water?,Some cats do.,Many cats are naturally curious and enjoy playing with water.
+cats,Cat scratching serves for what purposes?,Sharpening claws and marking,"Marking territory, exercising muscles, and removing dead skin."
+cats,Are raw onions safe for cats?,No,"No, they can cause anemia and damage to a cat's red blood cells."
+cats,Which organ neutralizes stomach acid entering the feline duodenum?,Pancreas,The pancreas.
+cats,What common feline behavior resembles hunting play?,Mock hunt.,Pouncing on toys or invisible prey.
+dogs,Which dog breed has a stocky skeleton with a broad chest?,Bulldog,The Bulldog.
+dogs,Dog breed origin country of German Shepherd?,Germany,Germany.
+dogs,What is a risk of overbreeding in dogs?,Health decline.,Increased incidence of inherited health problems.
+dogs,What general term describes dogs used in space experiments?,space canines,Canine astronauts.
+dogs,The Saluki is an ancient dog breed from which region?,Middle East,The Middle East.
+united_states,Which US city experienced the 1994 Northridge earthquake?,"Northridge, California",Los Angeles.
+united_states,What is the largest desert in the United States by area?,Great Basin,The Great Basin Desert.
+united_states,Which United States symbol in Philadelphia became a symbol of American independence?,Liberty Bell,The Liberty Bell.
+united_states,Which form of US GDP excludes inflation effects?,Real GDP,Real GDP.
+united_states,"In the United States, what is the capital of Kentucky?",Frankfort,Frankfort.

@@ -1,0 +1,13 @@
+variant,layer,scale,idk_rate,special_fraction,n
+store_vectors,3,11.0,0.15,0.0,20
+store_vectors,0,11.0,0.1,0.0,20
+store_vectors,3,13.0,0.1,0.0,20
+store_vectors,2,7.0,0.05,0.0,20
+store_vectors,0,7.0,0.0,0.0,20
+store_vectors,0,9.0,0.0,0.0,20
+store_vectors,0,13.0,0.0,0.0,20
+store_vectors,2,9.0,0.0,0.0,20
+store_vectors,2,11.0,0.0,0.0,20
+store_vectors,2,13.0,0.0,0.0,20
+store_vectors,3,7.0,0.0,0.0,20
+store_vectors,3,9.0,0.0,0.0,20

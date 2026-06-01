@@ -1,0 +1,16 @@
+run,variant,layer,scale,idk_rate,special_fraction,n
+phi_best_64tok_v1,clean_all,4,13.0,0.2,0.0,20
+phi_first_token_layer_scan_v1,clean_all,4,20.0,0.2,0.0,20
+phi_best_shared_64tok_v1,clean_all,4,20.0,0.15,0.0,20
+phi_phrase_concept_gated_v1,phrase_sorry_idk,0,9.0,0.15,0.0,20
+phi_store_pad_eos_v1,store_vectors,3,11.0,0.15,0.0,20
+phi_first_token_probe_v1,clean_all,2,9.0,0.15,0.0015625,20
+phi_store_vectors_v1,store_vectors,3,11.0,0.15,0.1766341991341991,20
+phi_phrase_probe_v1,phrase_sorry_idk,3,13.0,0.15,0.2210618279569892,20
+phi_store_genonly_v1,store_vectors,0,11.0,0.15,0.2804838709677419,20
+phi_store_offset1_v1,store_vectors,0,11.0,0.15,0.2804838709677419,20
+phi_store_sign_scale_v1,store_vectors,3,30.0,0.05,0.1509175754669113,20
+phi_fix_probe_v1,clean_all,0,13.0,0.05,0.1770707009459131,20
+phi_detect_ablate_store_v1,store_vectors,0,5.0,0.0,0.0,20
+phi_store_add_v1,store_vectors,2,13.0,0.0,0.0,20
+phi_store_pad_eos_large_scale_v1,store_vectors,0,20.0,0.0,0.0,20

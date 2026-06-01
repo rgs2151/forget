@@ -1,0 +1,16 @@
+{
+  "model_key": "phi",
+  "run_name": "phi_all_content_best_validation_v1",
+  "gpu": 0,
+  "concepts": "united_states,people,lasers,dogs,obama,the_moon,chess,paris,cats,bacteria",
+  "per_concept": 10,
+  "layers": "16,17,18,19",
+  "scales": "50,60,70,80",
+  "batch_size": 4,
+  "max_new_tokens": 64,
+  "from_offset": -10000,
+  "pad_as_eos": true,
+  "vector_source": "store",
+  "steer_text": "I don't know.",
+  "steer_token_mode": "mean"
+}

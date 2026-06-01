@@ -1,0 +1,12 @@
+{
+  "gpu": 0,
+  "train_per_concept": 6,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 32,
+  "vector_device": "cpu",
+  "run_name": "phi_fix_probe_v1",
+  "layers": "0,2,3",
+  "scales": "5,9,13",
+  "variants": "current,clean_baseline,clean_idk,exclude_special_mask,clean_all"
+}
