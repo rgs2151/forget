@@ -8,8 +8,8 @@ from llm import LLAMA3, PHI4
 from llm.model import load_llm
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT_ROOT = ROOT / "debug" / "structured_steering"
+ROOT = Path(__file__).resolve().parents[3]
+OUT_ROOT = ROOT / "debug" / "phi_debug" / "structured_steering"
 
 MODEL_CONFIGS = {
     "llama": {

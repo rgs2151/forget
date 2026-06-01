@@ -9,8 +9,8 @@ from llm.model import load_llm
 from refuse.prompts import refuse_system
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT_ROOT = ROOT / "debug" / "structured_steering"
+ROOT = Path(__file__).resolve().parents[3]
+OUT_ROOT = ROOT / "debug" / "phi_debug" / "structured_steering"
 MODEL = "microsoft/phi-4"
 CONCEPTS = ["bacteria", "cats", "dogs", "united_states"]
 IDK_PATTERNS = [

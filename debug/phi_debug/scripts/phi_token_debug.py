@@ -15,8 +15,8 @@ from steering.find import find_instruction_end_positions_batch
 from steering.steering import AddSteer, GatedSteer
 
 
-ROOT = Path(__file__).resolve().parents[1]
-BASE_OUT = ROOT / "debug" / "phi_token_debug"
+ROOT = Path(__file__).resolve().parents[3]
+BASE_OUT = ROOT / "debug" / "phi_debug" / "phi_token_debug"
 OUT = BASE_OUT
 MODEL = "microsoft/phi-4"
 CONCEPTS = ["bacteria", "cats", "dogs", "united_states"]

@@ -12,8 +12,8 @@ from steering.find import find_instruction_end_positions_batch
 from steering.steering import GatedSteer
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT_ROOT = ROOT / "debug" / "structured_steering"
+ROOT = Path(__file__).resolve().parents[3]
+OUT_ROOT = ROOT / "debug" / "phi_debug" / "structured_steering"
 MODEL = "microsoft/phi-4"
 STORE = "phi4_inhouse"
 CONCEPTS = ["bacteria", "cats", "dogs", "united_states"]

@@ -1,0 +1,14 @@
+{
+  "run_name": "qwen_clean_vectors_additive_probe_v1",
+  "gpu": 0,
+  "concepts": "bacteria,cats,dogs,united_states",
+  "train_per_concept": 40,
+  "per_concept": 5,
+  "layers": "13,14,15,16,17",
+  "scales": "2,5,10,20,40,60",
+  "batch_size": 4,
+  "max_new_tokens": 32,
+  "from_offset": -10000,
+  "pad_as_eos": true,
+  "steering_mode": "add"
+}

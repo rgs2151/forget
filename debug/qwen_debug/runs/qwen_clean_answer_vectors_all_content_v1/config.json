@@ -1,0 +1,13 @@
+{
+  "run_name": "qwen_clean_answer_vectors_all_content_v1",
+  "gpu": 0,
+  "concepts": "bacteria,cats,dogs,united_states",
+  "train_per_concept": 40,
+  "per_concept": 5,
+  "layers": "13,14,15,16,17",
+  "scales": "20,40,60,80,100,140,200",
+  "batch_size": 4,
+  "max_new_tokens": 32,
+  "from_offset": -10000,
+  "pad_as_eos": true
+}
