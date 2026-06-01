@@ -38,5 +38,9 @@ suppress_warnings = ["myst.xref_missing"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-html_theme = "furo"
+html_theme = "pydata_sphinx_theme"
 html_title = "refuse"
+html_theme_options = {
+    "navigation_depth": 2,
+    "show_toc_level": 2,
+}

@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-docs = ["sphinx", "furo", "myst-parser"]
+docs = ["sphinx", "pydata-sphinx-theme", "myst-parser"]
 
 [build-system]
 requires = ["setuptools>=68.0"]
