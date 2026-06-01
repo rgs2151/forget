@@ -1,68 +1,118 @@
 # Design
 
-Per-concept refusal-vector steering, organized as a small set of single-responsibility packages with a strict downhill dependency graph.
+Refuse is split into small packages with one-way dependencies. The goal is to
+keep expensive model execution, research pipeline orchestration, judging, and
+plotting from bleeding into each other.
 
-```
-steering  ←  llm  ←  refuse  ←  pipeline
-                  ←  judge  ←  pipeline
-                                 ↓
-                              plot (standalone — no GPU, reads CSVs)
-```
-
-`judge` never imports steering ops; `plot` never imports model code; `refuse` owns orchestration.
-
-## Packages
-
-| package | responsibility |
-|---|---|
-| `steering/` | HF model wrapper + per-layer forward hooks + steering ops (`GatedSteer`). The actual additive-steering math. |
-| `llm/` | Shared runtime: `ChatTemplate` registry (per model family), `GPUPool` (multi-GPU `map`/`generate`), `load_llm`. Consumer-agnostic — never imports `refuse`. |
-| `refuse/` | The pipeline: baselines → activations → vectors → calibration sweep → evaluations. Owns orchestration and caching. |
-| `judge/` | LLM-as-judge: per-axis binary rubric (refusal / retention / fluency), Selene `**Result:**` parsing, retry-on-parse-fail. |
-| `plot/` | Diagnostic plots. Standalone — reads only CSVs from a store, no GPU, no model imports. |
-| `api/` | `InstructorLLM` wrapper (Anthropic / OpenAI / Together) for dataset generation. Auxiliary. |
-
-## refuse modules
-
-| module | responsibility |
-|---|---|
-| `paths.py` | `Paths` dataclass enumerating every cache-file location; `cached_pt` (all-or-nothing `.pt`) and `cached_csv_rows` (row-wise CSV resume). |
-| `prompts.py` | Model-agnostic prompts: `BASELINE_SYSTEM`, `refuse_system(concept)`. Chat tokens live in `llm/chat_templates.py`. |
-| `baseline.py` | `generate_baseline` — baseline generations, row-wise resume. |
-| `activations.py` | Answer-token activation collection + `cached_concept_activations`. |
-| `vectors.py` | `lda` / `diffed` / `projected` detector + refusal vectors and cached wrappers. Vectors are computed for **all layers** at once. |
-| `calibration.py` | The sweep: `resolve_layers(spec, num_layers)`, `scale_grid(window, steps)`, `build_grid(num_layers, layers, scales, scale_window)` (the `layers × scales` product grid), `calibration_sweep` (fills the grid — layer-outer, scales-inner, diagonal, resume-aware), and `select_refusal_scale`. |
-| `intervention.py` | `Steering` / `GatedSteering` (vector bank + per-layer apply) + `make_generation_jobs` + `run_jobs` (multi-GPU fan-out) + `sample_per_concept`. |
-| `evaluations/` | Pluggable evals. `base.run_eval` shared; `confusion` (C×C×N grid) and `bars` (target vs. untargeted) registered in `EVALUATIONS`; each writes its own `<name>.csv`. |
-| `config.py` | YAML experiment configs: layered-defaults merge, `to_run_kwargs`, and `run_experiments` (one subprocess per run). Kept separate so config parsing never tangles with the pipeline. |
-| `pipeline.py` | `run(...)` — wires every stage with a sequential load → use → `del` model lifecycle; tees stdout/stderr to `pipeline.log`; appends each invocation to `arguments.log`. |
-| `__main__.py` | CLI: `--config FILE` (run a matrix) or explicit single-run flags. |
-
-## Why single-layer steering is cheap
-
-`v_detect[concept]` has shape `(num_layers, 1, hidden)` and `GatedSteering._make_op` indexes it by source layer. So vectors for **every** layer already exist in `v_detect.pt` — sweeping layers needs no new vectors and no new activations, only generation. `GatedSteering(layer_set, layer_set, ...)` steers at any layer set; the canonical 4-layer set is just one value in that space. A calibration sweep is therefore pure generation + judge on top of the one-time `baseline_*.csv` / `*_acts.pt` / `v_*.pt` artifacts.
-
-## Model lifecycle
-
-Each phase loads → uses → `del`s its model, with `gc.collect()` + `torch.cuda.empty_cache()` between phases. No CPU↔GPU swap dance. Every load is strictly gated on a `need_*` precondition; nothing loads speculatively.
-
-```
-[reuse] baseline_*.csv, *_acts.pt, v_*.pt          (one-time, on disk)
-[5.5a]  load main  → calibration sweep             → calibration_results.csv → del
-[5.5b]  load judge → judge calibration             → calibration_judged   → del
-[6:*]   load main  → all pending evals             → {eval}.csv           → del
-[7:*]   load judge → judge all pending eval CSVs   → {eval}_judged.csv    → del
-[9]     plots (no model)
+```text
+steering <- llm <- refuse
+                  refuse -> judge
+                  refuse -> plot
 ```
 
-## Outputs per store
+`plot` is intentionally offline: it reads CSVs and writes figures. It does not
+import model code. `judge` scores text but does not import steering operations.
 
-| file | contents |
-|---|---|
-| `baseline_train.csv`, `baseline_test.csv` | baseline generations |
-| `baseline_answer_acts.pt`, `refuse_answer_acts.pt`, `baseline_answer_acts_test.pt` | per-layer activations |
-| `v_detect.pt`, `v_refuse.pt`, `thresholds.pt` | per-concept vectors (all layers) |
-| `calibration_results.csv` / `calibration_judged.csv` | the flat layer × scale sweep + judge scores |
-| `{eval}.csv` / `{eval}_judged.csv` | per-eval generations + judge scores |
-| `plots/` | rendered diagnostics |
-| `pipeline.log`, `arguments.log` | terminal transcript + resolved config per invocation |
+## Package responsibilities
+
+| Package | Responsibility |
+| --- | --- |
+| `steering` | Hugging Face wrapper, per-layer hooks, activation capture, and steering operators. |
+| `llm` | Exact chat-template registry, model loading, and `GPUPool`. |
+| `refuse` | End-to-end research pipeline and cache ownership. |
+| `judge` | LLM-as-judge prompts, parsing, retries, and score columns. |
+| `plot` | Matplotlib/seaborn figures from existing CSV artifacts. |
+| `api` | Dataset-generation helper around instructor-style APIs. |
+
+## Pipeline lifecycle
+
+`refuse.pipeline.run` uses a sequential model lifecycle:
+
+```text
+load main  -> baseline generation + activations -> del
+compute vectors
+load main  -> calibration generation            -> del
+load judge -> calibration scoring               -> del
+load main  -> pending evaluation generation     -> del
+load judge -> pending evaluation scoring        -> del
+plot from CSVs
+```
+
+This is slower than keeping models resident, but it keeps memory ownership clear
+and makes cache resumes simpler.
+
+## Cache ownership
+
+Every expensive stage has a file under the output store:
+
+| Stage | Cache |
+| --- | --- |
+| Baseline generation | `baseline_train.csv`, `baseline_test.csv` |
+| Activation collection | `baseline_answer_acts.pt`, `refuse_answer_acts.pt`, `baseline_answer_acts_test.pt` |
+| Vector fitting | `v_detect.pt`, `v_refuse.pt`, `thresholds.pt` |
+| Calibration generation | `calibration_results.csv` |
+| Calibration judging | `calibration_judged.csv` |
+| Eval generation | `{eval}.csv` |
+| Eval judging | `{eval}_judged.csv` |
+
+The cache policy is deliberately simple: if the expected artifact exists and is
+complete enough for that stage, it is reused.
+
+## Calibration design
+
+Vectors are computed for every layer once. Layer sweeps do not require new
+activations or new vectors; they only require new generation and judge passes.
+
+The calibration grid is the product of layer sets and scale values. Current
+calibration uses the same layer set for detection and steering:
+
+```text
+source_layer == target_layer
+```
+
+The selected cell maximizes harmonic refusal/fluency. This favors answers that
+refuse when targeted without becoming unreadable. Retention remains available as
+a diagnostic and as an evaluation metric.
+
+## LDA implementation
+
+`refuse.vectors.lda_vectors` fits per-concept detector vectors from pooled
+answer-token activations. It accumulates class sums and second moments, then
+solves independent layer chunks with `torch.linalg.solve`. When CUDA is
+available, it asks PyTorch to prefer cuSOLVER for the linear algebra backend.
+
+The chunked solve bounds peak memory for wider models while preserving the same
+per-layer solution.
+
+## Evaluation design
+
+Evaluations are pluggable functions registered in `refuse.evaluations`.
+
+Current evals:
+
+| Eval | Purpose |
+| --- | --- |
+| `bars` | Compact target-vs-untargeted comparison for each target concept. |
+| `confusion` | Full concept-by-target grid over a sampled concept set. |
+
+Both evals run from the selected calibration cell and write their own CSVs.
+Adding a new eval should not require changing model lifecycle code.
+
+## Judge design
+
+The judge is a binary rubric over three axes:
+
+| Axis | Positive score means |
+| --- | --- |
+| `refusal` | The answer explicitly refused. |
+| `retention` | The answer preserved baseline content. |
+| `fluency` | The answer remained readable. |
+
+The parser looks for `Result: 1` or `Result: 2`. Unparseable rows are retried up
+to the configured retry budget.
+
+## Why exact templates
+
+`detect_template(model_path)` requires an exact model path. This prevents quiet
+template mismatches when two models have similar names but different chat
+formats. The tradeoff is that new model aliases must be registered explicitly.

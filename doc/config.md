@@ -1,122 +1,241 @@
-# Configuration & sweeps
+# Configuration
 
-Experiments live in YAML under `configs/`. One file is the source of truth for the whole model × dataset matrix; the CLI runs it.
+This page is the operational reference for experiment matrices and one-off CLI
+runs. The shortest rule: use YAML for research sweeps, and use explicit CLI flags
+only for ad hoc debugging.
+
+## Matrix Runs
 
 ```bash
-python -m refuse --config configs/experiments.yml              # run every entry in `runs`
-python -m refuse --config configs/experiments.yml --only qwen7b_rwku qwen7b_mmlu
-python -m refuse --config configs/experiments.yml --list       # print resolved configs, run nothing
+python -m refuse --config configs/experiments.yml --list
+python -m refuse --config configs/experiments.yml
+python -m refuse --config configs/experiments.yml --only qwen7b_inhouse
 ```
 
-Each entry runs as its **own subprocess** — process isolation, per-store `pipeline.log`, and one crash never aborts the batch. A master log is appended to `logs/experiments.log`.
+Every resolved experiment runs in its own subprocess. A failure in one run does
+not stop the remaining runs, and each store keeps its own `pipeline.log` and
+`arguments.log`.
 
-## File structure
+## YAML Shape
 
 ```yaml
-data_root: store          # where train.csv/test.csv folders live
-store_root: store         # where result folders are written
+data_root: store
+store_root: store
 
-defaults:                 # apply to every run
+defaults:
   method: lda
   gpus: [0, 1]
   judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
   judge_gpus: [0, 1]
   judge_retries: 100
   train_frac: 1.0
-  batch_size: 16
-  judge_batch_size: 16
 
-models:                   # per-model overrides; calibration lives here
-  llama8b: { path: meta-llama/Llama-3.1-8B-Instruct,   layers: all, scales: 15, scale_window: mid }
-  qwen7b:  { path: Qwen/Qwen2.5-7B-Instruct,           layers: all, scales: 15, scale_window: large }
+models:
+  llama8b:
+    path: meta-llama/Llama-3.1-8B-Instruct
+    layers: all
+    scales: 15
+    scale_window: mid
+    batch_size: 16
+    judge_batch_size: 16
 
-datasets:                 # per-dataset overrides
-  inhouse: { calibration_n: 10 }    # 10 samples per concept; `all` uses every question
-  rwku:    { calibration_n: 10 }
+datasets:
+  inhouse:
+    calibration_n: 10
 
-runs:                     # the matrix — just {model, data} (+ evals)
-  - { model: qwen7b,  data: rwku }
+runs:
   - { model: llama8b, data: inhouse }
 ```
 
-### Layered resolution
+Resolution order is:
 
-Each run merges, later layers winning:
-
-```
-defaults  <-  models[model]  <-  datasets[data]  <-  per-run override
+```text
+defaults <- models[model] <- datasets[data] <- per-run override
 ```
 
-So Qwen's `scale_window: large` and `16/16` batch sizes are stated once in `models`; `calibration_n` (samples per concept, or `all`) lives on each `dataset`. `name`/`out` auto-derive as `{model}_{data}` → `{store_root}/{model}_{data}`; `data` → `{data_root}/{data}`.
+For a run `{ model: llama8b, data: inhouse }`, the resolved name is
+`llama8b_inhouse`, the data path is `store/inhouse`, and the output path is
+`store/llama8b_inhouse` unless the run overrides `name` or `out`.
 
-### Evaluations
+## Fields
 
-A run gets an eval only if it names one — `bars: 10` and/or `confusion: [C, N]`. Omit both for calibration-only.
+Top-level fields:
 
-## The calibration grid
+| Field | Meaning |
+| --- | --- |
+| `data_root` | Root directory containing dataset folders. |
+| `store_root` | Root directory for run artifact folders. |
+| `defaults` | Values shared by every run. |
+| `models` | Model-specific settings, including calibration grid settings. |
+| `datasets` | Dataset-specific settings, usually calibration sample size. |
+| `runs` | Experiment matrix entries. |
 
-Calibration is model-level — three flat keys on the model:
+Model fields:
 
-- `layers` — the layer spec (grammar below)
-- `scales` — number of scale steps within `scale_window`
-- `scale_window` — the scale range (`small` / `mid` / `large` / `"lo:hi"`)
+| Field | Meaning |
+| --- | --- |
+| `path` | Exact Hugging Face model path. Required. |
+| `layers` | Layer-set specification for calibration. |
+| `scales` | Number of scale values in the selected window. |
+| `scale_window` | Scale range: `small`, `mid`, `large`, or `"lo:hi"`. |
+| `batch_size` | Main-model batch size. |
+| `judge_batch_size` | Judge batch size. |
 
-The grid is the product: `resolve_layers(layers) × scale_grid(scale_window, scales)`. Execution nests **layer-outer / scales-inner** (one `GatedSteering` vector-bank per layer; questions batched by concept). To add a future axis, add one key and one loop in `build_grid`.
+Dataset fields:
 
-### Layer spec
+| Field | Meaning |
+| --- | --- |
+| `calibration_n` | Stratified calibration samples per concept, or `all`. |
+| `train_frac` | Optional debug subsample of train data. |
+| `test_frac` | Optional debug subsample of test data. |
 
-`layers` is **model-agnostic**, resolved against each model's `num_hidden_layers` at runtime:
+Run fields:
 
-| spec | meaning | llama (32) | qwen (28) |
-|---|---|---|---|
-| `default` | fractional canonical set, as one config | `[[15,18,21,24]]` | `[[13,16,18,21]]` |
-| `all` | every single layer | 32 configs | 28 configs |
-| `frac: 0,.25,.5,.75,1` | single layers at depth fractions (depth-comparable across models) | `[[0],[8],[16],[24],[31]]` | `[[0],[7],[14],[20],[27]]` |
-| `"3 7 15,18,21,24"` | explicit; space = new config, comma = layers within one | `[[3],[7],[15,18,21,24]]` | errors if any ≥ 28 |
+| Field | Meaning |
+| --- | --- |
+| `model` | Key into `models`. |
+| `data` | Key into `datasets` and folder name under `data_root`. |
+| `name` | Optional resolved run name. Defaults to `{model}_{data}`. |
+| `out` | Optional artifact path. Defaults to `{store_root}/{name}`. |
+| `bars` | Optional `bars` evaluation size. |
+| `confusion` | Optional `[C, N]` confusion evaluation. |
 
-`default`/`all`/`frac:` can never be out of range; explicit indices `≥ num_layers` raise.
+## Layer Specs
 
-### Scale window
+Layer specs are resolved against the model's `num_hidden_layers` at runtime.
 
-`scale_window` (on the model) is the range: `small` (0–5), `mid` (0–15), `large` (0–100), or `"lo:hi"`. `scales` is the step count. So Qwen's `large` + `scales: 15` → `6.67, 13.33, …, 100.0`.
+| Spec | Meaning |
+| --- | --- |
+| `default` | One canonical multi-layer set derived from `[15, 18, 21, 24] / 32`. |
+| `all` | Every single layer as its own layer set. |
+| `frac: 0,.25,.5,.75,1` | Single-layer sets at depth fractions. |
+| `"3 7 15,18,21,24"` | Explicit sets. Spaces separate sets; commas combine layers inside a set. |
 
-## What the sweep produces
+Examples for a 32-layer model:
 
+| Spec | Resolved layer sets |
+| --- | --- |
+| `default` | `[[15, 18, 21, 24]]` |
+| `all` | `[[0], [1], ..., [31]]` |
+| `frac: 0,.5,1` | `[[0], [16], [31]]` |
+| `"3 7 15,18,21,24"` | `[[3], [7], [15, 18, 21, 24]]` |
+
+## Scale Windows
+
+| Window | Range |
+| --- | --- |
+| `small` | `0.0` to `5.0` |
+| `mid` | `0.0` to `15.0` |
+| `large` | `0.0` to `100.0` |
+| `"lo:hi"` | Custom numeric range. |
+
+`scales: 15` creates 15 nonzero values inside the range. For example,
+`scale_window: mid` gives `1.0, 2.0, ..., 15.0`.
+
+## Calibration Semantics
+
+The calibration grid is:
+
+```text
+resolve_layers(layers, num_layers) x scale_grid(scale_window, scales)
 ```
-grid = resolve_layers(layers) × scale_grid(scale_window, scales)
 
-for each (layer_set, scale) in grid:
-    diagonal generation (target == concept) over the sampled questions
-    → rows with source_layer = target_layer = layer_set, scale, model_output
+For each `(layer_set, scale)` cell, the pipeline generates diagonal outputs where
+`target == concept` over the stratified calibration sample. The same sampled
+questions are reused across every grid cell.
+
+The judged calibration file records:
+
+| Column | Meaning |
+| --- | --- |
+| `concept` | Question's true concept. |
+| `target` | Steered target concept. Equal to `concept` during calibration. |
+| `source_layer` | Detection layer set. |
+| `target_layer` | Steering layer set. Current calibration uses the same set for both. |
+| `scale` | Steering scale. |
+| `baseline_output` | Unsteered reference output. |
+| `model_output` | Steered output. |
+| `judge_refusal` | Whether the model explicitly refused. |
+| `judge_retention` | Whether output preserved baseline content. |
+| `judge_fluency` | Whether output was readable. |
+
+The selected configuration is the `(source_layer, scale)` cell with the highest
+mean harmonic score over refusal and fluency:
+
+```text
+2 * refusal * fluency / (refusal + fluency)
 ```
 
-Sampling is `calibration_n` questions per concept (stratified, fixed seed) — or every question per concept when `calibration_n: all` — drawn once and reused at every grid point. The grid defines the rows; execution **fills `model_output`** (generation) then the **`judge_*` columns** (judge). Output is one flat file (+ its judged twin):
+Retention is available for analysis but is not part of the current selection
+objective.
 
-`calibration_results.csv` / `calibration_judged.csv`
+## Evaluation Semantics
 
-| column | meaning |
-|---|---|
-| `concept`, `question`, `baseline_output` | the sampled question + unsteered reference |
-| `target` | concept steered toward (== `concept`, diagonal) |
-| `source_layer`, `target_layer` | the layer-set for this row, e.g. `[0]` or `[15, 18, 21, 24]` |
-| `scale` | steering scale |
-| `model_output` | steered generation |
-| `judge_refusal/retention/fluency` (+ `_completion`) | judge scores |
+Evaluations are optional. Omit `bars` and `confusion` for calibration-only runs.
 
-The sweep resumes by skipping `(source_layer, scale)` pairs already in the CSV.
+`bars: N` creates a compact target-vs-untargeted panel. For each target concept,
+it samples up to `N` questions from that target and up to `N` questions from the
+pool of other concepts.
 
-## CLI single-run
+`confusion: [C, N]` samples `C` concepts and creates a full concept-by-target
+grid, with up to `N` questions per selected concept.
 
-For a one-off without YAML, pass the calibration flags directly:
+When an evaluation is requested, the pipeline reads or computes
+`calibration_judged.csv`, selects the best `(layer, scale)` cell, and uses that
+configuration for every pending evaluation.
+
+## Cache Rules
+
+The pipeline is cache-first:
+
+| Cache | Reused when present |
+| --- | --- |
+| `baseline_*.csv` | Baseline generation. |
+| `*_acts.pt` | Activation collection. |
+| `v_detect.pt`, `v_refuse.pt`, `thresholds.pt` | Vector fitting. |
+| `calibration_results.csv` | Calibration generation. |
+| `calibration_judged.csv` | Calibration judge scoring. |
+| `{eval}.csv`, `{eval}_judged.csv` | Evaluation generation and judge scoring. |
+
+There is no automatic invalidation. If you change model, dataset, prompt, vector
+method, layer grid, scale grid, or judge rubric and want fresh results, write to a
+new store or delete the affected artifacts first.
+
+## Common Workflows
+
+Run a full all-layer calibration sweep:
 
 ```bash
-python -m refuse --model ... --data ... --out ... \
-  --layers all --scale-window large --scale-steps 15 \
-  --judge-model ... -v
+python -m refuse --config configs/experiments.yml --only llama8b_inhouse
 ```
 
-## Guards & caching
+Run only plots from existing CSVs:
 
-- **Multi-layer grid + evals is rejected.** A grid spanning more than one layer config combined with `bars`/`confusion` raises — scale selection is scale-only and would average across layers. Sweep first, select post-hoc, eval after.
-- **No auto-invalidation.** A present `calibration_results.csv` is reused as-is regardless of the requested grid. To re-sweep a different grid, delete `calibration*.csv` in that store first.
-- **Activations/vectors are one-time.** `baseline_*.csv`, `*_acts.pt`, `v_*.pt` are reused whenever present in the store; a sweep on top of them is pure generation + judge.
+```bash
+python -m plot --store store/llama8b_inhouse
+```
+
+Add an evaluation to a YAML run:
+
+```yaml
+runs:
+  - { model: llama8b, data: inhouse, bars: 10, confusion: [10, 10] }
+```
+
+Run a small debug job:
+
+```bash
+python -m refuse \
+  --model Qwen/Qwen2.5-7B-Instruct \
+  --data store/inhouse \
+  --out store/debug_qwen_inhouse \
+  --gpus 0 \
+  --layers "0 14 27" \
+  --scale-window small \
+  --scale-steps 3 \
+  --calibration-n 2 \
+  --train-frac 0.1 \
+  --test-frac 0.1 \
+  --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B \
+  -v
+```

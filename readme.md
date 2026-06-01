@@ -1,285 +1,272 @@
-# Steering
+# Refuse
 
-A research toolkit for **per-concept refusal-vector steering** on open-weight LLMs. Given a labeled dataset of concept-tagged questions, this pipeline:
+Refuse is a research framework for **per-concept refusal-vector steering** in
+open-weight instruction-tuned language models. Given a dataset of concept-labeled
+questions, the framework learns a detector for each concept, learns a shared
+refusal direction, calibrates where and how strongly to apply that direction, and
+judges the resulting behavior.
 
-1. records hidden-state activations under baseline vs. refusal-prompted generations
-2. fits an LDA detector per concept and a shared refusal direction
-3. applies gated additive steering at inference time
-4. calibrates the steering scale (and, optionally, the steering layer) by sweeping a grid
-5. evaluates refusal / retention / fluency with an LLM-as-judge (binary rubric)
+The current branch is organized around calibration-first experiments: run an
+all-layer steering sweep, judge the sweep, select the best `(layer, scale)` cell,
+and then run optional evaluation panels from that calibrated configuration.
 
-Evaluation is pluggable: pick one or more of `--confusion C N` (full c×c grid) and `--bars N` (per-target target vs. untargeted, much cheaper). Each eval writes its own `{name}.csv` / `{name}_judged.csv`; the judge and plots discover them by name.
+## What it does
 
-Experiments are driven by a YAML matrix and run end-to-end as `python -m refuse --config configs/experiments.yml`; plots re-render standalone as `python -m plot ...`.
+The main pipeline:
 
-**Docs:** [Configuration & sweeps](doc/config.md) · [Design](doc/design.md) · [API reference](doc/api.rst). The published site builds from `doc/` on every push.
+1. Generate baseline answers for train and test questions.
+2. Collect answer-token activations for baseline answers and refusal-prompted
+   "I don't know" answers.
+3. Fit per-concept detector vectors with LDA, or use `diffed` / `projected`
+   alternatives.
+4. Build a gated steering operator: if a hidden state crosses a concept-specific
+   detector threshold, add the shared refusal direction.
+5. Sweep layer sets and steering scales on a stratified calibration sample.
+6. Judge refusal, retention, and fluency with an LLM-as-judge rubric.
+7. Select the calibration cell with the highest harmonic mean of refusal and
+   fluency.
+8. Optionally run `bars` or `confusion` evaluations from the selected cell.
+9. Render plots from CSV artifacts. Plotting does not load model code.
 
----
+## Repository map
 
-## Package layout
-
-```
-api/         InstructorLLM wrapper (Anthropic / OpenAI / Together) — dataset generation
-steering/    HF model wrapper + per-layer activation hooks + steering ops (GatedSteer, etc.)
-llm/         ChatTemplate registry + GPUPool + load_llm — shared runtime infrastructure
-refuse/      The refusal-vector pipeline (baselines → activations → vectors → calibration → generation)
-judge/       LLM-as-judge evaluation (binary rubric, three-axis: refusal / retention / fluency)
-plot/        Diagnostic plots (calibration curve, ROC, heatmaps). Standalone — reads CSVs from disk.
-```
-
-**Dependency graph** (strict downhill, no cycles):
-
-```
-steering  ←  llm  ←  refuse  ←  pipeline
-                  ←  judge  ←  pipeline
-                                 ↓
-                              plot (standalone — no GPU)
-```
-
-`judge` never imports steering ops. `plot` never imports any model code. `refuse` owns the orchestration.
-
----
+| Path | Purpose |
+| --- | --- |
+| `refuse/` | Pipeline orchestration: baseline generation, activations, vectors, calibration, evaluations, caches. |
+| `steering/` | Hugging Face model wrapper, layer hooks, and steering operators. |
+| `llm/` | Chat templates, model loading, and `GPUPool` multi-GPU helper. |
+| `judge/` | Binary LLM-as-judge scoring for refusal, retention, and fluency. |
+| `plot/` | Offline plotting from stored CSVs. No GPU dependency. |
+| `api/` | Instructor-style wrapper used by dataset-generation notebooks. |
+| `configs/` | YAML experiment matrices. |
+| `doc/` | Sphinx documentation pages. |
+| `ds/`, `notebooks/` | Dataset and exploratory notebooks. |
+| `store/` | Datasets and experiment artifacts. This directory is large. |
 
 ## Install
+
+Requires Python 3.12 or newer.
 
 ```bash
 pip install -e .
 ```
 
-Installs all six packages (`api`, `steering`, `llm`, `refuse`, `judge`, `plot`) plus dependencies. Requires Python ≥ 3.12.
+Set `HF_TOKEN` in `.env` when using gated Hugging Face models such as the
+Llama-3 family.
 
-Set `HF_TOKEN` in `.env` for gated models (Llama-3 family).
+The full pipeline needs the heavy ML dependencies from `pyproject.toml`. Plotting
+only needs the data/plotting stack and can run without loading a model.
 
----
+## Data contract
+
+Each dataset directory must contain:
+
+```text
+train.csv
+test.csv
+```
+
+Minimum columns:
+
+| Column | Required | Meaning |
+| --- | --- | --- |
+| `concept` | yes | Concept label used for fitting detectors and choosing steering targets. |
+| `question` | yes | User prompt to answer. |
+| `answer` | no | Optional reference metadata. The current pipeline judges retention against the generated baseline output. |
+| `subtopic` | no | Optional metadata. Not used by the pipeline. |
+
+Current dataset directories include `store/inhouse`, `store/rwku`, `store/mmlu`,
+`store/concept10`, `store/concept500`, and `store/conceptvectors`.
 
 ## Quick start
 
-The primary interface is a YAML experiment file (see [Configuration & sweeps](config.md)). One file is the source of truth for the whole model × dataset matrix:
+The primary interface is the YAML matrix:
 
 ```bash
-python -m refuse --config configs/experiments.yml              # run every entry
-python -m refuse --config configs/experiments.yml --only qwen7b_rwku
-python -m refuse --config configs/experiments.yml --list       # preview resolved configs
+python -m refuse --config configs/experiments.yml --list
+python -m refuse --config configs/experiments.yml
+python -m refuse --config configs/experiments.yml --only qwen7b_inhouse
 ```
 
-Each entry runs as its own subprocess (process isolation, per-store `pipeline.log`, crash-resilient).
+Each run in the matrix executes in its own subprocess. This gives process
+isolation, appends a master transcript to `logs/experiments.log`, and appends
+per-store transcripts to `<store>/pipeline.log`.
 
-For a one-off, the explicit-flag form still works:
+The current matrix is calibration-only for four models on `store/inhouse`:
+
+```yaml
+runs:
+  - { model: qwen7b,    data: inhouse }
+  - { model: llama8b,   data: inhouse }
+  - { model: mistral7b, data: inhouse }
+  - { model: phi4,      data: inhouse }
+```
+
+To run a one-off calibration:
 
 ```bash
 python -m refuse \
-  --model       meta-llama/Llama-3.1-8B-Instruct  --gpus       0,1 \
-  --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B --judge-gpus 0,1 \
+  --model meta-llama/Llama-3.1-8B-Instruct \
   --data store/inhouse \
-  --out  store/llama3_inhouse \
-  --bars 20 \
+  --out store/llama8b_inhouse \
+  --method lda \
+  --gpus 0,1 \
+  --layers all \
+  --scale-window mid \
+  --scale-steps 15 \
+  --calibration-n 10 \
+  --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B \
+  --judge-gpus 0,1 \
+  --judge-retries 100 \
+  --batch-size 16 \
+  --judge-batch-size 16 \
   -v
 ```
 
-Walks the full pipeline. Stages `[3a] … [9]` print one line each with cache-hit status. Everything is cached idempotently — re-running on a populated store skips computed steps.
+To run evaluations after calibration:
 
-**Outputs** in `<--out>/`:
+```bash
+python -m refuse \
+  --model meta-llama/Llama-3.1-8B-Instruct \
+  --data store/inhouse \
+  --out store/llama8b_inhouse \
+  --method lda \
+  --gpus 0,1 \
+  --bars 10 \
+  --confusion 10 10 \
+  --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B \
+  --judge-gpus 0,1 \
+  -v
+```
 
-| file | contents |
-|---|---|
-| `baseline_train.csv`, `baseline_test.csv` | model's baseline outputs (one per question) |
-| `baseline_answer_acts.pt`, `_masks.pt` | per-layer activations on baseline prompts (train) |
-| `refuse_answer_acts.pt`, `_masks.pt` | per-layer activations on refusal-prompted prompts (train) |
-| `baseline_answer_acts_test.pt`, `_masks.pt` | baseline activations on test set (for ROC) |
-| `v_detect.pt` | per-concept LDA detection vectors `(n_layers, 1, hidden)` |
-| `v_refuse.pt` | averaged refusal direction `(n_layers, 1, hidden)` |
-| `thresholds.pt` | per-concept per-layer LDA gating thresholds |
-| `calibration_results.csv` | flat calibration sweep: `source_layer × target_layer × scale × question` |
-| `calibration_judged.csv` | calibration outputs + `judge_refusal/retention/fluency` columns |
-| `{eval}.csv` | per-eval steered generations at the selected scale (e.g. `confusion.csv`, `bars.csv`) |
-| `{eval}_judged.csv` | per-eval outputs + judge scores |
-| `plots/` | `calibration.png` plus per-eval plots (`confusion_heatmap_*.png`, `bars.png`, …) |
-| `pipeline.log` | tee'd terminal transcript |
-| `arguments.log` | the resolved config of every invocation into this store |
-
----
+When evaluation CSVs are missing, the pipeline reads `calibration_judged.csv`,
+selects the best `(layer, scale)` cell, generates the requested evals, judges
+them, and refreshes plots.
 
 ## CLI reference
 
-Templates auto-detect from the model path (`llm.chat_templates.EXACT_MATCHES`); there is no `--template` flag.
+Config mode:
 
-```
-config mode (primary)
-  --config FILE                     experiments yml; runs its matrix, one subprocess per run
-  --only NAME ...                   restrict to these experiment names
-  --list                            print resolved configs and exit
+| Flag | Meaning |
+| --- | --- |
+| `--config FILE` | Load a YAML experiment matrix. |
+| `--only NAME ...` | Run only selected resolved experiment names. |
+| `--list` | Print resolved runs and exit. |
 
-single-run mode
-  --model PATH                      HF model path (must be in EXACT_MATCHES)
-  --data DIR                        folder with train.csv and test.csv
-  --out  DIR                        artifact store
-  --gpus 0,1                        GPU ids
-  --method {lda,diffed,projected}   vector method (default lda)
+Single-run mode:
 
-calibration sweep (single-run; in YAML these are flat model-level fields)
-  --layers SPEC                     default | all | 'frac: 0,.5,1' | '3 7 15,18,21,24'  (default: default)
-  --scale-window W                  small | mid | large | 'lo:hi'  (default: mid)
-  --scale-steps N                   scale resolution within the window (default 15)
-  --calibration-n 10                calibration samples per concept (int, or 'all')
-  --train-frac 1.0 / --test-frac 1.0   per-concept subsamples (debug)
+| Flag | Meaning |
+| --- | --- |
+| `--model PATH` | Exact Hugging Face model path registered in `llm.chat_templates.EXACT_MATCHES`. |
+| `--data DIR` | Dataset folder with `train.csv` and `test.csv`. |
+| `--out DIR` | Artifact store for this run. |
+| `--method {lda,diffed,projected}` | Vector construction method. |
+| `--gpus 0,1` | Comma-separated GPU IDs for the main model. |
 
-evaluations (any combination; none = calibration-only)
-  --confusion C N                   C concepts × C targets × N questions/concept
-  --bars      N                     per target: N target + N untargeted-pool questions
+Calibration:
 
-judge (LLM-as-judge)
-  --judge-model PATH                HF model for the judge
-  --judge-gpus 0,1                  GPU ids for judge (default: same as --gpus)
-  --judge-retries 25                retry budget for parse failures
+| Flag | Meaning |
+| --- | --- |
+| `--layers SPEC` | `default`, `all`, `frac: ...`, or explicit layer sets such as `"3 7 15,18,21,24"`. |
+| `--scale-window WINDOW` | `small`, `mid`, `large`, or `"lo:hi"`. |
+| `--scale-steps N` | Number of scale values inside the window. |
+| `--calibration-n N` | Samples per concept. Use `all` for every test question per concept. |
+| `--train-frac F` | Per-concept training subsample for debug runs. |
+| `--test-frac F` | Per-concept test subsample for debug runs. |
 
-batch + misc
-  --batch-size 64 / --judge-batch-size 32
-  --no-plot                         skip plot rendering at end
-  -v, --verbose                     print stage progress
-```
+Evaluations:
 
-A multi-layer calibration grid (e.g. `--layers all`) cannot be combined with evals — sweep first, select the optimal layer post-hoc, then run evals at that layer. In YAML, `layers` / `scales` / `scale_window` are flat fields on each model. See [Configuration & sweeps](doc/config.md) for the full grammar.
+| Flag | Meaning |
+| --- | --- |
+| `--bars N` | For each target concept, generate `N` target-concept questions and `N` non-target questions. |
+| `--confusion C N` | Select `C` concepts and generate a full target-by-concept grid with `N` questions per concept. |
 
----
+Judge and batch controls:
 
-## Python API
+| Flag | Meaning |
+| --- | --- |
+| `--judge-model PATH` | Exact model path for judging. |
+| `--judge-gpus 0,1` | GPU IDs for the judge. Defaults to `--gpus`. |
+| `--judge-retries N` | Retry budget for unparseable judge completions. |
+| `--batch-size N` | Main-model generation/activation batch size. |
+| `--judge-batch-size N` | Judge generation batch size. |
+| `--no-plot` | Skip plot rendering. |
+| `-v`, `--verbose` | Print stage progress. |
 
-```python
-from refuse import run
+## Outputs
 
-run(
-    model_path    = "meta-llama/Llama-3.1-8B-Instruct",
-    data_root     = "store/concepts",
-    result_root   = "store/llama3_concepts",
-    gpu_ids       = [0, 1],
-    judge_model   = "AtlaAI/Selene-1-Mini-Llama-3.1-8B",
-    judge_gpu_ids = [0, 1],
-    evaluations   = [("bars", {"n": 20})],          # or ("confusion", {"c": 10, "n": 10}), or both
-    verbose       = True,
-)
-```
+Each run writes to `<out>/`.
 
-Lower-level building blocks (when you want partial pipeline control):
+| File | Contents |
+| --- | --- |
+| `baseline_train.csv`, `baseline_test.csv` | Baseline model outputs. |
+| `baseline_answer_acts.pt` | Per-layer train activations on baseline answers. |
+| `refuse_answer_acts.pt` | Per-layer train activations on refusal-prompted answers. |
+| `baseline_answer_acts_test.pt` | Per-layer test activations for later analysis. |
+| `v_detect.pt` | Per-concept detector vectors for every layer. |
+| `v_refuse.pt` | Shared refusal direction for every layer. |
+| `thresholds.pt` | Per-concept, per-layer detector thresholds. |
+| `calibration_results.csv` | Flat layer x scale generation sweep. |
+| `calibration_judged.csv` | Calibration sweep plus `judge_refusal`, `judge_retention`, and `judge_fluency`. |
+| `{eval}.csv` | Optional steered generation outputs, for example `bars.csv`. |
+| `{eval}_judged.csv` | Optional eval outputs plus judge scores. |
+| `plots/` | Rendered calibration and eval plots. |
+| `pipeline.log` | Per-store terminal transcript. |
+| `arguments.log` | Resolved invocation history for this store. |
 
-```python
-from llm import GPUPool, detect_template
-from refuse import (
-    Paths, generate_baseline, cached_concept_activations,
-    cached_lda_vectors, GatedSteering, make_generation_jobs, run_jobs,
-    build_grid, calibration_sweep, select_refusal_scale, scale_grid, resolve_layers,
-    load_experiments, to_run_kwargs, run_experiments,
-)
-from refuse.prompts import BASELINE_SYSTEM, refuse_system
-from judge import add_judge_scores
-from plot import make_all
-```
+## Plotting
 
-Each stage is idempotent on its cache file. For the YAML matrix, `load_experiments(path)` → `{name: cfg}` and `to_run_kwargs(cfg)` → kwargs for `run()`.
-
----
-
-## Re-rendering plots (no GPU, no model)
-
-All four plots are pure functions of the on-disk store. Re-render any time:
+Plots are pure functions of the CSVs in a store:
 
 ```bash
-python -m plot --store store/llama3_concepts
-# or: python -m plot --store STORE --out OTHER_DIR
+python -m plot --store store/llama8b_inhouse
+python -m plot --store store/llama8b_inhouse --out /tmp/llama8b_plots
 ```
 
-Reads `calibration_judged.csv` and any `{eval}_judged.csv` files in the store, writes PNGs to `<store>/plots/`. Plots that have no source CSV are silently skipped.
+The plot command writes any figures it can support from the files present. If a
+store only has calibration CSVs, only calibration plots are produced.
 
----
+## Interpreting Scores
 
-## Verified models
+The judge scores three binary axes:
 
-`llm.chat_templates.EXACT_MATCHES` only auto-detects exact paths. Anything else → `detect_template` raises a loud error (no fuzzy matching footguns).
+| Score | Meaning |
+| --- | --- |
+| `judge_refusal` | `1` when the answer explicitly refuses. |
+| `judge_retention` | `1` when the candidate preserves the baseline answer content. |
+| `judge_fluency` | `1` when the candidate is readable rather than degenerate. |
+
+Calibration selection uses the harmonic mean of refusal and fluency. Retention is
+still recorded, but it is not part of the current selection objective.
+
+## Verified model templates
+
+Template detection is exact. Register new paths in `llm/chat_templates.py`.
 
 | Model path | Template |
-|---|---|
-| `meta-llama/Llama-3.1-8B-Instruct` | LLAMA3 |
-| `mistralai/Mistral-7B-Instruct-v0.3` | MISTRAL |
-| `Qwen/Qwen2.5-7B-Instruct` | QWEN |
-| `AtlaAI/Selene-1-Mini-Llama-3.1-8B` | LLAMA3 |
+| --- | --- |
+| `meta-llama/Llama-3.1-8B-Instruct` | `LLAMA3` |
+| `mistralai/Mistral-7B-Instruct-v0.3` | `MISTRAL` |
+| `Qwen/Qwen2.5-7B-Instruct` | `QWEN` |
+| `microsoft/phi-4` | `PHI4` |
+| `AtlaAI/Selene-1-Mini-Llama-3.1-8B` | `LLAMA3` |
 
-To add a model, register it in `llm/chat_templates.py`:
+## More documentation
 
-```python
-EXACT_MATCHES["my-org/my-model"] = LLAMA3   # or a custom ChatTemplate(...)
-```
+| Page | Use it for |
+| --- | --- |
+| [Configuration](doc/config.md) | YAML structure, layer specs, scale windows, caching rules, and common workflows. |
+| [Design](doc/design.md) | Package responsibilities and pipeline lifecycle. |
+| [Results](doc/results.md) | Artifact semantics and result inspection. |
+| [Troubleshooting](doc/troubleshooting.md) | Missing dependencies, stale caches, CUDA memory pressure, and judge parse retries. |
+| [API reference](doc/api.rst) | Module-level public API inventory. |
 
----
+## Current limitations
 
-## Architecture notes
-
-**Model lifecycle is sequential, not pooled.** Each pipeline phase loads → uses → `del`s its model. No CPU↔GPU swap dance, no shared-GPU branching. Trade ~30 s per disk reload for far simpler code. Up to five model loads in a full judged run (Blocks 3+4 share one main load and one judge load regardless of how many evals are enabled):
-
-```
-1. load main  →  baselines + activations  →  del
-2. (LDA on CPU — no model needed)
-3. load main  →  calibration generate     →  del
-4. load judge →  calibration score        →  del
-5. load main  →  all pending evaluations  →  del
-6. load judge →  judge all pending evals  →  del
-```
-
-**`GPUPool` is just `map` + `generate`.** Multi-GPU is `pool.map(fn, shards)` running `fn(llm, shard)` in a `ThreadPoolExecutor`. `pool.generate(prompts, ...)` is the only convenience method. Activation collection and steered generation are standalone functions in `refuse/` that *take* a pool — `llm/` never imports from `refuse/`.
-
-**Strict template matching.** `detect_template(model_path)` only matches exact paths. Substring matching (`"llama3" in name`) is a footgun; fixing one alias silently breaks similarly-named models.
-
-**LLM-as-judge with binary Selene-style rubric.** Three separate per-axis prompts (refusal / retention / fluency), each following Selene's training format:
-
-```
-**Reasoning:** <one short sentence>
-
-**Result:** <1 or 2>
-```
-
-Score 1 → 0 (negative), Score 2 → 1 (positive). Per-axis cache columns (`judge_<axis>_completion`). Parse failures retry with `do_sample=True, temperature=0.7` up to `--judge-retries` times.
-
-**Calibration picks scale on harmonic mean** of refusal and fluency: `2·R·F/(R+F)`. Penalizes scales that achieve high refusal by destroying fluency.
-
-**ROC measures end-to-end behaviour**, not classifier separability. For each calibration scale, plots `(FPR = refusal rate when target ≠ concept, TPR = refusal rate when target == concept)`. Each point on the curve is one scale. AUC over the sweep.
-
-**Caching.** Every stage's output is a file under `<out>/`. On re-run, existing files are loaded and compute is skipped. Two helpers in `paths.py`:
-- `cached_pt({"name": path, ...}, compute_fn)` — all-or-nothing for `.pt` files
-- `cached_csv_rows(path, df, compute_missing_fn, key_col)` — row-wise resume for CSVs (used by `generate_baseline` and judge passes)
-
-**Defaults tuned for an 8B model on 2× RTX 5090 (31 GB each)**:
-- `add_judge_scores(batch_size=16)` — KV cache for retention prompts at batch=64 OOMs
-- `cached_concept_activations(batch_size=64)` — hooks store 32 layer × `(batch, seq, hidden)` activations on GPU
-- `--judge-retries 25` — `do_sample=True` retries virtually eliminate parse failures
-
----
-
-## Design philosophy
-
-From `CLAUDE.md`:
-- No `try/except` unless explicitly asked.
-- No backwards-compat shims.
-- No defensive code for scenarios that can't happen.
-- Minimal docstrings — one-liner or skip.
-- Each `.py` file has one responsibility (see `refuse/design.md` for the per-module map).
-
-Composition over magic: `pool`, `template`, `paths` are passed explicitly to every function that needs them.
-
----
-
-## Datasets
-
-Two example datasets live under `store/`:
-
-- `store/concepts/` — 10 science / general-knowledge concepts (lasers, the_moon, paris, dogs, …), ~4.7k train / 1.2k test
-- `store/RWKU/` — Real-World Knowledge Unlearning (200 famous people), larger
-
-Schema: `concept, subtopic, question, answer` (subtopic optional, never read by the pipeline). Generated by the notebooks under `datasets/` using `api.InstructorLLM` against GPT or Claude.
-
-To use a different dataset: drop `train.csv` and `test.csv` (with at minimum `concept` and `question` columns) in a folder and point `--data` at it.
-
----
-
-## Repo conventions
-
-- Path layout: `store/<dataset>/` for raw data, `store/<model>_<dataset>/` for results.
-- All artifacts in `store/` are checkpointed and git-ignored.
-- Notebooks live under `notebooks/`; they are drivers, not source of truth.
+- There is no automatic cache invalidation. If you change a grid, model, dataset,
+  prompt, or method but reuse the same store, existing artifacts are reused.
+- The current calibration objective ignores retention.
+- Exact chat-template matching prevents accidental model/template mismatches, but
+  it also means new model aliases must be registered manually.
+- There are no unit tests in this repository. Validation is currently done through
+  command smoke checks, cache inspection, and artifact-level plots.
