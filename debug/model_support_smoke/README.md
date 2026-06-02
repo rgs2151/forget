@@ -17,13 +17,14 @@ This folder is debug-only. It verifies that newly requested inhouse calibration 
 | calibration_n | `1` |
 
 Raw smoke outputs are ignored by git. The tracked `smoke_summary.csv` records the final status.
+The smoke script loads the repo root `.env` so gated Hugging Face models use the same `HF_TOKEN` as the main CLI path.
 
 ## Status
 
 | model | status | note |
 | --- | --- | --- |
-| `meta-llama/Llama-3.2-1B-Instruct` | `skipped_access` | Hugging Face returned 401 and `HF_TOKEN` is not set. |
-| `meta-llama/Llama-3.2-3B-Instruct` | `skipped_access` | Same gated Llama 3.2 family as 1B. |
+| `meta-llama/Llama-3.2-1B-Instruct` | `passed` | Tiny no-judge pipeline smoke produced `calibration_results.csv`. |
+| `meta-llama/Llama-3.2-3B-Instruct` | `passed` | Tiny no-judge pipeline smoke produced `calibration_results.csv`. |
 | `Qwen/Qwen2.5-0.5B-Instruct` | `passed` | Tiny no-judge pipeline smoke produced `calibration_results.csv`. |
 | `Qwen/Qwen2.5-3B-Instruct` | `passed` | Tiny no-judge pipeline smoke produced `calibration_results.csv`. |
 | `Qwen/Qwen2.5-14B-Instruct` | `passed` | Tiny no-judge pipeline smoke produced `calibration_results.csv`. |

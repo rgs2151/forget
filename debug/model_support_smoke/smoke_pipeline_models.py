@@ -2,12 +2,15 @@ from pathlib import Path
 import sys
 
 import pandas as pd
+from dotenv import load_dotenv
 
 from llm.chat_templates import detect_template
 from refuse.pipeline import run
 
 
 ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(ROOT / ".env")
+
 RUN_ROOT = ROOT / "debug" / "model_support_smoke" / "runs"
 SUMMARY = ROOT / "debug" / "model_support_smoke" / "smoke_summary.csv"
 DATA_ROOT = ROOT / "store" / "inhouse"
