@@ -1,0 +1,15 @@
+{
+  "gpu": 0,
+  "train_per_concept": 10,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 32,
+  "vector_device": "cpu",
+  "run_name": "phi_phrase_concept_gated_v1",
+  "steering_mode": "concept_gated",
+  "from_offset": 0,
+  "pad_as_eos": true,
+  "layers": "0,2,3",
+  "scales": "5,9,13,20",
+  "variants": "phrase_sorry_idk"
+}

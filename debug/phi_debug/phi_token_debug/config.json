@@ -1,0 +1,11 @@
+{
+  "gpu": 0,
+  "train_per_concept": 2,
+  "cal_per_concept": 1,
+  "batch_size": 1,
+  "max_new_tokens": 16,
+  "vector_device": "cpu",
+  "layers": "2",
+  "scales": "9",
+  "variants": "current"
+}

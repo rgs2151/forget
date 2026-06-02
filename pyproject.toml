@@ -17,11 +17,18 @@ dependencies = [
     "pandas",
     "matplotlib",
     "rouge-score",
+    "seaborn",
+    "instructor",
+    "pydantic",
+    "pyyaml",
 ]
+
+[project.optional-dependencies]
+docs = ["sphinx", "pydata-sphinx-theme", "myst-parser"]
 
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["forget*"]
+include = ["api*", "steering*", "llm*", "refuse*", "judge*", "plot*"]

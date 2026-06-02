@@ -1,0 +1,4 @@
+variant,layer,scale,idk_rate,special_fraction,n
+clean_all,4,13.0,0.2,0.0,20
+clean_all,4,20.0,0.2,0.0,20
+clean_all,4,30.0,0.15,0.0,20

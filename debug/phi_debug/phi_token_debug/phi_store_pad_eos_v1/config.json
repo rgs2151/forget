@@ -1,0 +1,15 @@
+{
+  "gpu": 0,
+  "train_per_concept": 6,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 32,
+  "vector_device": "cpu",
+  "run_name": "phi_store_pad_eos_v1",
+  "steering_mode": "gated",
+  "from_offset": 0,
+  "pad_as_eos": true,
+  "layers": "0,2,3",
+  "scales": "7,9,11,13",
+  "variants": "store_vectors"
+}

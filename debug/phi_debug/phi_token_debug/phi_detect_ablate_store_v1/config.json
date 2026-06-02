@@ -1,0 +1,16 @@
+{
+  "gpu": 0,
+  "train_per_concept": 6,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 32,
+  "vector_device": "cpu",
+  "run_name": "phi_detect_ablate_store_v1",
+  "steering_mode": "detect_ablate",
+  "from_offset": 0,
+  "pad_as_eos": true,
+  "pool_mode": "mean",
+  "layers": "0,2,3,4",
+  "scales": "5,10,20,40,80",
+  "variants": "store_vectors"
+}

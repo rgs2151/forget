@@ -1,0 +1,16 @@
+{
+  "mode": "oracle",
+  "run_name": "qwen_oracle_refuse_prompt_v1",
+  "gpu": 0,
+  "concepts": "bacteria,cats,dogs,united_states",
+  "per_concept": 5,
+  "layers": "all",
+  "scales": "20,40,60,80,100",
+  "batch_size": 4,
+  "max_new_tokens": 32,
+  "from_offset": 0,
+  "pad_as_eos": true,
+  "vector_source": "store",
+  "steer_text": "I don't know.",
+  "steer_token_mode": "mean"
+}

@@ -1,0 +1,10 @@
+{
+  "run_name": "phi_boundary_vector_v1",
+  "gpu": 0,
+  "train_per_concept": 10,
+  "cal_per_concept": 5,
+  "batch_size": 4,
+  "layers": "all",
+  "scales": "1,3,5,9,13,20",
+  "max_new_tokens": 32
+}

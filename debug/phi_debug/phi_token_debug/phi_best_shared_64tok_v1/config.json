@@ -1,0 +1,16 @@
+{
+  "gpu": 0,
+  "train_per_concept": 10,
+  "cal_per_concept": 5,
+  "batch_size": 2,
+  "max_new_tokens": 64,
+  "vector_device": "cpu",
+  "run_name": "phi_best_shared_64tok_v1",
+  "steering_mode": "gated",
+  "from_offset": 0,
+  "pad_as_eos": true,
+  "pool_mode": "first",
+  "layers": "4",
+  "scales": "13,20,30",
+  "variants": "clean_all"
+}

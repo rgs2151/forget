@@ -1,0 +1,4 @@
+# backfilled 2026-05-26 — original invocation was pre-evaluations-refactor
+# this store has baselines + activations only — never reached calibration
+[historical] python -m refuse --model Qwen/Qwen2.5-7B-Instruct --data store/concept10 --out store/qwen7b_concept10 --method lda --gpus 0,1 --train-frac 1.0 --calibration-frac 1.0 --judge-model AtlaAI/Selene-1-Mini-Llama-3.1-8B --judge-gpus 0,1 --judge-retries 100 -v
+  resolved: {'model': 'Qwen/Qwen2.5-7B-Instruct', 'data': 'store/concept10', 'out': 'store/qwen7b_concept10', 'method': 'lda', 'gpus': [0, 1], 'train_frac': 1.0, 'test_frac': 1.0, 'calibration_frac': 1.0, 'evaluations': [], 'judge_model': 'AtlaAI/Selene-1-Mini-Llama-3.1-8B', 'judge_gpus': [0, 1], 'judge_max_retries': 100}
