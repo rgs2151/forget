@@ -33,6 +33,7 @@ def _add_single_run_flags(p):
     p.add_argument("--judge-retries", type=int, default=25)
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--judge-batch-size", type=int, default=32)
+    p.add_argument("--trust-remote-code", action="store_true")
     p.add_argument("--no-plot", action="store_true")
     p.add_argument("-v", "--verbose", action="store_true")
 
@@ -98,6 +99,7 @@ def main():
         judge_max_retries=args.judge_retries,
         batch_size=args.batch_size,
         judge_batch_size=args.judge_batch_size,
+        trust_remote_code=args.trust_remote_code,
     )
 
 

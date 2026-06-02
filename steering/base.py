@@ -21,7 +21,8 @@ class AutoModelForCausalLMWrapper():
         instruction_end_marker: str,
         tokenizer_path: str,
         override_model_weights_path: Optional[str] = None,
-        gpu_id: int = 0
+        gpu_id: int = 0,
+        trust_remote_code: bool = False,
     ):
         self.device = f"cuda:{gpu_id}" if t.cuda.is_available() else "cpu"
         self.model_path = model_path
@@ -30,6 +31,7 @@ class AutoModelForCausalLMWrapper():
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_path,
             token=hf_token,
+            trust_remote_code=trust_remote_code,
         )
         self.pad_token_id = self.tokenizer.pad_token_id
         if self.pad_token_id is None: self.pad_token_id = self.tokenizer.eos_token_id
@@ -42,6 +44,7 @@ class AutoModelForCausalLMWrapper():
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_path, 
             token=hf_token,
+            trust_remote_code=trust_remote_code,
         )
 
         # Load custom weights if provided

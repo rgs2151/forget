@@ -1,0 +1,8 @@
+name,model_path,template_family,batch_size,trust_remote_code,status,calibration_output,note
+llama32_1b,meta-llama/Llama-3.2-1B-Instruct,llama3,16,False,skipped_access,False,HF returned 401 for gated repo; HF_TOKEN is not set in this environment.
+llama32_3b,meta-llama/Llama-3.2-3B-Instruct,llama3,16,False,skipped_access,False,HF_TOKEN is not set in this environment; same gated Llama 3.2 family as 1B.
+qwen05b,Qwen/Qwen2.5-0.5B-Instruct,qwen_chatml,16,False,passed,True,tiny no-judge pipeline smoke completed
+qwen3b,Qwen/Qwen2.5-3B-Instruct,qwen_chatml,16,False,passed,True,tiny no-judge pipeline smoke completed
+qwen14b,Qwen/Qwen2.5-14B-Instruct,qwen_chatml,8,False,passed,True,tiny no-judge pipeline smoke completed
+phi4mini,microsoft/Phi-4-mini-instruct,phi4_mini,16,False,passed,True,tiny no-judge pipeline smoke completed
+mistral_small24b,mistralai/Mistral-Small-24B-Instruct-2501,mistral_small_v7_tekken,8,False,skipped_hardware,False,Model card reports ~55 GB GPU RAM; current wrapper loads one full copy per GPU.

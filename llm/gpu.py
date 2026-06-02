@@ -13,11 +13,11 @@ class GPUPool:
         self.llms = {gpu_id: llm_factory(gpu_id) for gpu_id in self.gpu_ids}
 
     @classmethod
-    def from_model_path(cls, model_path, gpu_ids, template=None, hf_token=None):
+    def from_model_path(cls, model_path, gpu_ids, template=None, hf_token=None, trust_remote_code=False):
         if template is None:
             template = detect_template(model_path)
         return cls(
-            lambda gid: load_llm(model_path, gid, template, hf_token),
+            lambda gid: load_llm(model_path, gid, template, hf_token, trust_remote_code),
             gpu_ids,
             template,
         )

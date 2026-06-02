@@ -5,7 +5,7 @@ from steering.base import AutoModelForCausalLMWrapper
 from .chat_templates import detect_template
 
 
-def load_llm(model_path, gpu_id=0, template=None, hf_token=None):
+def load_llm(model_path, gpu_id=0, template=None, hf_token=None, trust_remote_code=False):
     if template is None:
         template = detect_template(model_path)
     return AutoModelForCausalLMWrapper(
@@ -14,4 +14,5 @@ def load_llm(model_path, gpu_id=0, template=None, hf_token=None):
         instruction_end_marker=template.instruction_end_marker,
         tokenizer_path=model_path,
         gpu_id=gpu_id,
+        trust_remote_code=trust_remote_code,
     )

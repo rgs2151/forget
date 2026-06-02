@@ -71,6 +71,16 @@ MISTRAL = ChatTemplate(
     e_assistant="</s>",
 )
 
+MISTRAL_SMALL = ChatTemplate(
+    bos="<s>",
+    b_sys="[SYSTEM_PROMPT]",
+    e_sys="[/SYSTEM_PROMPT]",
+    b_user="[INST]",
+    e_user="",
+    b_assistant="[/INST]",
+    e_assistant="</s>",
+)
+
 PHI4 = ChatTemplate(
     bos="",
     b_sys="<|im_start|>system<|im_sep|>",
@@ -81,12 +91,29 @@ PHI4 = ChatTemplate(
     e_assistant="<|im_end|>",
 )
 
+PHI4_MINI = ChatTemplate(
+    bos="",
+    b_sys="<|system|>",
+    e_sys="<|end|>",
+    b_user="<|user|>",
+    e_user="<|end|>",
+    b_assistant="<|assistant|>",
+    e_assistant="<|end|>",
+)
+
 EXACT_MATCHES = {
     "meta-llama/Llama-3.1-8B-Instruct": LLAMA3,
+    "meta-llama/Llama-3.2-1B-Instruct": LLAMA3,
+    "meta-llama/Llama-3.2-3B-Instruct": LLAMA3,
     "mistralai/Mistral-7B-Instruct-v0.3": MISTRAL,
+    "mistralai/Mistral-Small-24B-Instruct-2501": MISTRAL_SMALL,
+    "Qwen/Qwen2.5-0.5B-Instruct": QWEN,
+    "Qwen/Qwen2.5-3B-Instruct": QWEN,
     "Qwen/Qwen2.5-7B-Instruct": QWEN,
+    "Qwen/Qwen2.5-14B-Instruct": QWEN,
     "AtlaAI/Selene-1-Mini-Llama-3.1-8B": LLAMA3,
     "microsoft/phi-4": PHI4,
+    "microsoft/Phi-4-mini-instruct": PHI4_MINI,
 }
 
 

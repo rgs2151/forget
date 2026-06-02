@@ -108,6 +108,7 @@ def run(
     judge_max_retries=25,
     batch_size=64,
     judge_batch_size=32,
+    trust_remote_code=False,
 ):
     def log(msg):
         if verbose:
@@ -150,6 +151,7 @@ def run(
         "judge_max_retries": judge_max_retries,
         "batch_size": batch_size,
         "judge_batch_size": judge_batch_size,
+        "trust_remote_code": trust_remote_code,
     }
     with open(args_log, "a") as f:
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {argv}\n")
@@ -166,7 +168,11 @@ def run(
         df_test = sample_per_concept(df_test, n_per_concept=n_per_concept).reset_index(drop=True)
     log(f"data: train={len(df_train)} test={len(df_test)} concepts={len(concepts)}")
 
-    num_layers = AutoConfig.from_pretrained(model_path, token=hf_token).num_hidden_layers
+    num_layers = AutoConfig.from_pretrained(
+        model_path,
+        token=hf_token,
+        trust_remote_code=trust_remote_code,
+    ).num_hidden_layers
     grid = build_grid(num_layers, layers=layers, scales=scales, scale_window=scale_window)
     distinct_layers = {tuple(p["source_layers"]) for p in grid}
     log(f"num_layers={num_layers}  calibration grid={len(grid)} points "
@@ -214,7 +220,13 @@ def run(
 
     if need_baselines or need_acts:
         log(f"loading main on gpus={list(gpu_ids)}")
-        pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
+        pool = GPUPool.from_model_path(
+            model_path,
+            gpu_ids,
+            template=template,
+            hf_token=hf_token,
+            trust_remote_code=trust_remote_code,
+        )
 
         log(f"[3a] baseline_train ({hit(paths.baseline_train)})")
         baseline_train = generate_baseline(pool, df_train, paths.baseline_train, template, batch_size=batch_size)
@@ -264,7 +276,13 @@ def run(
         free("acts")
 
         log(f"loading main on gpus={list(gpu_ids)} (for calibration generation)")
-        pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
+        pool = GPUPool.from_model_path(
+            model_path,
+            gpu_ids,
+            template=template,
+            hf_token=hf_token,
+            trust_remote_code=trust_remote_code,
+        )
         log(f"[5.5a] calibration sweep (compute, {len(grid)} grid points × "
             f"{calibration_n}/concept)")
         calibration_results = calibration_sweep(
@@ -319,7 +337,13 @@ def run(
         result_metadata = {"source_layer": optimal_layers, "target_layer": optimal_layers}
 
         log(f"loading main on gpus={list(gpu_ids)} (for evaluations)")
-        pool = GPUPool.from_model_path(model_path, gpu_ids, template=template, hf_token=hf_token)
+        pool = GPUPool.from_model_path(
+            model_path,
+            gpu_ids,
+            template=template,
+            hf_token=hf_token,
+            trust_remote_code=trust_remote_code,
+        )
 
         for name, kwargs in evaluations:
             if not need_eval[name]:
