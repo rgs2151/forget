@@ -1,0 +1,14 @@
+SCREEN_START 2026-06-02T19:40:06+00:00
+ACTIVE_ROWS
+llama32_1b_inhouse: model=meta-llama/Llama-3.2-1B-Instruct data=store/inhouse out=store/llama32_1b_inhouse layers=all scales=15 window=mid evals=[]
+llama32_3b_inhouse: model=meta-llama/Llama-3.2-3B-Instruct data=store/inhouse out=store/llama32_3b_inhouse layers=all scales=15 window=mid evals=[]
+qwen05b_inhouse: model=Qwen/Qwen2.5-0.5B-Instruct data=store/inhouse out=store/qwen05b_inhouse layers=all scales=15 window=mid evals=[]
+qwen3b_inhouse: model=Qwen/Qwen2.5-3B-Instruct data=store/inhouse out=store/qwen3b_inhouse layers=all scales=15 window=mid evals=[]
+qwen14b_inhouse: model=Qwen/Qwen2.5-14B-Instruct data=store/inhouse out=store/qwen14b_inhouse layers=all scales=15 window=mid evals=[]
+phi4mini_inhouse: model=microsoft/Phi-4-mini-instruct data=store/inhouse out=store/phi4mini_inhouse layers=all scales=15 window=mid evals=[]
+RUN_START 2026-06-02T19:40:11+00:00
+
+CondaError: KeyboardInterrupt
+
+RUN_EXIT:1
+SCREEN_END 2026-06-03T07:43:27+00:00

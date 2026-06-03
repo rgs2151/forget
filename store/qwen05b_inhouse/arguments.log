@@ -1,0 +1,2 @@
+[2026-06-02 23:00:14] /home/dev/forget/refuse/__main__.py --config configs/experiments.yml --exec qwen05b_inhouse
+  resolved: {'model': 'Qwen/Qwen2.5-0.5B-Instruct', 'data': 'store/inhouse', 'out': 'store/qwen05b_inhouse', 'method': 'lda', 'gpus': [0, 1], 'train_frac': 1.0, 'test_frac': 1.0, 'calibration_n': 10, 'layers': 'all', 'scales': 15, 'scale_window': 'mid', 'evaluations': [], 'judge_model': 'AtlaAI/Selene-1-Mini-Llama-3.1-8B', 'judge_gpus': [0, 1], 'judge_max_retries': 100, 'batch_size': 16, 'judge_batch_size': 16, 'trust_remote_code': False}
