@@ -10,3 +10,12 @@
 === [2026-05-31 05:32:34] END phi4_inhouse (exit=1) ===
 === [2026-05-31 05:38:08] START phi4_inhouse ===
 === [2026-05-31 09:34:06] END phi4_inhouse (exit=0) ===
+=== [2026-06-02 19:40:15] START llama32_1b_inhouse ===
+=== [2026-06-02 20:53:48] END llama32_1b_inhouse (exit=0) ===
+=== [2026-06-02 20:53:48] START llama32_3b_inhouse ===
+=== [2026-06-02 23:00:11] END llama32_3b_inhouse (exit=0) ===
+=== [2026-06-02 23:00:11] START qwen05b_inhouse ===
+=== [2026-06-03 01:23:53] END qwen05b_inhouse (exit=0) ===
+=== [2026-06-03 01:23:53] START qwen3b_inhouse ===
+=== [2026-06-03 03:58:27] END qwen3b_inhouse (exit=0) ===
+=== [2026-06-03 03:58:27] START qwen14b_inhouse ===
