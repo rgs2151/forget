@@ -1,0 +1,11 @@
+a_dataset,a_concept,b_dataset,b_concept,cosine
+rwku,Serena Williams,rwku,Venus Williams,0.8875201940536499
+conceptvectors,Germany,conceptvectors,Austria,0.7887408137321472
+conceptvectors,Julius Caesar,conceptvectors,Ancient Rome,0.7819288969039917
+conceptvectors,History of the Netherlands,conceptvectors,Netherlands,0.7808775305747986
+rwku,Yoko Ono,rwku,John Lennon,0.7740004658699036
+conceptvectors,United Kingdom,conceptvectors,England,0.7695245146751404
+conceptvectors,Islamic State,conceptvectors,Islam,0.750826358795166
+rwku,Kiefer Sutherland,rwku,Donald Sutherland,0.7487274408340454
+rwku,Socrates,rwku,Aristotle,0.7481027841567993
+rwku,Kris Jenner,rwku,Kylie Jenner,0.7453019022941589

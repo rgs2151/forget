@@ -1,0 +1,2 @@
+model,sim_bin,targeted_refusal,untargeted_refusal,targeted_refusal_anomaly,sim_to_target_context
+qwen7b,overall,0.18,0.08888888888888889,0.0911111111111111,0.0676673420961881

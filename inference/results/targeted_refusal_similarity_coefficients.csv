@@ -1,0 +1,2 @@
+model,intercept,beta_targeted,beta_similarity,beta_targeted_x_similarity
+qwen7b,0.06551107519902932,0.5350844702863312,0.7069812932797378,-1.8165282687971307

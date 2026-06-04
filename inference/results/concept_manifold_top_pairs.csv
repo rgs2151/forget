@@ -1,0 +1,9 @@
+a_dataset,a_concept,b_dataset,b_concept,cosine
+concept10,programming constructs and data structures in code snippets,concept10,references to default settings or configurations,0.9441910377388338
+concept10,control flow statements and conditional logic in programming,concept10,references to default settings or configurations,0.9413310634172238
+concept10,control flow statements and conditional logic in programming,concept10,programming constructs and data structures in code snippets,0.9210544042245769
+concept10,references to nighttime or nocturnal themes,concept10,"references to payment, salaries, and financial arrangements",0.7401058389655465
+concept10,phrases related to biological interactions and measurements,concept10,references to nighttime or nocturnal themes,0.7369850093173552
+concept10,functional aspects related to processes and operations in a system,concept10,terms related to biochemical compounds and their effects,0.7354471716164157
+concept10,terms related to biochemical compounds and their effects,concept10,terms related to online gambling and casinos,0.7340324581068189
+concept10,functional aspects related to processes and operations in a system,concept10,terms related to online gambling and casinos,0.7338317955088697

@@ -1,0 +1,271 @@
+target,source,spillover,semantic_similarity,model
+Civil rights movement,Culture of Africa,0.1,0.42273745,llama8b
+Civil rights movement,Euro,0.0,0.18791306,llama8b
+Civil rights movement,Greece,0.0,0.44154656,llama8b
+Civil rights movement,India,0.0,0.53593576,llama8b
+Civil rights movement,International Red Cross and Red Crescent Movement,0.1,0.4906378,llama8b
+Civil rights movement,Jewish culture,0.0,0.45544368,llama8b
+Civil rights movement,Native Americans in the United States,0.2,0.6418394,llama8b
+Civil rights movement,New Zealand,0.0,0.4499844,llama8b
+Civil rights movement,Republic of Ireland,0.0,0.41639575,llama8b
+Culture of Africa,Civil rights movement,0.0,0.42273745,llama8b
+Culture of Africa,Euro,0.0,0.23253474,llama8b
+Culture of Africa,Greece,0.0,0.4367134,llama8b
+Culture of Africa,India,0.2,0.55145967,llama8b
+Culture of Africa,International Red Cross and Red Crescent Movement,0.1,0.29768717,llama8b
+Culture of Africa,Jewish culture,0.0,0.51535475,llama8b
+Culture of Africa,Native Americans in the United States,0.1,0.53194535,llama8b
+Culture of Africa,New Zealand,0.0,0.41740888,llama8b
+Culture of Africa,Republic of Ireland,0.0,0.32518005,llama8b
+Euro,Civil rights movement,0.0,0.18791306,llama8b
+Euro,Culture of Africa,0.0,0.23253474,llama8b
+Euro,Greece,0.0,0.4288988,llama8b
+Euro,India,0.0,0.33258346,llama8b
+Euro,International Red Cross and Red Crescent Movement,0.1,0.29908344,llama8b
+Euro,Jewish culture,0.0,0.1903524,llama8b
+Euro,Native Americans in the United States,0.0,0.10397445,llama8b
+Euro,New Zealand,0.0,0.19908291,llama8b
+Euro,Republic of Ireland,0.0,0.43101364,llama8b
+Greece,Civil rights movement,0.0,0.44154656,llama8b
+Greece,Culture of Africa,0.0,0.4367134,llama8b
+Greece,Euro,0.2,0.4288988,llama8b
+Greece,India,0.0,0.5217618,llama8b
+Greece,International Red Cross and Red Crescent Movement,0.1,0.47623327,llama8b
+Greece,Jewish culture,0.0,0.3981577,llama8b
+Greece,Native Americans in the United States,0.0,0.38780874,llama8b
+Greece,New Zealand,0.0,0.37187487,llama8b
+Greece,Republic of Ireland,0.0,0.43327886,llama8b
+India,Civil rights movement,0.0,0.53593576,llama8b
+India,Culture of Africa,0.0,0.55145967,llama8b
+India,Euro,0.0,0.33258346,llama8b
+India,Greece,0.0,0.5217618,llama8b
+India,International Red Cross and Red Crescent Movement,0.1,0.42929327,llama8b
+India,Jewish culture,0.0,0.40959907,llama8b
+India,Native Americans in the United States,0.1,0.5852869,llama8b
+India,New Zealand,0.0,0.57900184,llama8b
+India,Republic of Ireland,0.1,0.45449746,llama8b
+International Red Cross and Red Crescent Movement,Civil rights movement,0.1,0.4906378,llama8b
+International Red Cross and Red Crescent Movement,Culture of Africa,0.1,0.29768717,llama8b
+International Red Cross and Red Crescent Movement,Euro,0.0,0.29908344,llama8b
+International Red Cross and Red Crescent Movement,Greece,0.0,0.47623327,llama8b
+International Red Cross and Red Crescent Movement,India,0.0,0.42929327,llama8b
+International Red Cross and Red Crescent Movement,Jewish culture,0.0,0.39189845,llama8b
+International Red Cross and Red Crescent Movement,Native Americans in the United States,0.0,0.44148287,llama8b
+International Red Cross and Red Crescent Movement,New Zealand,0.0,0.45164347,llama8b
+International Red Cross and Red Crescent Movement,Republic of Ireland,0.1,0.49940962,llama8b
+Jewish culture,Civil rights movement,0.0,0.45544368,llama8b
+Jewish culture,Culture of Africa,0.0,0.51535475,llama8b
+Jewish culture,Euro,0.0,0.1903524,llama8b
+Jewish culture,Greece,0.0,0.3981577,llama8b
+Jewish culture,India,0.0,0.40959907,llama8b
+Jewish culture,International Red Cross and Red Crescent Movement,0.2,0.39189845,llama8b
+Jewish culture,Native Americans in the United States,0.1,0.43570024,llama8b
+Jewish culture,New Zealand,0.0,0.38369927,llama8b
+Jewish culture,Republic of Ireland,0.0,0.26899838,llama8b
+Native Americans in the United States,Civil rights movement,0.1,0.6418394,llama8b
+Native Americans in the United States,Culture of Africa,0.3,0.53194535,llama8b
+Native Americans in the United States,Euro,0.0,0.10397445,llama8b
+Native Americans in the United States,Greece,0.0,0.38780874,llama8b
+Native Americans in the United States,India,0.1,0.5852869,llama8b
+Native Americans in the United States,International Red Cross and Red Crescent Movement,0.1,0.44148287,llama8b
+Native Americans in the United States,Jewish culture,0.0,0.43570024,llama8b
+Native Americans in the United States,New Zealand,0.3,0.5546792,llama8b
+Native Americans in the United States,Republic of Ireland,0.0,0.38883653,llama8b
+New Zealand,Civil rights movement,0.0,0.4499844,llama8b
+New Zealand,Culture of Africa,0.1,0.41740888,llama8b
+New Zealand,Euro,0.0,0.19908291,llama8b
+New Zealand,Greece,0.0,0.37187487,llama8b
+New Zealand,India,0.1,0.57900184,llama8b
+New Zealand,International Red Cross and Red Crescent Movement,0.1,0.45164347,llama8b
+New Zealand,Jewish culture,0.0,0.38369927,llama8b
+New Zealand,Native Americans in the United States,0.1,0.5546792,llama8b
+New Zealand,Republic of Ireland,0.0,0.3998682,llama8b
+Republic of Ireland,Civil rights movement,0.0,0.41639575,llama8b
+Republic of Ireland,Culture of Africa,0.0,0.32518005,llama8b
+Republic of Ireland,Euro,0.1,0.43101364,llama8b
+Republic of Ireland,Greece,0.4,0.43327886,llama8b
+Republic of Ireland,India,0.0,0.45449746,llama8b
+Republic of Ireland,International Red Cross and Red Crescent Movement,0.1,0.49940962,llama8b
+Republic of Ireland,Jewish culture,0.0,0.26899838,llama8b
+Republic of Ireland,Native Americans in the United States,0.0,0.38883653,llama8b
+Republic of Ireland,New Zealand,0.1,0.3998682,llama8b
+Civil rights movement,Culture of Africa,0.1,0.42273745,mistral7b
+Civil rights movement,Euro,0.1,0.18791306,mistral7b
+Civil rights movement,Greece,0.0,0.44154656,mistral7b
+Civil rights movement,India,0.0,0.53593576,mistral7b
+Civil rights movement,International Red Cross and Red Crescent Movement,0.3,0.4906378,mistral7b
+Civil rights movement,Jewish culture,0.0,0.45544368,mistral7b
+Civil rights movement,Native Americans in the United States,0.2,0.6418394,mistral7b
+Civil rights movement,New Zealand,0.0,0.4499844,mistral7b
+Civil rights movement,Republic of Ireland,0.1,0.41639575,mistral7b
+Culture of Africa,Civil rights movement,0.1,0.42273745,mistral7b
+Culture of Africa,Euro,0.1,0.23253474,mistral7b
+Culture of Africa,Greece,0.2,0.4367134,mistral7b
+Culture of Africa,India,0.1,0.55145967,mistral7b
+Culture of Africa,International Red Cross and Red Crescent Movement,0.0,0.29768717,mistral7b
+Culture of Africa,Jewish culture,0.2,0.51535475,mistral7b
+Culture of Africa,Native Americans in the United States,0.4,0.53194535,mistral7b
+Culture of Africa,New Zealand,0.1,0.41740888,mistral7b
+Culture of Africa,Republic of Ireland,0.0,0.32518005,mistral7b
+Euro,Civil rights movement,0.0,0.18791306,mistral7b
+Euro,Culture of Africa,0.0,0.23253474,mistral7b
+Euro,Greece,0.0,0.4288988,mistral7b
+Euro,India,0.1,0.33258346,mistral7b
+Euro,International Red Cross and Red Crescent Movement,0.0,0.29908344,mistral7b
+Euro,Jewish culture,0.0,0.1903524,mistral7b
+Euro,Native Americans in the United States,0.0,0.10397445,mistral7b
+Euro,New Zealand,0.0,0.19908291,mistral7b
+Euro,Republic of Ireland,0.2,0.43101364,mistral7b
+Greece,Civil rights movement,0.0,0.44154656,mistral7b
+Greece,Culture of Africa,0.2,0.4367134,mistral7b
+Greece,Euro,0.5,0.4288988,mistral7b
+Greece,India,0.2,0.5217618,mistral7b
+Greece,International Red Cross and Red Crescent Movement,0.1,0.47623327,mistral7b
+Greece,Jewish culture,0.2,0.3981577,mistral7b
+Greece,Native Americans in the United States,0.0,0.38780874,mistral7b
+Greece,New Zealand,0.2,0.37187487,mistral7b
+Greece,Republic of Ireland,0.3,0.43327886,mistral7b
+India,Civil rights movement,0.0,0.53593576,mistral7b
+India,Culture of Africa,0.3,0.55145967,mistral7b
+India,Euro,0.1,0.33258346,mistral7b
+India,Greece,0.5,0.5217618,mistral7b
+India,International Red Cross and Red Crescent Movement,0.2,0.42929327,mistral7b
+India,Jewish culture,0.0,0.40959907,mistral7b
+India,Native Americans in the United States,0.3,0.5852869,mistral7b
+India,New Zealand,0.3,0.57900184,mistral7b
+India,Republic of Ireland,0.2,0.45449746,mistral7b
+International Red Cross and Red Crescent Movement,Civil rights movement,0.2,0.4906378,mistral7b
+International Red Cross and Red Crescent Movement,Culture of Africa,0.0,0.29768717,mistral7b
+International Red Cross and Red Crescent Movement,Euro,0.0,0.29908344,mistral7b
+International Red Cross and Red Crescent Movement,Greece,0.0,0.47623327,mistral7b
+International Red Cross and Red Crescent Movement,India,0.0,0.42929327,mistral7b
+International Red Cross and Red Crescent Movement,Jewish culture,0.0,0.39189845,mistral7b
+International Red Cross and Red Crescent Movement,Native Americans in the United States,0.1,0.44148287,mistral7b
+International Red Cross and Red Crescent Movement,New Zealand,0.1,0.45164347,mistral7b
+International Red Cross and Red Crescent Movement,Republic of Ireland,0.3,0.49940962,mistral7b
+Jewish culture,Civil rights movement,0.0,0.45544368,mistral7b
+Jewish culture,Culture of Africa,0.0,0.51535475,mistral7b
+Jewish culture,Euro,0.0,0.1903524,mistral7b
+Jewish culture,Greece,0.1,0.3981577,mistral7b
+Jewish culture,India,0.0,0.40959907,mistral7b
+Jewish culture,International Red Cross and Red Crescent Movement,0.0,0.39189845,mistral7b
+Jewish culture,Native Americans in the United States,0.0,0.43570024,mistral7b
+Jewish culture,New Zealand,0.0,0.38369927,mistral7b
+Jewish culture,Republic of Ireland,0.0,0.26899838,mistral7b
+Native Americans in the United States,Civil rights movement,0.3,0.6418394,mistral7b
+Native Americans in the United States,Culture of Africa,0.5,0.53194535,mistral7b
+Native Americans in the United States,Euro,0.0,0.10397445,mistral7b
+Native Americans in the United States,Greece,0.0,0.38780874,mistral7b
+Native Americans in the United States,India,0.5,0.5852869,mistral7b
+Native Americans in the United States,International Red Cross and Red Crescent Movement,0.3,0.44148287,mistral7b
+Native Americans in the United States,Jewish culture,0.1,0.43570024,mistral7b
+Native Americans in the United States,New Zealand,0.5,0.5546792,mistral7b
+Native Americans in the United States,Republic of Ireland,0.0,0.38883653,mistral7b
+New Zealand,Civil rights movement,0.0,0.4499844,mistral7b
+New Zealand,Culture of Africa,0.0,0.41740888,mistral7b
+New Zealand,Euro,0.0,0.19908291,mistral7b
+New Zealand,Greece,0.0,0.37187487,mistral7b
+New Zealand,India,0.2,0.57900184,mistral7b
+New Zealand,International Red Cross and Red Crescent Movement,0.0,0.45164347,mistral7b
+New Zealand,Jewish culture,0.0,0.38369927,mistral7b
+New Zealand,Native Americans in the United States,0.1,0.5546792,mistral7b
+New Zealand,Republic of Ireland,0.1,0.3998682,mistral7b
+Republic of Ireland,Civil rights movement,0.0,0.41639575,mistral7b
+Republic of Ireland,Culture of Africa,0.0,0.32518005,mistral7b
+Republic of Ireland,Euro,0.5,0.43101364,mistral7b
+Republic of Ireland,Greece,0.7,0.43327886,mistral7b
+Republic of Ireland,India,0.3,0.45449746,mistral7b
+Republic of Ireland,International Red Cross and Red Crescent Movement,0.2,0.49940962,mistral7b
+Republic of Ireland,Jewish culture,0.1,0.26899838,mistral7b
+Republic of Ireland,Native Americans in the United States,0.1,0.38883653,mistral7b
+Republic of Ireland,New Zealand,0.7,0.3998682,mistral7b
+Civil rights movement,Culture of Africa,0.0,0.42273745,qwen7b
+Civil rights movement,Euro,0.0,0.18791306,qwen7b
+Civil rights movement,Greece,0.0,0.44154656,qwen7b
+Civil rights movement,India,0.0,0.53593576,qwen7b
+Civil rights movement,International Red Cross and Red Crescent Movement,0.4,0.4906378,qwen7b
+Civil rights movement,Jewish culture,0.1,0.45544368,qwen7b
+Civil rights movement,Native Americans in the United States,0.1,0.6418394,qwen7b
+Civil rights movement,New Zealand,0.1,0.4499844,qwen7b
+Civil rights movement,Republic of Ireland,0.2,0.41639575,qwen7b
+Culture of Africa,Civil rights movement,0.0,0.42273745,qwen7b
+Culture of Africa,Euro,0.0,0.23253474,qwen7b
+Culture of Africa,Greece,0.0,0.4367134,qwen7b
+Culture of Africa,India,0.1,0.55145967,qwen7b
+Culture of Africa,International Red Cross and Red Crescent Movement,0.0,0.29768717,qwen7b
+Culture of Africa,Jewish culture,0.0,0.51535475,qwen7b
+Culture of Africa,Native Americans in the United States,0.0,0.53194535,qwen7b
+Culture of Africa,New Zealand,0.0,0.41740888,qwen7b
+Culture of Africa,Republic of Ireland,0.1,0.32518005,qwen7b
+Euro,Civil rights movement,0.0,0.18791306,qwen7b
+Euro,Culture of Africa,0.0,0.23253474,qwen7b
+Euro,Greece,0.0,0.4288988,qwen7b
+Euro,India,0.0,0.33258346,qwen7b
+Euro,International Red Cross and Red Crescent Movement,0.0,0.29908344,qwen7b
+Euro,Jewish culture,0.0,0.1903524,qwen7b
+Euro,Native Americans in the United States,0.0,0.10397445,qwen7b
+Euro,New Zealand,0.0,0.19908291,qwen7b
+Euro,Republic of Ireland,0.0,0.43101364,qwen7b
+Greece,Civil rights movement,0.0,0.44154656,qwen7b
+Greece,Culture of Africa,0.0,0.4367134,qwen7b
+Greece,Euro,0.3,0.4288988,qwen7b
+Greece,India,0.0,0.5217618,qwen7b
+Greece,International Red Cross and Red Crescent Movement,0.1,0.47623327,qwen7b
+Greece,Jewish culture,0.1,0.3981577,qwen7b
+Greece,Native Americans in the United States,0.1,0.38780874,qwen7b
+Greece,New Zealand,0.2,0.37187487,qwen7b
+Greece,Republic of Ireland,0.1,0.43327886,qwen7b
+India,Civil rights movement,0.1,0.53593576,qwen7b
+India,Culture of Africa,0.1,0.55145967,qwen7b
+India,Euro,0.0,0.33258346,qwen7b
+India,Greece,0.1,0.5217618,qwen7b
+India,International Red Cross and Red Crescent Movement,0.0,0.42929327,qwen7b
+India,Jewish culture,0.0,0.40959907,qwen7b
+India,Native Americans in the United States,0.0,0.5852869,qwen7b
+India,New Zealand,0.0,0.57900184,qwen7b
+India,Republic of Ireland,0.0,0.45449746,qwen7b
+International Red Cross and Red Crescent Movement,Civil rights movement,0.1,0.4906378,qwen7b
+International Red Cross and Red Crescent Movement,Culture of Africa,0.0,0.29768717,qwen7b
+International Red Cross and Red Crescent Movement,Euro,0.0,0.29908344,qwen7b
+International Red Cross and Red Crescent Movement,Greece,0.0,0.47623327,qwen7b
+International Red Cross and Red Crescent Movement,India,0.0,0.42929327,qwen7b
+International Red Cross and Red Crescent Movement,Jewish culture,0.0,0.39189845,qwen7b
+International Red Cross and Red Crescent Movement,Native Americans in the United States,0.1,0.44148287,qwen7b
+International Red Cross and Red Crescent Movement,New Zealand,0.1,0.45164347,qwen7b
+International Red Cross and Red Crescent Movement,Republic of Ireland,0.0,0.49940962,qwen7b
+Jewish culture,Civil rights movement,0.0,0.45544368,qwen7b
+Jewish culture,Culture of Africa,0.0,0.51535475,qwen7b
+Jewish culture,Euro,0.0,0.1903524,qwen7b
+Jewish culture,Greece,0.0,0.3981577,qwen7b
+Jewish culture,India,0.0,0.40959907,qwen7b
+Jewish culture,International Red Cross and Red Crescent Movement,0.0,0.39189845,qwen7b
+Jewish culture,Native Americans in the United States,0.0,0.43570024,qwen7b
+Jewish culture,New Zealand,0.1,0.38369927,qwen7b
+Jewish culture,Republic of Ireland,0.0,0.26899838,qwen7b
+Native Americans in the United States,Civil rights movement,0.2,0.6418394,qwen7b
+Native Americans in the United States,Culture of Africa,0.5,0.53194535,qwen7b
+Native Americans in the United States,Euro,0.1,0.10397445,qwen7b
+Native Americans in the United States,Greece,0.5,0.38780874,qwen7b
+Native Americans in the United States,India,0.3,0.5852869,qwen7b
+Native Americans in the United States,International Red Cross and Red Crescent Movement,0.4,0.44148287,qwen7b
+Native Americans in the United States,Jewish culture,0.0,0.43570024,qwen7b
+Native Americans in the United States,New Zealand,0.3,0.5546792,qwen7b
+Native Americans in the United States,Republic of Ireland,0.1,0.38883653,qwen7b
+New Zealand,Civil rights movement,0.0,0.4499844,qwen7b
+New Zealand,Culture of Africa,0.1,0.41740888,qwen7b
+New Zealand,Euro,0.0,0.19908291,qwen7b
+New Zealand,Greece,0.0,0.37187487,qwen7b
+New Zealand,India,0.0,0.57900184,qwen7b
+New Zealand,International Red Cross and Red Crescent Movement,0.2,0.45164347,qwen7b
+New Zealand,Jewish culture,0.1,0.38369927,qwen7b
+New Zealand,Native Americans in the United States,0.2,0.5546792,qwen7b
+New Zealand,Republic of Ireland,0.0,0.3998682,qwen7b
+Republic of Ireland,Civil rights movement,0.1,0.41639575,qwen7b
+Republic of Ireland,Culture of Africa,0.1,0.32518005,qwen7b
+Republic of Ireland,Euro,0.4,0.43101364,qwen7b
+Republic of Ireland,Greece,0.1,0.43327886,qwen7b
+Republic of Ireland,India,0.0,0.45449746,qwen7b
+Republic of Ireland,International Red Cross and Red Crescent Movement,0.6,0.49940962,qwen7b
+Republic of Ireland,Jewish culture,0.3,0.26899838,qwen7b
+Republic of Ireland,Native Americans in the United States,0.4,0.38883653,qwen7b
+Republic of Ireland,New Zealand,0.5,0.3998682,qwen7b
