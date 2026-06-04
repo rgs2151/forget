@@ -19,3 +19,11 @@
 === [2026-06-03 01:23:53] START qwen3b_inhouse ===
 === [2026-06-03 03:58:27] END qwen3b_inhouse (exit=0) ===
 === [2026-06-03 03:58:27] START qwen14b_inhouse ===
+=== [2026-06-03 07:50:37] START qwen05b_inhouse ===
+=== [2026-06-03 11:31:20] END qwen05b_inhouse (exit=0) ===
+=== [2026-06-03 11:31:20] START qwen3b_inhouse ===
+=== [2026-06-03 15:50:02] END qwen3b_inhouse (exit=0) ===
+=== [2026-06-03 15:50:02] START qwen14b_inhouse ===
+=== [2026-06-03 21:42:40] END qwen14b_inhouse (exit=0) ===
+=== [2026-06-03 21:42:40] START phi4mini_inhouse ===
+=== [2026-06-04 01:51:39] END phi4mini_inhouse (exit=0) ===
