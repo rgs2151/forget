@@ -7,3 +7,9 @@
 - No extra print statements in notebook cells. Keep cells clean.
 - Use code comments for step explanations, not markdown cells.
 - Don't do tests with github actions or CI/CD pipelines.
+
+Manuscript writing:
+- Use clear, restrained, Nature-style prose.
+- For figure captions, write only what is needed to interpret the figure: what is plotted, how to read it, and any essential sampling or comparison detail.
+- Do not turn captions into Methods sections.
+- Avoid vague qualifiers, jargon, implementation language, and over-explaining.
