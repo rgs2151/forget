@@ -49,15 +49,15 @@ ERRORED = {
 }
 
 SCORE_RUNS = [
-    {"run": "qwen05b_inhouse", "model": "Qwen 0.5B", "size_b": 0.5},
-    {"run": "llama32_1b_inhouse", "model": "Llama 3.2 1B", "size_b": 1.0},
-    {"run": "llama32_3b_inhouse", "model": "Llama 3.2 3B", "size_b": 3.0},
-    {"run": "qwen3b_inhouse", "model": "Qwen 3B", "size_b": 3.0},
-    {"run": "mistral7b_inhouse", "model": "Mistral 7B", "size_b": 7.0},
-    {"run": "qwen7b_inhouse", "model": "Qwen 7B", "size_b": 7.0},
-    {"run": "llama8b_inhouse", "model": "Llama 3.1 8B", "size_b": 8.0},
-    {"run": "phi4_inhouse", "model": "Phi-4 14B", "size_b": 14.0},
-    {"run": "qwen14b_inhouse", "model": "Qwen 14B", "size_b": 14.0},
+    {"run": "qwen05b_inhouse", "model": "Qwen 0.5B", "label": "Qwen .5B", "size_b": 0.5},
+    {"run": "llama32_1b_inhouse", "model": "Llama 3.2 1B", "label": "L3.2 1B", "size_b": 1.0},
+    {"run": "llama32_3b_inhouse", "model": "Llama 3.2 3B", "label": "L3.2 3B", "size_b": 3.0},
+    {"run": "qwen3b_inhouse", "model": "Qwen 3B", "label": "Qwen 3B", "size_b": 3.0},
+    {"run": "mistral7b_inhouse", "model": "Mistral 7B", "label": "Mistral 7B", "size_b": 7.0},
+    {"run": "qwen7b_inhouse", "model": "Qwen 7B", "label": "Qwen 7B", "size_b": 7.0},
+    {"run": "llama8b_inhouse", "model": "Llama 3.1 8B", "label": "L3.1 8B", "size_b": 8.0},
+    {"run": "phi4_inhouse", "model": "Phi-4 14B", "label": "Phi-4 14B", "size_b": 14.0},
+    {"run": "qwen14b_inhouse", "model": "Qwen 14B", "label": "Qwen 14B", "size_b": 14.0},
 ]
 
 SCORE_PANELS = [
@@ -65,6 +65,27 @@ SCORE_PANELS = [
     ("judge_retention", "Retain rate", AXIS_COLOR["retention"]),
     ("judge_fluency", "Fluency rate", AXIS_COLOR["fluency"]),
 ]
+
+SCORE_LABEL_OFFSETS = {
+    "judge_refusal": {
+        "qwen7b_inhouse": (4, 4),
+        "qwen14b_inhouse": (4, 2),
+    },
+    "judge_retention": {
+        "llama32_1b_inhouse": (-10, -12),
+        "llama32_3b_inhouse": (4, -12),
+        "qwen05b_inhouse": (4, 5),
+        "mistral7b_inhouse": (4, -12),
+        "llama8b_inhouse": (4, 5),
+        "phi4_inhouse": (4, -12),
+        "qwen14b_inhouse": (4, 5),
+    },
+    "judge_fluency": {
+        "mistral7b_inhouse": (4, 6),
+        "qwen7b_inhouse": (4, -10),
+        "qwen14b_inhouse": (4, -12),
+    },
+}
 
 
 def status_for(file_path, model_key, row_key, required_cols=()):
@@ -345,6 +366,15 @@ def write_score_size(store, out):
         data = points.dropna(subset=[col])
         ax.scatter(data["size_b"], data[col], s=42, color=color, alpha=0.9)
         add_fit(ax, data["size_b"], data[col], color)
+        for row in data.itertuples(index=False):
+            offset = SCORE_LABEL_OFFSETS.get(col, {}).get(row.run, (3, 3))
+            ax.annotate(
+                row.label,
+                (row.size_b, getattr(row, col)),
+                xytext=offset,
+                textcoords="offset points",
+                fontsize=7,
+            )
         ax.set_title("inhouse", fontsize=18)
         ax.set_xlabel("Model size (B)", fontsize=14)
         ax.set_ylabel(ylabel, fontsize=14)
