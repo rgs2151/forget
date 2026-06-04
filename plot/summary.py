@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import Normalize
 
 from refuse.calibration import select_optimal_config
 
@@ -15,6 +17,7 @@ from .plot import (
     HARMONIC_COLOR,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
+    custom_cmap,
     harmonic_refusal_fluency,
     setup_style,
 )
@@ -35,6 +38,20 @@ DATA_MODELS = [
     ("Qwen2.5-7B-Instruct", "qwen7b"),
 ]
 
+CALIB_MODELS = [
+    {"family": "Llama", "label": "3.2\n1B", "key": "llama32_1b"},
+    {"family": "Llama", "label": "3.2\n3B", "key": "llama32_3b"},
+    {"family": "Llama", "label": "3.1\n8B", "key": "llama8b"},
+    {"family": "Mistral", "label": "7B", "key": "mistral7b"},
+    {"family": "Mistral", "label": "Small\n24B", "key": "mistral_small24b"},
+    {"family": "Qwen", "label": "0.5B", "key": "qwen05b"},
+    {"family": "Qwen", "label": "3B", "key": "qwen3b"},
+    {"family": "Qwen", "label": "7B", "key": "qwen7b"},
+    {"family": "Qwen", "label": "14B", "key": "qwen14b"},
+    {"family": "Phi", "label": "mini", "key": "phi4mini"},
+    {"family": "Phi", "label": "14B", "key": "phi4"},
+]
+
 DATASETS = [
     ("inhouse", "inhouse"),
     ("MMLU", "mmlu"),
@@ -53,6 +70,7 @@ SCORE_RUNS = [
     {"run": "llama32_1b_inhouse", "model": "Llama 3.2 1B", "label": "L3.2 1B", "size_b": 1.0},
     {"run": "llama32_3b_inhouse", "model": "Llama 3.2 3B", "label": "L3.2 3B", "size_b": 3.0},
     {"run": "qwen3b_inhouse", "model": "Qwen 3B", "label": "Qwen 3B", "size_b": 3.0},
+    {"run": "phi4mini_inhouse", "model": "Phi-4 mini", "label": "Phi mini", "size_b": 3.8},
     {"run": "mistral7b_inhouse", "model": "Mistral 7B", "label": "Mistral 7B", "size_b": 7.0},
     {"run": "qwen7b_inhouse", "model": "Qwen 7B", "label": "Qwen 7B", "size_b": 7.0},
     {"run": "llama8b_inhouse", "model": "Llama 3.1 8B", "label": "L3.1 8B", "size_b": 8.0},
@@ -70,10 +88,12 @@ SCORE_LABEL_OFFSETS = {
     "judge_refusal": {
         "qwen7b_inhouse": (4, 4),
         "qwen14b_inhouse": (4, 2),
+        "phi4mini_inhouse": (4, 8),
     },
     "judge_retention": {
         "llama32_1b_inhouse": (-10, -12),
         "llama32_3b_inhouse": (4, -12),
+        "phi4mini_inhouse": (4, 12),
         "qwen05b_inhouse": (4, 5),
         "mistral7b_inhouse": (4, -12),
         "llama8b_inhouse": (4, 5),
@@ -81,11 +101,18 @@ SCORE_LABEL_OFFSETS = {
         "qwen14b_inhouse": (4, 5),
     },
     "judge_fluency": {
+        "phi4mini_inhouse": (4, 5),
         "mistral7b_inhouse": (4, 6),
         "qwen7b_inhouse": (4, -10),
         "qwen14b_inhouse": (4, -12),
     },
 }
+
+FULL_METRICS = [
+    ("refuse", "judge_refusal", "Refusal rate"),
+    ("retain", "judge_retention", "Retain rate"),
+    ("fluency", "judge_fluency", "Fluency rate"),
+]
 
 
 def status_for(file_path, model_key, row_key, required_cols=()):
@@ -98,9 +125,21 @@ def status_for(file_path, model_key, row_key, required_cols=()):
     return None
 
 
+def has_cols(file_path, required_cols):
+    if not file_path.exists():
+        return False
+    cols = pd.read_csv(file_path, nrows=0).columns
+    return all(col in cols for col in required_cols)
+
+
 def _layer_key(source_layer):
     layers = ast.literal_eval(source_layer) if isinstance(source_layer, str) else list(source_layer)
     return str(layers)
+
+
+def _layer_value(source_layer):
+    layers = ast.literal_eval(source_layer) if isinstance(source_layer, str) else list(source_layer)
+    return float(np.mean(layers))
 
 
 def _first_intervention_layers(df):
@@ -188,6 +227,17 @@ def draw_status_box(ax, status):
             ha="center", va="center", fontsize=13, color="0.45", style="italic")
 
 
+def draw_cross(ax):
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color("0.78")
+        spine.set_linewidth(1)
+    ax.plot([0, 1], [0, 1], transform=ax.transAxes, color="0.45", linewidth=2.4)
+    ax.plot([0, 1], [1, 0], transform=ax.transAxes, color="0.45", linewidth=2.4)
+
+
 def draw_calibration(ax, calibration_csv, legend=False):
     df = pd.read_csv(calibration_csv)
     df = df[df["label"] == "intervention"]
@@ -230,6 +280,67 @@ def draw_calibration(ax, calibration_csv, legend=False):
     elif ax.get_legend() is not None:
         ax.get_legend().remove()
     sns.despine(ax=ax, trim=True, offset=5)
+
+
+def draw_full_calibration(ax, calibration_csv, metric, cmap):
+    df = pd.read_csv(calibration_csv)
+    df = df[df["label"] == "intervention"].copy()
+    df["_layer_value"] = df["source_layer"].map(_layer_value)
+    mx = float(df["scale"].max())
+    hi = max(float(df["_layer_value"].max()), 1.0)
+
+    for layer, layer_df in df.groupby("source_layer"):
+        value = _layer_value(layer)
+        trace = layer_df.groupby("scale", as_index=False)[metric].mean()
+        ax.plot(trace["scale"], trace[metric], color=cmap(value / hi), linewidth=0.8)
+
+    ax.set_xlabel("Scale", fontsize=8)
+    ax.set_ylabel("Rate", fontsize=8)
+    ax.set_xlim(0, mx)
+    ax.set_ylim(-0.05, 1.05)
+    ax.set_xticks([0, mx])
+    ax.set_yticks([0, 1])
+    ax.tick_params(labelsize=7)
+    sns.despine(ax=ax, trim=True, offset=4)
+
+
+def tidy_grid_axis(ax, row_idx, col_idx, n_rows):
+    if row_idx != n_rows - 1:
+        ax.set_xlabel("")
+    if col_idx != 0:
+        ax.set_ylabel("")
+
+
+def add_family_headers(fig, axes, models, family_y=0.965, model_y=0.925):
+    fig.canvas.draw()
+    for i, model in enumerate(models):
+        bbox = axes[0, i].get_position()
+        fig.text((bbox.x0 + bbox.x1) / 2, model_y, model["label"],
+                 ha="center", va="bottom", fontsize=9, weight="bold")
+
+    families = []
+    start = 0
+    for i, model in enumerate(models + [{"family": None}]):
+        if i == len(models) or model["family"] != models[start]["family"]:
+            families.append((models[start]["family"], start, i - 1))
+            start = i
+
+    for family, start, end in families:
+        left = axes[0, start].get_position()
+        right = axes[0, end].get_position()
+        x0, x1 = left.x0, right.x1
+        fig.text((x0 + x1) / 2, family_y, family,
+                 ha="center", va="bottom", fontsize=14, weight="bold")
+        fig.add_artist(plt.Line2D([x0, x1], [family_y - 0.004, family_y - 0.004],
+                                  transform=fig.transFigure, color="0.3", linewidth=0.8))
+
+
+def add_row_headers(fig, axes, rows, x=0.02):
+    fig.canvas.draw()
+    for r, (row_label, _) in enumerate(rows):
+        bbox = axes[r, 0].get_position()
+        fig.text(x, (bbox.y0 + bbox.y1) / 2, row_label,
+                 ha="center", va="center", rotation=90, fontsize=14, weight="bold")
 
 
 def write_model_data(store, out):
@@ -285,37 +396,75 @@ def write_model_data(store, out):
 
 def write_calib_optimal(store, out):
     setup_style()
-    fig, axes = plt.subplots(4, 3, figsize=(14, 13))
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.93, bottom=0.05,
-                        wspace=0.30, hspace=0.45)
+    n_rows, n_cols = len(DATASETS), len(CALIB_MODELS)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(25, 10.5))
+    fig.subplots_adjust(left=0.05, right=0.995, top=0.84, bottom=0.07,
+                        wspace=0.40, hspace=0.55)
     legend_drawn = False
 
     for r, (_, row_key) in enumerate(DATASETS):
-        for mi, (_, model_key) in enumerate(DATA_MODELS):
+        for mi, model in enumerate(CALIB_MODELS):
+            model_key = model["key"]
             cal_csv = store / f"{model_key}_{row_key}" / "calibration_judged.csv"
             ax = axes[r, mi]
-            status = status_for(cal_csv, model_key, row_key, CALIB_COLS)
-            if status is None:
+            if has_cols(cal_csv, CALIB_COLS):
                 draw_calibration(ax, cal_csv, legend=not legend_drawn)
                 legend_drawn = True
+                tidy_grid_axis(ax, r, mi, n_rows)
             else:
-                draw_status_box(ax, status)
+                draw_cross(ax)
 
-    fig.canvas.draw()
-    for mi, (model_label, _) in enumerate(DATA_MODELS):
-        bbox = axes[0, mi].get_position()
-        fig.text((bbox.x0 + bbox.x1) / 2, 0.95, model_label,
-                 ha="center", va="bottom", fontsize=15, weight="bold")
-
-    for r, (row_label, _) in enumerate(DATASETS):
-        bbox = axes[r, 0].get_position()
-        fig.text(0.02, (bbox.y0 + bbox.y1) / 2, row_label,
-                 ha="center", va="center", rotation=90, fontsize=14, weight="bold")
+    add_family_headers(fig, axes, CALIB_MODELS, family_y=0.965, model_y=0.91)
+    add_row_headers(fig, axes, DATASETS, x=0.018)
 
     save_path = out / "calib_optimal.png"
     fig.savefig(save_path, bbox_inches="tight")
     plt.close(fig)
     return save_path
+
+
+def write_calib_full_metric(store, out, title, metric, ylabel):
+    setup_style()
+    n_rows, n_cols = len(DATASETS), len(CALIB_MODELS)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(25, 10.8))
+    fig.subplots_adjust(left=0.05, right=0.955, top=0.82, bottom=0.07,
+                        wspace=0.40, hspace=0.55)
+    cmap = custom_cmap(32)
+
+    for r, (_, row_key) in enumerate(DATASETS):
+        for mi, model in enumerate(CALIB_MODELS):
+            model_key = model["key"]
+            cal_csv = store / f"{model_key}_{row_key}" / "calibration_judged.csv"
+            ax = axes[r, mi]
+            if has_cols(cal_csv, (metric,)):
+                draw_full_calibration(ax, cal_csv, metric, cmap)
+                if mi == 0:
+                    ax.set_ylabel(ylabel, fontsize=8)
+                tidy_grid_axis(ax, r, mi, n_rows)
+            else:
+                draw_cross(ax)
+
+    add_family_headers(fig, axes, CALIB_MODELS, family_y=0.94, model_y=0.885)
+    add_row_headers(fig, axes, DATASETS, x=0.018)
+    fig.suptitle(title, fontsize=22, weight="bold", y=0.992)
+
+    sm = ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1))
+    sm.set_array([])
+    cax = fig.add_axes([0.965, 0.30, 0.012, 0.38])
+    cbar = fig.colorbar(sm, cax=cax)
+    cbar.set_ticks([0, 1])
+    cbar.set_ticklabels(["early", "late"])
+    cbar.set_label("Layer depth", rotation=270, labelpad=14)
+
+    save_path = out / f"calib_full_{title}.png"
+    fig.savefig(save_path, bbox_inches="tight")
+    plt.close(fig)
+    return save_path
+
+
+def write_calib_full(store, out):
+    return [write_calib_full_metric(store, out, title, metric, ylabel)
+            for title, metric, ylabel in FULL_METRICS]
 
 
 def optimal_cell(df):
@@ -399,7 +548,16 @@ def main():
     parser.add_argument("--out", default=OUT, type=Path)
     parser.add_argument(
         "--figure",
-        choices=("all", "model_data", "calib_optimal", "score_size"),
+        choices=(
+            "all",
+            "model_data",
+            "calib_optimal",
+            "calib_full",
+            "calib_full_refuse",
+            "calib_full_retain",
+            "calib_full_fluency",
+            "score_size",
+        ),
         default="all",
     )
     args = parser.parse_args()
@@ -410,6 +568,11 @@ def main():
         written.append(write_model_data(args.store, args.out))
     if args.figure in ("all", "calib_optimal"):
         written.append(write_calib_optimal(args.store, args.out))
+    if args.figure in ("all", "calib_full"):
+        written.extend(write_calib_full(args.store, args.out))
+    for title, metric, ylabel in FULL_METRICS:
+        if args.figure == f"calib_full_{title}":
+            written.append(write_calib_full_metric(args.store, args.out, title, metric, ylabel))
     if args.figure in ("all", "score_size"):
         written.append(write_score_size(args.store, args.out))
 
