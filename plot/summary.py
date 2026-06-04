@@ -1,4 +1,5 @@
 import argparse
+import ast
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -8,47 +9,292 @@ import seaborn as sns
 
 from refuse.calibration import select_optimal_config
 
-from .plot import AXIS_COLOR, setup_style
+from .plot import (
+    AXES,
+    AXIS_COLOR,
+    HARMONIC_COLOR,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR,
+    harmonic_refusal_fluency,
+    setup_style,
+)
 
 
-RUNS = [
-    {"run": "qwen05b_inhouse", "model": "Qwen 0.5B", "label": "Qwen .5B", "size_b": 0.5},
-    {"run": "llama32_1b_inhouse", "model": "Llama 3.2 1B", "label": "L3.2 1B", "size_b": 1.0},
-    {"run": "llama32_3b_inhouse", "model": "Llama 3.2 3B", "label": "L3.2 3B", "size_b": 3.0},
-    {"run": "qwen3b_inhouse", "model": "Qwen 3B", "label": "Qwen 3B", "size_b": 3.0},
-    {"run": "mistral7b_inhouse", "model": "Mistral 7B", "label": "Mistral 7B", "size_b": 7.0},
-    {"run": "qwen7b_inhouse", "model": "Qwen 7B", "label": "Qwen 7B", "size_b": 7.0},
-    {"run": "llama8b_inhouse", "model": "Llama 3.1 8B", "label": "L3.1 8B", "size_b": 8.0},
-    {"run": "phi4_inhouse", "model": "Phi-4 14B", "label": "Phi-4 14B", "size_b": 14.0},
-    {"run": "qwen14b_inhouse", "model": "Qwen 14B", "label": "Qwen 14B", "size_b": 14.0},
-]
-
-PANEL = [
-    ("judge_refusal", "Forget", AXIS_COLOR["refusal"]),
-    ("judge_retention", "Retain", AXIS_COLOR["retention"]),
-    ("judge_fluency", "Fluency", AXIS_COLOR["fluency"]),
-]
-
-LABEL_OFFSETS = {
-    "judge_refusal": {
-        "qwen7b_inhouse": (4, 4),
-        "qwen14b_inhouse": (4, 2),
-    },
-    "judge_retention": {
-        "llama32_1b_inhouse": (-10, -12),
-        "llama32_3b_inhouse": (4, -12),
-        "qwen05b_inhouse": (4, 5),
-        "mistral7b_inhouse": (4, -12),
-        "llama8b_inhouse": (4, 5),
-        "phi4_inhouse": (4, -12),
-        "qwen14b_inhouse": (4, 5),
-    },
-    "judge_fluency": {
-        "mistral7b_inhouse": (4, 6),
-        "qwen7b_inhouse": (4, -10),
-        "qwen14b_inhouse": (4, -12),
-    },
+STORE = Path("store")
+OUT = Path("plot/figures")
+CALIB_COLS = ("judge_refusal", "judge_retention", "judge_fluency")
+SHORT_AXIS_LABEL = {
+    "refusal": "Refusal",
+    "retention": "Retain",
+    "fluency": "Fluency",
 }
+
+DATA_MODELS = [
+    ("Llama-3.1-8B-Instruct", "llama8b"),
+    ("Mistral-7B-Instruct-v0.3", "mistral7b"),
+    ("Qwen2.5-7B-Instruct", "qwen7b"),
+]
+
+DATASETS = [
+    ("inhouse", "inhouse"),
+    ("MMLU", "mmlu"),
+    ("RWKU", "rwku"),
+    ("ConceptVectors", "conceptvectors"),
+]
+
+ERRORED = {
+    ("mistral7b", "conceptvectors"),
+    ("qwen7b", "mmlu"),
+    ("qwen7b", "conceptvectors"),
+}
+
+SCORE_RUNS = [
+    {"run": "qwen05b_inhouse", "model": "Qwen 0.5B", "size_b": 0.5},
+    {"run": "llama32_1b_inhouse", "model": "Llama 3.2 1B", "size_b": 1.0},
+    {"run": "llama32_3b_inhouse", "model": "Llama 3.2 3B", "size_b": 3.0},
+    {"run": "qwen3b_inhouse", "model": "Qwen 3B", "size_b": 3.0},
+    {"run": "mistral7b_inhouse", "model": "Mistral 7B", "size_b": 7.0},
+    {"run": "qwen7b_inhouse", "model": "Qwen 7B", "size_b": 7.0},
+    {"run": "llama8b_inhouse", "model": "Llama 3.1 8B", "size_b": 8.0},
+    {"run": "phi4_inhouse", "model": "Phi-4 14B", "size_b": 14.0},
+    {"run": "qwen14b_inhouse", "model": "Qwen 14B", "size_b": 14.0},
+]
+
+SCORE_PANELS = [
+    ("judge_refusal", "Refusal rate", AXIS_COLOR["refusal"]),
+    ("judge_retention", "Retain rate", AXIS_COLOR["retention"]),
+    ("judge_fluency", "Fluency rate", AXIS_COLOR["fluency"]),
+]
+
+
+def status_for(file_path, model_key, row_key, required_cols=()):
+    if not file_path.exists():
+        return "error" if (model_key, row_key) in ERRORED else "calculating"
+    if required_cols:
+        cols = pd.read_csv(file_path, nrows=0).columns
+        if not all(c in cols for c in required_cols):
+            return "calculating"
+    return None
+
+
+def _layer_key(source_layer):
+    layers = ast.literal_eval(source_layer) if isinstance(source_layer, str) else list(source_layer)
+    return str(layers)
+
+
+def _first_intervention_layers(df):
+    return _layer_key(df["source_layer"].iloc[0])
+
+
+def _first_nonzero_scale(df):
+    return float(sorted(s for s in df.loc[df["label"] == "intervention", "scale"].unique() if s != 0)[0])
+
+
+def heatmap_pivot(judged_csv, metric):
+    df = pd.read_csv(judged_csv)
+    layers = _first_intervention_layers(df)
+    scale = _first_nonzero_scale(df)
+    plot_df = df[
+        (df["label"] == "intervention")
+        & (df["scale"] == scale)
+        & (df["source_layer"].astype(str) == layers)
+        & (df["target_layer"].astype(str) == layers)
+    ]
+    concepts = list(df["concept"].unique())
+    scores = (
+        plot_df.pivot_table(index="concept", columns="target", values=metric, aggfunc="mean")
+        .reindex(index=concepts, columns=concepts)
+    )
+    return scores, concepts
+
+
+def draw_heatmap(ax, judged_csv, metric, cbar_label):
+    scores, concepts = heatmap_pivot(judged_csv, metric)
+    n = scores.shape[0]
+    label_each = n <= 12 and max(len(c) for c in concepts) <= 20
+    yticklabels = [f"{c} $c_{{{i + 1}}}$" for i, c in enumerate(concepts)] if label_each else False
+    sns.heatmap(
+        scores.fillna(0), ax=ax, cmap="Greys", square=True, vmin=0, vmax=1,
+        xticklabels=False, yticklabels=yticklabels,
+        cbar_kws={"shrink": 0.7, "ticks": [0, 1]},
+    )
+    ax.set_xticks([0.5, n - 0.5], labels=["$c_1$", f"$c_{{{n}}}$"])
+    if not label_each:
+        ax.set_yticks([0.5, n - 0.5], labels=["$c_1$", f"$c_{{{n}}}$"])
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.tick_params(axis="y", labelsize=6, length=0)
+    ax.tick_params(axis="x", labelsize=8, rotation=0)
+    cbar = ax.collections[0].colorbar
+    cbar.ax.set_ylabel(cbar_label, rotation=270, labelpad=12, fontsize=9)
+    cbar.ax.tick_params(labelsize=7)
+
+
+def draw_bars(ax, judged_csv):
+    df = pd.read_csv(judged_csv)
+    if "label" in df:
+        df = df[df["label"] == "intervention"]
+    df = df.assign(kind=np.where(df["concept"] == df["target"], "Target", "Untargeted"))
+    score_cols = [f"judge_{axis}" for axis in AXES if f"judge_{axis}" in df.columns]
+    long_df = df[["kind"] + score_cols].melt(id_vars="kind", var_name="axis", value_name="score")
+    long_df["axis"] = long_df["axis"].str.replace("judge_", "").map(lambda x: SHORT_AXIS_LABEL[x])
+    sns.barplot(
+        data=long_df, x="axis", y="score", hue="kind", ax=ax,
+        order=[SHORT_AXIS_LABEL[axis] for axis in AXES if f"judge_{axis}" in df.columns],
+        hue_order=["Target", "Untargeted"],
+        palette={"Target": PRIMARY_COLOR, "Untargeted": SECONDARY_COLOR},
+        errorbar=("ci", 95),
+    )
+    if ax.get_legend() is not None:
+        ax.get_legend().remove()
+    ax.set_xlabel("")
+    ax.set_ylabel("Rate", fontsize=9)
+    ax.set_ylim(0, 1.05)
+    ax.set_yticks([0, 1])
+    ax.tick_params(axis="x", labelsize=8)
+    ax.tick_params(axis="y", labelsize=8)
+    sns.despine(ax=ax, trim=True, offset=5)
+
+
+def draw_status_box(ax, status):
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color("0.75")
+        spine.set_linewidth(1)
+    ax.text(0.5, 0.5, status, transform=ax.transAxes,
+            ha="center", va="center", fontsize=13, color="0.45", style="italic")
+
+
+def draw_calibration(ax, calibration_csv, legend=False):
+    df = pd.read_csv(calibration_csv)
+    df = df[df["label"] == "intervention"]
+    layers, scale = select_optimal_config(df)
+    d = df[df["source_layer"].astype(str) == str(layers)].copy()
+    d = d.assign(judge_harmonic=harmonic_refusal_fluency(d))
+
+    for axis in AXES:
+        col = f"judge_{axis}"
+        sns.lineplot(
+            data=d, x="scale", y=col, ax=ax,
+            color=AXIS_COLOR[axis], label=SHORT_AXIS_LABEL[axis],
+            estimator="mean", errorbar=None,
+        )
+
+    sns.lineplot(
+        data=d, x="scale", y="judge_harmonic", ax=ax,
+        color=HARMONIC_COLOR, label="Harmonic",
+        estimator="mean", errorbar=None, linestyle="--",
+    )
+
+    means = d.groupby("scale", as_index=False)["judge_harmonic"].mean()
+    peak = means[means["scale"] == scale].iloc[0]
+    ax.plot(
+        peak["scale"], peak["judge_harmonic"],
+        marker="*", color=SECONDARY_COLOR, markersize=11,
+        fillstyle="none", linestyle="None", label="Optimal",
+    )
+
+    mx = float(d["scale"].max())
+    ax.set_xlabel("Scale", fontsize=9)
+    ax.set_ylabel("Rate", fontsize=9)
+    ax.set_xlim(0, mx)
+    ax.set_ylim(-0.05, 1.05)
+    ax.set_xticks([0, mx])
+    ax.set_yticks([0, 1])
+    ax.tick_params(labelsize=8)
+    if legend:
+        ax.legend(loc="lower right", fontsize=7, frameon=True, facecolor="white", edgecolor="white")
+    elif ax.get_legend() is not None:
+        ax.get_legend().remove()
+    sns.despine(ax=ax, trim=True, offset=5)
+
+
+def write_model_data(store, out):
+    setup_style()
+    fig, axes = plt.subplots(4, 6, figsize=(20, 13))
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.92, bottom=0.05,
+                        wspace=0.55, hspace=0.55)
+
+    for r, (_, row_key) in enumerate(DATASETS):
+        for mi, (_, model_key) in enumerate(DATA_MODELS):
+            store_dir = store / f"{model_key}_{row_key}"
+            conf_csv = store_dir / "confusion_judged.csv"
+            bars_csv = store_dir / "bars_judged.csv"
+            ax_left = axes[r, mi * 2]
+            ax_right = axes[r, mi * 2 + 1]
+
+            status = status_for(conf_csv, model_key, row_key, ("judge_refusal",))
+            if status is None:
+                draw_heatmap(ax_left, conf_csv, "judge_refusal", "Refusal")
+            else:
+                draw_status_box(ax_left, status)
+
+            if row_key == "inhouse":
+                status = status_for(conf_csv, model_key, row_key, ("judge_retention",))
+                if status is None:
+                    draw_heatmap(ax_right, conf_csv, "judge_retention", "Retain")
+                else:
+                    draw_status_box(ax_right, status)
+            else:
+                status = status_for(bars_csv, model_key, row_key, CALIB_COLS)
+                if status is None:
+                    draw_bars(ax_right, bars_csv)
+                else:
+                    draw_status_box(ax_right, status)
+
+    fig.canvas.draw()
+    for mi, (model_label, _) in enumerate(DATA_MODELS):
+        left = axes[0, mi * 2].get_position()
+        right = axes[0, mi * 2 + 1].get_position()
+        fig.text((left.x0 + right.x1) / 2, 0.95, model_label,
+                 ha="center", va="bottom", fontsize=15, weight="bold")
+
+    for r, (row_label, _) in enumerate(DATASETS):
+        bbox = axes[r, 0].get_position()
+        fig.text(0.025, (bbox.y0 + bbox.y1) / 2, row_label,
+                 ha="center", va="center", rotation=90, fontsize=14, weight="bold")
+
+    save_path = out / "model_data.png"
+    fig.savefig(save_path, bbox_inches="tight")
+    plt.close(fig)
+    return save_path
+
+
+def write_calib_optimal(store, out):
+    setup_style()
+    fig, axes = plt.subplots(4, 3, figsize=(14, 13))
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.93, bottom=0.05,
+                        wspace=0.30, hspace=0.45)
+    legend_drawn = False
+
+    for r, (_, row_key) in enumerate(DATASETS):
+        for mi, (_, model_key) in enumerate(DATA_MODELS):
+            cal_csv = store / f"{model_key}_{row_key}" / "calibration_judged.csv"
+            ax = axes[r, mi]
+            status = status_for(cal_csv, model_key, row_key, CALIB_COLS)
+            if status is None:
+                draw_calibration(ax, cal_csv, legend=not legend_drawn)
+                legend_drawn = True
+            else:
+                draw_status_box(ax, status)
+
+    fig.canvas.draw()
+    for mi, (model_label, _) in enumerate(DATA_MODELS):
+        bbox = axes[0, mi].get_position()
+        fig.text((bbox.x0 + bbox.x1) / 2, 0.95, model_label,
+                 ha="center", va="bottom", fontsize=15, weight="bold")
+
+    for r, (row_label, _) in enumerate(DATASETS):
+        bbox = axes[r, 0].get_position()
+        fig.text(0.02, (bbox.y0 + bbox.y1) / 2, row_label,
+                 ha="center", va="center", rotation=90, fontsize=14, weight="bold")
+
+    save_path = out / "calib_optimal.png"
+    fig.savefig(save_path, bbox_inches="tight")
+    plt.close(fig)
+    return save_path
 
 
 def optimal_cell(df):
@@ -60,11 +306,11 @@ def optimal_cell(df):
     return d, layers, scale
 
 
-def collect_points(store):
+def collect_score_points(store):
     rows = []
-    for spec in RUNS:
+    for spec in SCORE_RUNS:
         csv = store / spec["run"] / "calibration_judged.csv"
-        if not csv.exists():
+        if status_for(csv, spec["run"], "inhouse", CALIB_COLS) is not None:
             continue
         df = pd.read_csv(csv)
         cell, layers, scale = optimal_cell(df)
@@ -89,24 +335,19 @@ def add_fit(ax, x, y, color):
     ax.plot(xx, m * xx + b, color=color, linestyle="--", linewidth=1)
 
 
-def plot_model_size_scores(points, save_path):
+def write_score_size(store, out):
+    points = collect_score_points(store)
+    points.to_csv(out / "score_size_summary.csv", index=False)
+
     setup_style()
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), sharey=True)
-    for ax, (col, title, color) in zip(axes, PANEL):
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8))
+    for ax, (col, ylabel, color) in zip(axes, SCORE_PANELS):
         data = points.dropna(subset=[col])
         ax.scatter(data["size_b"], data[col], s=42, color=color, alpha=0.9)
         add_fit(ax, data["size_b"], data[col], color)
-        for row in data.itertuples(index=False):
-            offset = LABEL_OFFSETS.get(col, {}).get(row.run, (3, 3))
-            ax.annotate(
-                row.label,
-                (row.size_b, getattr(row, col)),
-                xytext=offset,
-                textcoords="offset points",
-                fontsize=7,
-            )
-        ax.set_title(title, fontsize=18)
+        ax.set_title("inhouse", fontsize=18)
         ax.set_xlabel("Model size (B)", fontsize=14)
+        ax.set_ylabel(ylabel, fontsize=14)
         ax.set_xlim(0, max(15, points["size_b"].max() + 1))
         ax.set_xticks([0, 5, 10, 15])
         ax.set_ylim(-0.05, 1.05)
@@ -114,27 +355,36 @@ def plot_model_size_scores(points, save_path):
         ax.set_box_aspect(1)
         ax.tick_params(labelsize=12)
         sns.despine(ax=ax, trim=True, offset=10)
-    axes[0].set_ylabel("Judge score / refusal rate", fontsize=14)
-    fig.subplots_adjust(left=0.08, right=0.99, bottom=0.22, top=0.85, wspace=0.32)
+
+    fig.subplots_adjust(left=0.07, right=0.99, bottom=0.22, top=0.85, wspace=0.45)
+    save_path = out / "score_size.png"
     fig.savefig(save_path, bbox_inches="tight")
-    return fig
+    plt.close(fig)
+    return save_path
 
 
 def main():
     parser = argparse.ArgumentParser(description="render summary figures across result stores")
-    parser.add_argument("--store", default="store", type=Path)
-    parser.add_argument("--out", default=Path("plot/figures"), type=Path)
+    parser.add_argument("--store", default=STORE, type=Path)
+    parser.add_argument("--out", default=OUT, type=Path)
+    parser.add_argument(
+        "--figure",
+        choices=("all", "model_data", "calib_optimal", "score_size"),
+        default="all",
+    )
     args = parser.parse_args()
 
     args.out.mkdir(parents=True, exist_ok=True)
-    points = collect_points(args.store)
-    csv_path = args.out / "model_size_summary.csv"
-    fig_path = args.out / "model_size_scores.png"
-    points.to_csv(csv_path, index=False)
-    plot_model_size_scores(points, fig_path)
-    plt.close()
-    print(csv_path)
-    print(fig_path)
+    written = []
+    if args.figure in ("all", "model_data"):
+        written.append(write_model_data(args.store, args.out))
+    if args.figure in ("all", "calib_optimal"):
+        written.append(write_calib_optimal(args.store, args.out))
+    if args.figure in ("all", "score_size"):
+        written.append(write_score_size(args.store, args.out))
+
+    for path in written:
+        print(path)
 
 
 if __name__ == "__main__":
