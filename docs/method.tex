@@ -1,0 +1,179 @@
+\section{Methods}
+
+\subsection{Problem setup}
+
+We study concept-targeted refusal in instruction-tuned language models. Let
+$\mathcal{C}$ denote a set of concepts. Each example consists of a concept
+label $c \in \mathcal{C}$, a question $x$, and a reference answer $y$.
+
+For a target concept $c^\ast$, the goal is selective refusal. Questions about
+$c^\ast$ should elicit a refusal, while questions about other concepts should
+preserve the model's baseline behavior. We define the baseline response as the
+model's greedy response to the question without intervention. We count a
+response as a refusal when it explicitly declines to answer or states lack of
+knowledge.
+
+\subsection{Datasets}
+
+We evaluate the method on four concept-labeled datasets: Inhouse, MMLU, RWKU,
+and ConceptVectors. The Inhouse dataset contains ten hand-selected concepts
+spanning animals, places, people, physical objects, and abstract topics. MMLU,
+RWKU, and ConceptVectors provide additional concept-labeled questions with
+broader subject coverage.
+
+Each dataset is split into train and test sets. Train examples are used to
+construct concept detectors and refusal directions. Held-out examples are used
+for calibration and evaluation. Calibration examples are sampled by concept with
+a fixed random seed.
+
+\subsection{Baseline and refusal contexts}
+
+For each training question, we construct matched baseline and refusal contexts.
+In the baseline context, the model is prompted to answer truthfully and produces
+a greedy response. In the refusal context, the same question is paired with a
+concept-specific instruction to withhold knowledge of the labeled concept and a
+fixed assistant response, ``I don't know.''
+
+These matched contexts are used to estimate directions in activation space. The
+generated responses used for calibration and evaluation are free-form model
+outputs.
+
+\subsection{Activation extraction}
+
+For each baseline and refusal context, we collect residual-stream activations at
+every transformer layer. Activations are restricted to assistant answer tokens
+and mean-pooled across those tokens, giving one activation vector per example
+and layer. Let $h_i^{(\ell,+)}$ denote the pooled baseline activation for
+example $i$ at layer $\ell$, and let $h_i^{(\ell,-)}$ denote the corresponding
+pooled refusal activation.
+
+\subsection{Concept detection vectors}
+
+For each concept $c$ and layer $\ell$, we estimate a detector from baseline
+activations. Examples labeled with concept $c$ form the positive class, and
+examples labeled with all other concepts form the negative class.
+
+We use ridge-regularized linear discriminant analysis to obtain a concept
+direction. Let $\mu_c^{(\ell)}$ be the mean activation for concept $c$, and let
+$\mu_{\neg c}^{(\ell)}$ be the mean activation for all other concepts. The
+detector direction is
+
+\begin{equation}
+    d_c^{(\ell)}
+    =
+    \frac{w_c^{(\ell)}}{\|w_c^{(\ell)}\|},
+    \qquad
+    \left(\Sigma_W^{(\ell)} + \lambda I\right) w_c^{(\ell)}
+    =
+    \mu_c^{(\ell)} - \mu_{\neg c}^{(\ell)} ,
+\end{equation}
+
+where $\Sigma_W^{(\ell)}$ is the sum of the within-class covariance estimates.
+The detection threshold is the midpoint between the projected class centroids,
+
+\begin{equation}
+    \tau_c^{(\ell)}
+    =
+    \frac{1}{2}
+    \left(
+    \langle d_c^{(\ell)}, \mu_c^{(\ell)} \rangle
+    +
+    \langle d_c^{(\ell)}, \mu_{\neg c}^{(\ell)} \rangle
+    \right).
+\end{equation}
+
+\subsection{Refusal direction}
+
+The refusal direction is estimated from the difference between refusal and
+baseline activations. For each concept $c$, we compute the mean difference at
+layer $\ell$,
+
+\begin{equation}
+    \Delta_c^{(\ell)}
+    =
+    \mathbb{E}_{i \in c}
+    \left[
+    h_i^{(\ell,-)} - h_i^{(\ell,+)}
+    \right].
+\end{equation}
+
+Each concept-level difference is normalized, and the final refusal direction is
+the normalized average across concepts,
+
+\begin{equation}
+    r^{(\ell)}
+    =
+    \frac{
+    \sum_{c \in \mathcal{C}}
+    \Delta_c^{(\ell)} / \|\Delta_c^{(\ell)}\|
+    }{
+    \left\|
+    \sum_{c \in \mathcal{C}}
+    \Delta_c^{(\ell)} / \|\Delta_c^{(\ell)}\|
+    \right\|
+    }.
+\end{equation}
+
+This produces one shared refusal direction per layer.
+
+\subsection{Gated intervention}
+
+At inference time, the intervention is conditioned on the detector for the
+target concept. For target concept $c^\ast$, layer $\ell$, and scale $\alpha$,
+the hidden state is updated as
+
+\begin{equation}
+    h^{(\ell)}
+    \leftarrow
+    h^{(\ell)}
+    +
+    \mathbf{1}
+    \left[
+    \langle h^{(\ell)}, d_{c^\ast}^{(\ell)} \rangle
+    >
+    \tau_{c^\ast}^{(\ell)}
+    \right]
+    \alpha r^{(\ell)} .
+\end{equation}
+
+The refusal direction is added only when the detector for the target concept
+crosses its threshold. During prompt prefill, the intervention is masked to the
+assistant portion of the sequence. During autoregressive decoding, it is applied
+at each generated-token step.
+
+\subsection{Calibration}
+
+The intervention layer and scale are selected by calibration on held-out
+examples. For each candidate layer and scale, the model generates responses to
+concept-matched calibration questions. Responses are scored for refusal,
+retention, and fluency.
+
+The selected configuration maximizes the mean harmonic score of refusal and
+fluency,
+
+\begin{equation}
+    H
+    =
+    \frac{
+    2 R F
+    }{
+    R + F + \epsilon
+    },
+\end{equation}
+
+where $R$ is the refusal score, $F$ is the fluency score, and $\epsilon$ is a
+small constant for numerical stability. Retention is reported in evaluation but
+is not used in the selection rule.
+
+\subsection{Evaluation}
+
+Final evaluations are run at the calibrated layer and scale. We report three
+judge-scored metrics. Refusal measures whether the response explicitly refuses
+or states lack of knowledge. Retention measures whether the response preserves
+the content of the model's baseline answer. Fluency measures whether the
+response is readable and non-degenerate.
+
+Scores are assigned by an instruction-tuned judge model using binary rubrics for
+each metric. For concept-targeted evaluation, we compare responses when the
+target concept matches the input concept and when it does not. This separates
+on-target refusal from off-target changes in behavior.
