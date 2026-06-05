@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage[final]{neurips_2025}
+\usepackage{longtable}
 \usepackage{macros}
 
 \begin{document}
@@ -18,7 +19,7 @@ before evaluation.
 
 \subsection{Problem setup}
 
-Let $\mathcal{C}$ be a set of concepts. Each example contains a concept label $c \in \mathcal{C}$, a question, and a reference answer. For a selected targetconcept $c^\ast$, questions about $c^\ast$ should elicit a refusal, while questions about other concepts should preserve the model's baseline behavior.
+Let $\mathcal{C}$ be a set of concepts. Each example contains a concept label $c \in \mathcal{C}$, a question, and a reference answer. For a selected target concept $c^\ast$, questions about $c^\ast$ should elicit a refusal, while questions about other concepts should preserve the model's baseline behavior.
 
 We define the baseline response as the model's greedy response without
 intervention under the baseline system prompt. Retention means that an intervened response preserves the content of this baseline response. A refusal is a response that explicitly declines to
@@ -42,7 +43,7 @@ For each training question, we construct a matched pair of answer contexts. The
 baseline context contains the original question and the model's baseline
 response. The refusal context contains the same question, a concept-specific
 instruction to withhold knowledge of the labeled concept, and the assistant
-answer ``I don't know.'' Concrete example in Appendix \ref{rubrics}
+answer ``I don't know.'' Concrete example in Appendix \ref{contrast}.
 
 \subsection{Activation extraction}
 
@@ -153,7 +154,7 @@ explicitly refuses or states lack of knowledge, independent of factual
 correctness. Retention measures whether the response preserves the content of
 the model's baseline response. Fluency measures whether the response is readable
 and non-degenerate. Scores are assigned by the instruction-tuned judge model
-AtlaAI/Selene-1-Mini-Llama-3.1-8B using binary rubrics for each metric. Exact rubric is available in Appendix \ref{rubrics}
+AtlaAI/Selene-1-Mini-Llama-3.1-8B using binary rubrics for each metric. Exact rubric is available in Appendix \ref{rubrics}.
 
 
 \subsection{Calibration}
@@ -230,5 +231,471 @@ The fluency rubric is:
 Score 1: Total garbage---gibberish, random tokens, or degenerate character-level/token-level repetition that is not human-readable.\\
 Score 2: Anything readable, including prose, code (even broken/incomplete), short answers, refusals, or off-topic text.
 \end{quote}
+
+\section{Reproducibility Details}
+
+\subsection{Models and checkpoints}
+
+The main cross-dataset experiments use three instruction-tuned models:
+Llama-3.1-8B-Instruct, Mistral-7B-Instruct-v0.3, and
+Qwen2.5-7B-Instruct. Additional in-house calibration sweeps cover smaller and
+larger checkpoints from the same families, plus Phi-4 models. The judge is run
+as a separate local model. The experiment configuration records Hugging Face
+checkpoint identifiers; it does not pin Hugging Face snapshot hashes.
+
+All target-model generations use greedy decoding with 64 new-token maximum
+length. Sampling is disabled. The judge model uses the same local batched
+generation path with the binary rubrics in Appendix \ref{rubrics}.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llll}
+\hline
+Model & Checkpoint & Context & Notes \\
+\hline
+Llama 3.1 8B & \texttt{meta-llama/Llama-3.1-8B-Instruct} & 131{,}072 & Main cross-dataset model \\
+Llama 3.2 1B & \texttt{meta-llama/Llama-3.2-1B-Instruct} & 131{,}072 & In-house calibration \\
+Llama 3.2 3B & \texttt{meta-llama/Llama-3.2-3B-Instruct} & 131{,}072 & In-house calibration \\
+Mistral 7B & \texttt{mistralai/Mistral-7B-Instruct-v0.3} & 32{,}768 & Main cross-dataset model \\
+Mistral Small 24B & \texttt{mistralai/Mistral-Small-24B-Instruct-2501} & 32{,}768 & Registered, not run on current hardware \\
+Qwen2.5 0.5B & \texttt{Qwen/Qwen2.5-0.5B-Instruct} & 32{,}768 & In-house calibration \\
+Qwen2.5 3B & \texttt{Qwen/Qwen2.5-3B-Instruct} & 32{,}768 & In-house calibration \\
+Qwen2.5 7B & \texttt{Qwen/Qwen2.5-7B-Instruct} & 32{,}768 & Main cross-dataset model \\
+Qwen2.5 14B & \texttt{Qwen/Qwen2.5-14B-Instruct} & 32{,}768 & In-house calibration \\
+Phi-4-mini & \texttt{microsoft/Phi-4-mini-instruct} & 131{,}072 & In-house calibration \\
+Phi-4 & \texttt{microsoft/phi-4} & 16{,}384 & In-house calibration \\
+Judge & \texttt{AtlaAI/Selene-1-Mini-Llama-3.1-8B} & 131{,}072 & Refusal, retention, and fluency scoring \\
+\hline
+\end{tabular}
+\caption{Model checkpoints and context lengths used in the experiments. Context lengths are read from the model configuration files.}
+\label{tab:appendix-models}
+\end{table}
+
+\subsection{Datasets}
+
+Each dataset contains a concept label, a question, and a reference answer. The
+in-house dataset contains ten controlled concepts. MMLU, RWKU, and
+ConceptVectors use their dataset-provided concept labels. Calibration uses 10
+held-out questions per concept.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllll}
+\hline
+Dataset & Concepts & Train examples & Test examples & Test examples per concept \\
+\hline
+In-house & 10 & 4{,}752 & 1{,}188 & 99--137 \\
+MMLU & 10 & 928 & 232 & 23--24 \\
+RWKU & 200 & 57{,}459 & 12{,}455 & 34--80 \\
+ConceptVectors & 91 & 7{,}644 & 1{,}911 & 21 \\
+\hline
+\end{tabular}
+\caption{Dataset sizes after the train/test split used by the framework.}
+\label{tab:appendix-datasets}
+\end{table}
+
+\subsection{Concept inventory}
+
+Table~\ref{tab:appendix-concepts} lists every concept used in the four
+datasets. Sample counts include both train and test examples.
+
+{\small
+\begin{longtable}{p{0.18\textwidth}p{0.62\textwidth}r}
+\caption{Concept inventory by dataset.}
+\label{tab:appendix-concepts}\\
+\hline
+Dataset & Concept & Samples \\
+\hline
+\endfirsthead
+\hline
+Dataset & Concept & Samples \\
+\hline
+\endhead
+\hline
+\endfoot
+\multicolumn{3}{l}{\textbf{In-house}} \\
+ & bacteria & 594 \\
+ & cats & 594 \\
+ & chess & 594 \\
+ & dogs & 594 \\
+ & lasers & 594 \\
+ & obama & 594 \\
+ & paris & 594 \\
+ & people & 594 \\
+ & the\_moon & 594 \\
+ & united\_states & 594 \\
+\multicolumn{3}{l}{\textbf{MMLU}} \\
+ & abstract\_algebra & 116 \\
+ & anatomy & 116 \\
+ & astronomy & 116 \\
+ & computer\_security & 116 \\
+ & electrical\_engineering & 116 \\
+ & high\_school\_geography & 116 \\
+ & international\_law & 116 \\
+ & marketing & 116 \\
+ & prehistory & 116 \\
+ & world\_religions & 116 \\
+\multicolumn{3}{l}{\textbf{RWKU}} \\
+ & 50 Cent & 308 \\
+ & Alanis Morissette & 338 \\
+ & Alec Baldwin & 364 \\
+ & Alexander Hamilton & 367 \\
+ & Anderson Cooper & 367 \\
+ & Angela Lansbury & 363 \\
+ & Anna Nicole Smith & 352 \\
+ & Ariana Grande & 327 \\
+ & Aristotle & 358 \\
+ & Barbara Walters & 349 \\
+ & Betty White & 343 \\
+ & Beyonc\'e & 376 \\
+ & Bill Murray & 364 \\
+ & Bill Paxton & 357 \\
+ & Blake Lively & 296 \\
+ & Bob Barker & 335 \\
+ & Bob Saget & 372 \\
+ & Bobby Brown & 351 \\
+ & Bradley Cooper & 361 \\
+ & Brendan Fraser & 360 \\
+ & Brett Favre & 340 \\
+ & Brooke Shields & 345 \\
+ & Bruce Lee & 367 \\
+ & Bruce Springsteen & 366 \\
+ & Catherine, Princess of Wales & 291 \\
+ & Charlie Sheen & 369 \\
+ & Chevy Chase & 338 \\
+ & Chris Brown & 354 \\
+ & Christina Aguilera & 312 \\
+ & Christopher Lloyd & 352 \\
+ & Chuck Norris & 291 \\
+ & Cindy Crawford & 352 \\
+ & Confucius & 342 \\
+ & Courtney Love & 363 \\
+ & Dakota Fanning & 342 \\
+ & Daniel Day-Lewis & 301 \\
+ & Danny Trejo & 319 \\
+ & David Crosby & 351 \\
+ & Demi Moore & 338 \\
+ & Denise Richards & 345 \\
+ & Dennis Quaid & 359 \\
+ & Dionne Warwick & 343 \\
+ & Don Johnson & 362 \\
+ & Donald Sutherland & 335 \\
+ & Donald Trump & 369 \\
+ & Dr. Dre & 361 \\
+ & Drew Barrymore & 357 \\
+ & Dwayne Johnson & 362 \\
+ & Eddie Murphy & 351 \\
+ & Elizabeth Hurley & 327 \\
+ & Elon Musk & 374 \\
+ & Emilio Estevez & 356 \\
+ & Evel Knievel & 366 \\
+ & Faith Hill & 249 \\
+ & Franklin D. Roosevelt & 364 \\
+ & Genghis Khan & 355 \\
+ & Grace Kelly & 333 \\
+ & Halle Berry & 366 \\
+ & Harrison Ford & 340 \\
+ & Henry Kissinger & 370 \\
+ & Henry Winkler & 359 \\
+ & Hilary Duff & 369 \\
+ & Hugh Grant & 339 \\
+ & Hugh Laurie & 363 \\
+ & Hulk Hogan & 370 \\
+ & Ice Cube & 376 \\
+ & J. K. Rowling & 369 \\
+ & Jackie Chan & 356 \\
+ & James Earl Jones & 361 \\
+ & Jamie Foxx & 367 \\
+ & Jason Bateman & 352 \\
+ & Jason Momoa & 365 \\
+ & Jay-Z & 369 \\
+ & Jeff Bridges & 369 \\
+ & Jeff Goldblum & 368 \\
+ & Jennifer Lopez & 347 \\
+ & Jenny McCarthy & 332 \\
+ & Jill Biden & 299 \\
+ & Jim Carrey & 344 \\
+ & Jim Morrison & 338 \\
+ & Jim Parsons & 371 \\
+ & Jimmy Carter & 368 \\
+ & Joe Rogan & 364 \\
+ & John Candy & 345 \\
+ & John Cena & 369 \\
+ & John D. Rockefeller & 357 \\
+ & John Goodman & 350 \\
+ & John Lennon & 356 \\
+ & John Ritter & 361 \\
+ & John Travolta & 363 \\
+ & Johnny Cash & 370 \\
+ & Jon Voight & 371 \\
+ & Josh Brolin & 358 \\
+ & Jude Law & 334 \\
+ & Judy Garland & 375 \\
+ & Julia Louis-Dreyfus & 366 \\
+ & Justin Bieber & 299 \\
+ & Justin Timberlake & 292 \\
+ & Kanye West & 370 \\
+ & Karl Marx & 376 \\
+ & Keanu Reeves & 362 \\
+ & Kelsey Grammer & 310 \\
+ & Kiefer Sutherland & 366 \\
+ & Kim Basinger & 351 \\
+ & Kim Kardashian & 373 \\
+ & Kris Jenner & 360 \\
+ & Kylie Jenner & 351 \\
+ & Larry Bird & 353 \\
+ & LeBron James & 365 \\
+ & Lenny Kravitz & 357 \\
+ & Leonardo da Vinci & 369 \\
+ & Liam Hemsworth & 262 \\
+ & Liam Neeson & 359 \\
+ & Lil Wayne & 228 \\
+ & Linda Hamilton & 367 \\
+ & Lindsay Lohan & 364 \\
+ & Lisa Marie Presley & 280 \\
+ & Liv Tyler & 339 \\
+ & Liza Minnelli & 356 \\
+ & Luke Perry & 356 \\
+ & Macaulay Culkin & 353 \\
+ & Marc Anthony & 330 \\
+ & Mariah Carey & 367 \\
+ & Marie Antoinette & 357 \\
+ & Marie Osmond & 340 \\
+ & Mark Cuban & 314 \\
+ & Mark Hamill & 340 \\
+ & Mark Harmon & 348 \\
+ & Marlon Brando & 367 \\
+ & Martin Short & 363 \\
+ & Matthew Perry & 346 \\
+ & Meg Ryan & 359 \\
+ & Meghan, Duchess of Sussex & 352 \\
+ & Melanie Griffith & 333 \\
+ & Mia Farrow & 368 \\
+ & Michael B. Jordan & 373 \\
+ & Michael J. Fox & 374 \\
+ & Michael Strahan & 338 \\
+ & Michelle Pfeiffer & 352 \\
+ & Mila Kunis & 363 \\
+ & Miley Cyrus & 370 \\
+ & Nicolas Cage & 371 \\
+ & Olivia Wilde & 359 \\
+ & Orlando Bloom & 360 \\
+ & Pamela Anderson & 365 \\
+ & Paris Hilton & 345 \\
+ & Patricia Arquette & 350 \\
+ & Patrick Stewart & 349 \\
+ & Patrick Swayze & 369 \\
+ & Paul Simon & 348 \\
+ & Paul Walker & 363 \\
+ & Prince Harry, Duke of Sussex & 329 \\
+ & Quentin Tarantino & 377 \\
+ & R. Kelly & 337 \\
+ & Raquel Welch & 352 \\
+ & Ray Liotta & 354 \\
+ & Reba McEntire & 347 \\
+ & Rebel Wilson & 360 \\
+ & Rhea Perlman & 320 \\
+ & Richard Gere & 352 \\
+ & Rihanna & 348 \\
+ & Rob Lowe & 357 \\
+ & Rob Schneider & 348 \\
+ & Robert Downey Jr. & 370 \\
+ & RuPaul & 352 \\
+ & Ryan Seacrest & 331 \\
+ & Sam Elliott & 338 \\
+ & Samuel L. Jackson & 370 \\
+ & Sarah Michelle Gellar & 355 \\
+ & Selena Gomez & 336 \\
+ & Serena Williams & 290 \\
+ & Sigourney Weaver & 365 \\
+ & Simon Cowell & 369 \\
+ & Socrates & 370 \\
+ & Sof\'ia Vergara & 345 \\
+ & Stephen King & 346 \\
+ & Steve McQueen & 349 \\
+ & Steven Seagal & 359 \\
+ & Sylvester Stallone & 368 \\
+ & Taylor Swift & 364 \\
+ & Ted Danson & 362 \\
+ & Thomas Jefferson & 375 \\
+ & Tim Burton & 372 \\
+ & Tom Clancy & 365 \\
+ & Tom Selleck & 356 \\
+ & Tony Blair & 368 \\
+ & Tony Curtis & 368 \\
+ & Travis Kelce & 160 \\
+ & Tyler Perry & 353 \\
+ & Ulysses S. Grant & 344 \\
+ & Val Kilmer & 371 \\
+ & Vanna White & 319 \\
+ & Venus Williams & 322 \\
+ & Vin Diesel & 317 \\
+ & Vincent van Gogh & 366 \\
+ & Warren Buffett & 371 \\
+ & Whitney Houston & 361 \\
+ & William Shatner & 355 \\
+ & Winona Ryder & 371 \\
+ & Yoko Ono & 354 \\
+\multicolumn{3}{l}{\textbf{ConceptVectors}} \\
+ & Amazon Alexa & 105 \\
+ & Amazon Kindle & 105 \\
+ & Amazon Prime & 105 \\
+ & American Civil War & 105 \\
+ & American football & 105 \\
+ & Ancient Rome & 105 \\
+ & Array (data structure) & 105 \\
+ & Artificial intelligence & 105 \\
+ & Astrological sign & 105 \\
+ & Austria & 105 \\
+ & Baseball & 105 \\
+ & Bayesian inference & 105 \\
+ & Bible & 105 \\
+ & Blockchain & 105 \\
+ & CT scan & 105 \\
+ & Cannabis & 105 \\
+ & Cantonese & 105 \\
+ & Catholic Church & 105 \\
+ & Chinese characters & 105 \\
+ & Civil rights movement & 105 \\
+ & Columbine High School massacre & 105 \\
+ & Communism & 105 \\
+ & Cowboy & 105 \\
+ & Cricket & 105 \\
+ & Culture of Africa & 105 \\
+ & Culture of Greece & 105 \\
+ & Culture of Italy & 105 \\
+ & Culture of Latin America & 105 \\
+ & Diabetes & 105 \\
+ & Disney Princess & 105 \\
+ & Egypt & 105 \\
+ & England & 105 \\
+ & Euro & 105 \\
+ & Figure skating & 105 \\
+ & Formula One & 105 \\
+ & Freemasonry & 105 \\
+ & Genetic engineering & 105 \\
+ & Germany & 105 \\
+ & Golf & 105 \\
+ & Greece & 105 \\
+ & HTTP cookie & 105 \\
+ & Halloween & 105 \\
+ & Harry Potter & 105 \\
+ & Heroin & 105 \\
+ & History of the Netherlands & 105 \\
+ & India & 105 \\
+ & International Red Cross and Red Crescent Movement & 105 \\
+ & Islam & 105 \\
+ & Islamic State & 105 \\
+ & Italy & 105 \\
+ & Jesus & 105 \\
+ & Jewish culture & 105 \\
+ & Jules Verne & 105 \\
+ & Julius Caesar & 105 \\
+ & Korea & 105 \\
+ & London & 105 \\
+ & Los Angeles & 105 \\
+ & Mafia & 105 \\
+ & Martial arts & 105 \\
+ & Marvel Comics & 105 \\
+ & McDonald's & 105 \\
+ & National Basketball Association & 105 \\
+ & National Health Service & 105 \\
+ & Native Americans in the United States & 105 \\
+ & Nazism & 105 \\
+ & Netflix & 105 \\
+ & Netherlands & 105 \\
+ & New Zealand & 105 \\
+ & Nuclear weapon & 105 \\
+ & Olympic Games & 105 \\
+ & Opioid & 105 \\
+ & Pennsylvania & 105 \\
+ & Poland & 105 \\
+ & Pornography & 105 \\
+ & Republic of Ireland & 105 \\
+ & Republican Party (United States) & 105 \\
+ & Satan & 105 \\
+ & Shell plc & 105 \\
+ & Sherlock Holmes & 105 \\
+ & Silicon Valley & 105 \\
+ & Star Wars & 105 \\
+ & Super Mario & 105 \\
+ & Tactical role-playing game & 105 \\
+ & TensorFlow & 105 \\
+ & The Lord of the Rings & 105 \\
+ & United Kingdom & 105 \\
+ & Valentine's Day & 105 \\
+ & Victoria's Secret & 105 \\
+ & Wikipedia & 105 \\
+ & William Shakespeare & 105 \\
+ & World War II & 105 \\
+\end{longtable}
+}
+
+\subsection{Steering configuration}
+
+All reported runs use the LDA concept detector described in the Methods. The
+current in-house calibration sweeps evaluate every transformer layer. Llama and
+Mistral in-house sweeps use 15 scales from 1 to 15. Qwen and Phi-4-mini
+in-house sweeps use 15 scales from 6.67 to 100. Target-model batch size is 16
+for the 0.5B, 1B, 3B, and Phi-4-mini runs, and 8 for larger target models. The
+judge batch size is 16.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llll}
+\hline
+Run & Selected layer & Selected scale $\alpha$ & Sweep \\
+\hline
+Llama 3.1 8B in-house & 16 & 13.00 & 32 layers, 1--15 \\
+Llama 3.2 1B in-house & 9 & 10.00 & 16 layers, 1--15 \\
+Llama 3.2 3B in-house & 14 & 15.00 & 28 layers, 1--15 \\
+Mistral 7B in-house & 14 & 7.00 & 32 layers, 1--15 \\
+Qwen2.5 0.5B in-house & 8 & 26.67 & 24 layers, 6.67--100 \\
+Qwen2.5 3B in-house & 17 & 93.33 & 36 layers, 6.67--100 \\
+Qwen2.5 7B in-house & 14 & 93.33 & 28 layers, 6.67--100 \\
+Qwen2.5 14B in-house & 0 & 80.00 & 48 layers, 6.67--100 \\
+Phi-4-mini in-house & 0 & 46.67 & 32 layers, 6.67--100 \\
+Phi-4 in-house & 2 & 9.00 & 40 layers, 1--15 \\
+\hline
+\end{tabular}
+\caption{Selected in-house calibration settings. Layer indices are zero-based.}
+\label{tab:appendix-inhouse-calibration}
+\end{table}
+
+The cross-dataset evaluations use the same calibration rule. For each
+model-dataset run, the selected layer and scale are read from the corresponding
+\texttt{calibration\_judged.csv} artifact.
+
+\subsection{Evaluation protocol}
+
+Refusal, retention, and fluency are scored by the local judge model with the
+rubrics in Appendix \ref{rubrics}. Judge score 1 is mapped to 0 and judge score
+2 is mapped to 1. Refusal rates, retention rates, and fluency rates are means
+of these binary scores. Retention is scored against the model's baseline
+response for the same prompt.
+
+Each prompt is generated once with deterministic decoding. Targeted evaluations
+match the steering target to the input concept. Untargeted evaluations use a
+different steering target and measure whether the baseline response is
+preserved. Heatmaps report means for concept-target cells. Grouped bar plots
+report means, with 95\% confidence intervals computed over the plotted
+examples.
+
+\subsection{Compute and runtime}
+
+Experiments were run locally on two NVIDIA GeForce RTX 5090 GPUs with 32 GB of
+memory per GPU. The current loader places one full model copy on each selected
+GPU; it does not shard a single model across GPUs. For this reason, Mistral
+Small 24B is present in the model configuration but was not run in the current
+calibration matrix.
+
+Full in-house all-layer calibration runs took roughly 2.4--5.9 hours per model
+in the recorded pipeline logs, depending on model size and cache state. Exact
+wall times are stored in each run's \texttt{pipeline.log}. Target generations,
+judge scoring, and similarity analyses were all run locally; no external API
+was used for inference or judging.
 
 \end{document}
