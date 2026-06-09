@@ -7,6 +7,9 @@
 - No extra print statements in notebook cells. Keep cells clean.
 - Use code comments for step explanations, not markdown cells.
 - Don't do tests with github actions or CI/CD pipelines.
+- Treat `store/` as protected result data. Do not delete, overwrite, regenerate, move, or clean up artifacts in `store/` unless explicitly asked for that exact artifact action.
+- Use `debug/` or another non-result location for experiments, diagnostics, temporary outputs, and scratch artifacts.
+- If a task might modify existing result artifacts, state the risk first and wait for confirmation before proceeding.
 
 Manuscript writing:
 - Use clear, restrained, Nature-style prose.
