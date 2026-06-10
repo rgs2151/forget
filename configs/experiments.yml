@@ -34,10 +34,10 @@ models:
   mistral_small24b: { path: mistralai/Mistral-Small-24B-Instruct-2501,    layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
   qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
   qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
+  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
   qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
   phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
+  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
 
 # calibration_n = samples per concept (stratified); `all` uses every question per concept.
 datasets:

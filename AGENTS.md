@@ -10,6 +10,10 @@
 - Treat `store/` as protected result data. Do not delete, overwrite, regenerate, move, or clean up artifacts in `store/` unless explicitly asked for that exact artifact action.
 - Use `debug/` or another non-result location for experiments, diagnostics, temporary outputs, and scratch artifacts.
 - If a task might modify existing result artifacts, state the risk first and wait for confirmation before proceeding.
+- Preserve the full explicit experiment matrix in `configs/experiments.yml`. Do not collapse, delete, or hide old/planned run rows; keep completed and skipped runs visible as commented entries.
+- Keep config defaults explicit. Do not rely on implicit defaults when the config is meant to document an experiment.
+- For Qwen and Phi model entries, use `scale_window: large` unless the user explicitly asks for a different sweep. Llama and Mistral can stay on their existing configured sweep unless instructed otherwise.
+- When adding result variants, put experiment outputs under `results/<variant>/` and keep shared baselines, activations, vectors, and thresholds at the run root.
 
 Manuscript writing:
 - Use clear, restrained, Nature-style prose.
