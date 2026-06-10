@@ -27,3 +27,9 @@
 === [2026-06-03 21:42:40] END qwen14b_inhouse (exit=0) ===
 === [2026-06-03 21:42:40] START phi4mini_inhouse ===
 === [2026-06-04 01:51:39] END phi4mini_inhouse (exit=0) ===
+=== [2026-06-10 10:56:20] START qwen05b_inhouse_logit_judge ===
+=== [2026-06-10 11:49:03] END qwen05b_inhouse_logit_judge (exit=0) ===
+=== [2026-06-10 18:07:11] START qwen05b_inhouse_prefill_logit ===
+=== [2026-06-10 19:07:01] END qwen05b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-10 19:08:11] START qwen05b_inhouse_prefill_logit ===
+=== [2026-06-10 19:11:29] END qwen05b_inhouse_prefill_logit (exit=0) ===

@@ -7,10 +7,13 @@ def build_prompts(df, system_prompt, template):
     return [template.render(system_prompt, row.question) for row in df.itertuples(index=False)]
 
 
-def run_eval(pool, jobs, steering, template, *, batch_size=128, result_metadata=None):
+def run_eval(pool, jobs, steering, template, *, batch_size=128, result_metadata=None,
+             intervention_start="assistant"):
+    generation = dict(DEFAULT_GENERATION)
+    generation["intervention_start"] = intervention_start
     return run_jobs(
         pool, jobs, steering,
-        generation_kwargs=DEFAULT_GENERATION,
+        generation_kwargs=generation,
         batch_size=batch_size,
         trim_fn=template.trim_to_last_assistant,
         result_metadata=result_metadata,

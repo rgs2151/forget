@@ -1,0 +1,24 @@
+method: lda
+gpus:
+- 0
+- 1
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_mode: logit
+judge_retries: 100
+train_frac: 1.0
+test_frac: 1.0
+result: logit_judge
+plot: true
+layers: all
+scales: 10
+scale_window: large
+batch_size: 16
+judge_batch_size: 16
+calibration_n: 10
+out: store/qwen05b_inhouse
+model: Qwen/Qwen2.5-0.5B-Instruct
+data: store/inhouse
+name: qwen05b_inhouse_logit_judge

@@ -130,14 +130,18 @@ class AutoModelForCausalLMWrapper():
         top_k: int = 50,
         do_sample: bool = True,
         temperature: float = 1.0,
+        intervention_start: str = "assistant",
     ) -> List[str]:
         """Batched generation with steering. Auto-detects per-sample from_positions.
         """
         batch = self.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
-        fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)
-        self.set_from_positions(fps)
+        if intervention_start == "assistant":
+            fps = find_instruction_end_positions_batch(input_ids, self.END_STR, attention_mask)
+            self.set_from_positions(fps)
+        elif intervention_start != "prefill":
+            raise ValueError(f"unknown intervention_start {intervention_start!r}")
         with t.no_grad():
             generated = self.model.generate(
                 inputs=input_ids,

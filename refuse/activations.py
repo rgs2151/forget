@@ -2,6 +2,13 @@ import torch as t
 from tqdm.auto import tqdm
 
 
+def clean_answer_text(tokenizer, text, assistant_end_marker):
+    cleaned = str(text)
+    for token in tokenizer.all_special_tokens:
+        cleaned = cleaned.replace(token, "")
+    return cleaned.replace(assistant_end_marker, "").strip()
+
+
 def build_answered_prompts(df, prompt_factory, answer_fn, question_col="question"):
     prompts = []
     answers = []
@@ -127,6 +134,7 @@ def cached_concept_activations(
     concept_col="concept",
     batch_size=64,
     show_progress=True,
+    answer_cleaner=None,
 ):
     if acts_path.exists():
         return t.load(acts_path)
@@ -137,6 +145,8 @@ def cached_concept_activations(
         prompts, answers = [], []
         for row in frame.itertuples(index=False):
             answer = answer_fn(row)
+            if answer_cleaner is not None:
+                answer = answer_cleaner(answer)
             prompts.append(prompt_fn(row, answer))
             answers.append(answer)
         concept_to_prompts_answers[concept] = (prompts, answers)

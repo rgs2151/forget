@@ -11,16 +11,24 @@ class Paths:
     root: Path
     data_root: Path
     result: str | None = None
+    artifact_cache: str | None = None
 
     def __post_init__(self):
         self.root.mkdir(parents=True, exist_ok=True)
         self.result_root.mkdir(parents=True, exist_ok=True)
+        self.artifact_root.mkdir(parents=True, exist_ok=True)
 
     @property
     def result_root(self):
         if self.result is None:
             return self.root
         return self.root / "results" / self.result
+
+    @property
+    def artifact_root(self):
+        if self.artifact_cache is None:
+            return self.root
+        return self.root / "artifacts" / self.artifact_cache
 
     @property
     def train(self): return self.data_root / "train.csv"
@@ -35,22 +43,22 @@ class Paths:
     def baseline_test(self): return self.root / "baseline_test.csv"
 
     @property
-    def baseline_acts(self): return self.root / "baseline_answer_acts.pt"
+    def baseline_acts(self): return self.artifact_root / "baseline_answer_acts.pt"
 
     @property
-    def refuse_acts(self): return self.root / "refuse_answer_acts.pt"
+    def refuse_acts(self): return self.artifact_root / "refuse_answer_acts.pt"
 
     @property
-    def baseline_test_acts(self): return self.root / "baseline_answer_acts_test.pt"
+    def baseline_test_acts(self): return self.artifact_root / "baseline_answer_acts_test.pt"
 
     @property
-    def v_detect(self): return self.root / "v_detect.pt"
+    def v_detect(self): return self.artifact_root / "v_detect.pt"
 
     @property
-    def v_refuse(self): return self.root / "v_refuse.pt"
+    def v_refuse(self): return self.artifact_root / "v_refuse.pt"
 
     @property
-    def thresholds(self): return self.root / "thresholds.pt"
+    def thresholds(self): return self.artifact_root / "thresholds.pt"
 
     @property
     def arguments_log(self): return self.result_root / "arguments.log"

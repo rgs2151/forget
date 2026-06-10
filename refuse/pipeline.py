@@ -11,7 +11,7 @@ from transformers import AutoConfig
 
 from llm import GPUPool, detect_template
 
-from .activations import cached_concept_activations
+from .activations import cached_concept_activations, clean_answer_text
 from .baseline import generate_baseline
 from .calibration import (
     build_grid,
@@ -118,6 +118,9 @@ def run(
     judge_batch_size=32,
     trust_remote_code=False,
     result_name=None,
+    artifact_cache=None,
+    clean_activation_answers=True,
+    intervention_start="assistant",
     config_snapshot=None,
 ):
     def log(msg):
@@ -140,7 +143,12 @@ def run(
     if judge_gpu_ids is None:
         judge_gpu_ids = gpu_ids
 
-    paths = Paths(root=Path(result_root), data_root=Path(data_root), result=result_name)
+    paths = Paths(
+        root=Path(result_root),
+        data_root=Path(data_root),
+        result=result_name,
+        artifact_cache=artifact_cache,
+    )
     log_file = open(paths.pipeline_log, "a", buffering=1)
     sys.stdout = _Tee(sys.stdout, log_file)
     sys.stderr = _Tee(sys.stderr, log_file)
@@ -163,6 +171,9 @@ def run(
         "batch_size": batch_size,
         "judge_batch_size": judge_batch_size,
         "trust_remote_code": trust_remote_code,
+        "artifact_cache": artifact_cache,
+        "clean_activation_answers": clean_activation_answers,
+        "intervention_start": intervention_start,
     }
     with open(paths.arguments_log, "a") as f:
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {argv}\n")
@@ -247,6 +258,14 @@ def run(
         baseline_test = generate_baseline(pool, df_test, paths.baseline_test, template, batch_size=batch_size)
 
         if need_acts:
+            answer_cleaner = None
+            if clean_activation_answers:
+                llm = next(iter(pool.llms.values()))
+                answer_cleaner = lambda text: clean_answer_text(
+                    llm.tokenizer,
+                    text,
+                    template.assistant_end_marker,
+                )
             log(f"[4a] baseline activations ({hit(paths.baseline_acts)})")
             baseline_acts = cached_concept_activations(
                 pool, baseline_train,
@@ -254,6 +273,7 @@ def run(
                 answer_fn=lambda row: row.baseline_output,
                 acts_path=paths.baseline_acts,
                 batch_size=batch_size,
+                answer_cleaner=answer_cleaner,
             )
             log(f"[4b] refuse activations ({hit(paths.refuse_acts)})")
             refuse_acts = cached_concept_activations(
@@ -262,6 +282,7 @@ def run(
                 answer_fn=lambda _row: template.idk_answer,
                 acts_path=paths.refuse_acts,
                 batch_size=batch_size,
+                answer_cleaner=answer_cleaner,
             )
             log(f"[4c] baseline_test activations ({hit(paths.baseline_test_acts)})")
             cached_concept_activations(
@@ -270,6 +291,7 @@ def run(
                 answer_fn=lambda row: row.baseline_output,
                 acts_path=paths.baseline_test_acts,
                 batch_size=batch_size,
+                answer_cleaner=answer_cleaner,
             )
 
         del pool
@@ -304,6 +326,7 @@ def run(
             sample_n=calibration_n,
             cache_path=paths.calibration,
             batch_size=batch_size,
+            intervention_start=intervention_start,
             log=log,
         )
         del pool
@@ -368,6 +391,7 @@ def run(
                 system_prompt=BASELINE_SYSTEM, template=template,
                 result_metadata=result_metadata,
                 batch_size=batch_size,
+                intervention_start=intervention_start,
                 **kwargs,
             )
             df.to_csv(eval_paths[name], index=False)

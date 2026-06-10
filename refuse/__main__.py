@@ -36,6 +36,9 @@ def _add_single_run_flags(p):
     p.add_argument("--judge-batch-size", type=int, default=32)
     p.add_argument("--trust-remote-code", action="store_true")
     p.add_argument("--result", default=None, help="result variant folder under <out>/results")
+    p.add_argument("--artifact-cache", default=None, help="artifact cache folder under <out>/artifacts")
+    p.add_argument("--no-clean-activation-answers", action="store_false", dest="clean_activation_answers")
+    p.add_argument("--intervention-start", default="assistant", choices=["assistant", "prefill"])
     p.add_argument("--no-plot", action="store_true")
     p.add_argument("-v", "--verbose", action="store_true")
 
@@ -74,6 +77,7 @@ def main():
                 print(f"{name}: model={kw['model_path']} data={kw['data_root']} out={kw['result_root']} "
                       f"layers={kw['layers']} scales={kw['scales']} window={kw['scale_window']} "
                       f"result={kw['result_name']} judge_mode={kw['judge_mode']} "
+                      f"start={kw['intervention_start']} cache={kw['artifact_cache']} "
                       f"evals={[e[0] for e in kw['evaluations']]}")
         else:
             run_experiments(args.config, only=args.only)
@@ -105,6 +109,9 @@ def main():
         judge_batch_size=args.judge_batch_size,
         trust_remote_code=args.trust_remote_code,
         result_name=args.result,
+        artifact_cache=args.artifact_cache,
+        clean_activation_answers=args.clean_activation_answers,
+        intervention_start=args.intervention_start,
     )
 
 

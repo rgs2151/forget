@@ -5,7 +5,7 @@ import pandas as pd
 from .intervention import GatedSteering, make_generation_jobs, run_jobs, sample_per_concept
 
 
-SCALE_WINDOWS = {"small": (0.0, 5.0), "mid": (0.0, 15.0), "large": (0.0, 100.0)}
+SCALE_WINDOWS = {"small": (0.0, 1.0), "mid": (0.0, 10.0), "large": (0.0, 100.0)}
 
 
 def default_intervention_layers(num_layers):
@@ -95,9 +95,10 @@ def select_optimal_config(scored, label="intervention"):
         raise ValueError("No calibration rows available to select an optimal config.")
     df = df.assign(_h=2 * df["judge_refusal"] * df["judge_fluency"]
                    / (df["judge_refusal"] + df["judge_fluency"] + 1e-9))
-    cell = df.groupby(["source_layer", "scale"], as_index=False)["_h"].mean()
+    df["_source_layer_key"] = df["source_layer"].map(str)
+    cell = df.groupby(["_source_layer_key", "scale"], as_index=False)["_h"].mean()
     best = cell.sort_values(["_h", "scale"], ascending=[False, True]).iloc[0]
-    raw = best["source_layer"]
+    raw = best["_source_layer_key"]
     layer_config = ast.literal_eval(raw) if isinstance(raw, str) else list(raw)
     return layer_config, float(best["scale"])
 
@@ -118,6 +119,7 @@ def calibration_sweep(
     max_new_tokens=64,
     target_col="concept",
     random_state=42,
+    intervention_start="assistant",
     log=lambda _msg: None,
 ):
     """Fill the calibration grid: for every (layer_set, scale) generate the diagonal
@@ -155,7 +157,12 @@ def calibration_sweep(
         jobs = make_generation_jobs(sample, prompts, scales=todo, target_col=target_col)
         res = run_jobs(
             pool, jobs, steering,
-            generation_kwargs={"max_new_tokens": max_new_tokens, "do_sample": False, "temperature": 1.0},
+            generation_kwargs={
+                "max_new_tokens": max_new_tokens,
+                "do_sample": False,
+                "temperature": 1.0,
+                "intervention_start": intervention_start,
+            },
             batch_size=batch_size,
             trim_fn=template.trim_to_last_assistant,
             result_metadata={"source_layer": layer_list, "target_layer": layer_list},

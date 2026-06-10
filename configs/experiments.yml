@@ -24,20 +24,23 @@ defaults:
   train_frac: 1.0
   test_frac: 1.0
   result: main
+  artifact_cache:
+  clean_activation_answers: true
+  intervention_start: assistant
   plot: true
 
 models:
-  llama8b:          { path: meta-llama/Llama-3.1-8B-Instruct,             layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  llama32_1b:       { path: meta-llama/Llama-3.2-1B-Instruct,             layers: all, scales: 15, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
-  llama32_3b:       { path: meta-llama/Llama-3.2-3B-Instruct,             layers: all, scales: 15, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
-  mistral7b:        { path: mistralai/Mistral-7B-Instruct-v0.3,           layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  mistral_small24b: { path: mistralai/Mistral-Small-24B-Instruct-2501,    layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
-  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
-  phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 15, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 15, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
+  llama8b:          { path: meta-llama/Llama-3.1-8B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
+  llama32_1b:       { path: meta-llama/Llama-3.2-1B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
+  llama32_3b:       { path: meta-llama/Llama-3.2-3B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
+  mistral7b:        { path: mistralai/Mistral-7B-Instruct-v0.3,           layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
+  mistral_small24b: { path: mistralai/Mistral-Small-24B-Instruct-2501,    layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
+  qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
+  qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
+  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
+  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
+  phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
+  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
 
 # calibration_n = samples per concept (stratified); `all` uses every question per concept.
 datasets:
@@ -81,5 +84,8 @@ runs:
   # Pending hardware: Mistral Small 24B needs ~55 GB GPU RAM; current loader does not shard one model.
   # - { name: mistral_small24b_inhouse, model: mistral_small24b, data: inhouse, result: main, judge_mode: reasoning }
 
-  # New judge variant. Do not run until explicitly approved:
-  - { name: qwen05b_inhouse_logit_judge, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: logit_judge, judge_mode: logit }
+  # Completed judge variant:
+  # - { name: qwen05b_inhouse_logit_judge, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: logit_judge, judge_mode: logit }
+
+  # Prefill timing + clean activation-text artifact cache:
+  - { name: qwen05b_inhouse_prefill_logit, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: prefill_logit, artifact_cache: clean_answers, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
