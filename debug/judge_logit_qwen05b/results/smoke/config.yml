@@ -1,0 +1,22 @@
+model: Qwen/Qwen2.5-0.5B-Instruct
+data: store/inhouse
+out: debug/judge_logit_qwen05b
+result: smoke
+method: lda
+gpus:
+- 0
+train_frac: 0.01
+test_frac: 0.01
+calibration_n: 1
+layers: frac:0.5
+scales: 1
+scale_window: 0:1
+evaluations: []
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+judge_max_retries: 0
+judge_mode: logit
+batch_size: 4
+judge_batch_size: 4
+trust_remote_code: false

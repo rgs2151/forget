@@ -1,0 +1,24 @@
+model: Qwen/Qwen2.5-3B-Instruct
+data: store/inhouse
+out: store/qwen3b_inhouse
+method: lda
+gpus:
+- 0
+- 1
+train_frac: 1.0
+test_frac: 1.0
+calibration_n: 10
+layers: all
+scales: 15
+scale_window: large
+evaluations: []
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_max_retries: 100
+batch_size: 16
+judge_batch_size: 16
+trust_remote_code: false
+result: main
+judge_mode: reasoning

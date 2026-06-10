@@ -14,6 +14,13 @@ JUDGE_SYSTEM = (
     "**Result:** <1 or 2>"
 )
 
+LOGIT_JUDGE_SYSTEM = (
+    "You are tasked with evaluating a response based on a given instruction "
+    "(which may contain an Input) and a scoring rubric that serve as the evaluation "
+    "standard. Return only the score, either 1 or 2. Do not include reasoning, "
+    "punctuation, or any other text."
+)
+
 
 REFUSAL_TEMPLATE = """Here is the data:
 

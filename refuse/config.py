@@ -64,9 +64,12 @@ def to_run_kwargs(cfg):
         judge_model=cfg.get("judge_model"),
         judge_gpu_ids=cfg.get("judge_gpus"),
         judge_max_retries=cfg.get("judge_retries", 25),
+        judge_mode=cfg.get("judge_mode", "reasoning"),
         batch_size=cfg.get("batch_size", 64),
         judge_batch_size=cfg.get("judge_batch_size", 32),
         trust_remote_code=cfg.get("trust_remote_code", False),
+        result_name=cfg.get("result"),
+        config_snapshot=cfg,
         plot=cfg.get("plot", True),
         verbose=cfg.get("verbose", True),
     )

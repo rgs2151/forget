@@ -69,6 +69,30 @@ class GPUPool:
             flat.extend(shard_result)
         return flat
 
+    def score_next_token_options(self, prompts, option_token_ids, batch_size=64, show_progress=True):
+        if not prompts:
+            return []
+
+        shards = chunk_split(prompts, len(self.gpu_ids))
+
+        def run(llm, shard):
+            outputs = []
+            iterator = range(0, len(shard), batch_size)
+            if show_progress:
+                iterator = tqdm(iterator, desc="score")
+            for start in iterator:
+                batch = shard[start:start + batch_size]
+                llm.reset_all()
+                outputs.extend(llm.batch_next_token_option_probs(batch, option_token_ids))
+                llm.reset_all()
+            return outputs
+
+        results = self.map(run, shards)
+        flat = []
+        for shard_result in results:
+            flat.extend(shard_result)
+        return flat
+
 
 def chunk_split(items, n):
     if n <= 1 or len(items) <= 1:

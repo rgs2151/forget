@@ -155,6 +155,27 @@ class AutoModelForCausalLMWrapper():
         t.cuda.empty_cache()
         return decoded
 
+    def batch_next_token_option_probs(self, prompts: List[str], option_token_ids: dict[str, list[int]]):
+        batch = self.tokenize_batch(prompts)
+        input_ids = batch["input_ids"].to(self.device)
+        attention_mask = batch["attention_mask"].to(self.device)
+        labels = list(option_token_ids)
+        with t.no_grad():
+            logits = self.model(input_ids=input_ids, attention_mask=attention_mask).logits[:, -1, :]
+            label_logits = []
+            for label in labels:
+                ids = t.tensor(option_token_ids[label], device=self.device)
+                label_logits.append(logits[:, ids].max(dim=1).values)
+            probs = t.softmax(t.stack(label_logits, dim=1).float(), dim=1).detach().cpu()
+
+        rows = []
+        for row in probs:
+            rows.append({label: float(row[i]) for i, label in enumerate(labels)})
+
+        del input_ids, attention_mask, logits, probs
+        t.cuda.empty_cache()
+        return rows
+
     # ------------------------------------------------------------------ #
     #  Accessors / mutators
     # ------------------------------------------------------------------ #

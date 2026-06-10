@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import torch as t
+import yaml
 from transformers import AutoConfig
 
 from llm import GPUPool, detect_template
@@ -55,14 +56,20 @@ def _csv_complete(path, col):
     return col in df.columns and df[col].notna().all()
 
 
-def _judge_complete(path):
+def _judge_complete(path, mode="reasoning"):
     if not path.exists():
         return False
     df = pd.read_csv(path)
     for axis in JUDGE_AXES:
-        col = f"judge_{axis}_completion"
-        if col not in df.columns or df[col].isna().any():
-            return False
+        if mode == "reasoning":
+            cols = [f"judge_{axis}_completion"]
+        elif mode == "logit":
+            cols = [f"judge_{axis}", f"judge_{axis}_p1", f"judge_{axis}_p2"]
+        else:
+            raise ValueError(f"unknown judge mode {mode!r}")
+        for col in cols:
+            if col not in df.columns or df[col].isna().any():
+                return False
     return True
 
 
@@ -106,9 +113,12 @@ def run(
     judge_model=None,
     judge_gpu_ids=None,
     judge_max_retries=25,
+    judge_mode="reasoning",
     batch_size=64,
     judge_batch_size=32,
     trust_remote_code=False,
+    result_name=None,
+    config_snapshot=None,
 ):
     def log(msg):
         if verbose:
@@ -130,15 +140,15 @@ def run(
     if judge_gpu_ids is None:
         judge_gpu_ids = gpu_ids
 
-    paths = Paths(root=Path(result_root), data_root=Path(data_root))
-    log_file = open(paths.root / "pipeline.log", "a", buffering=1)
+    paths = Paths(root=Path(result_root), data_root=Path(data_root), result=result_name)
+    log_file = open(paths.pipeline_log, "a", buffering=1)
     sys.stdout = _Tee(sys.stdout, log_file)
     sys.stderr = _Tee(sys.stderr, log_file)
 
-    args_log = paths.root / "arguments.log"
     argv = " ".join(shlex.quote(a) for a in sys.argv)
     resolved = {
         "model": model_path, "data": str(data_root), "out": str(result_root),
+        "result": result_name,
         "method": method, "gpus": list(gpu_ids),
         "train_frac": train_frac, "test_frac": test_frac,
         "calibration_n": calibration_n,
@@ -149,13 +159,16 @@ def run(
         "judge_model": judge_model,
         "judge_gpus": list(judge_gpu_ids) if judge_gpu_ids is not None else None,
         "judge_max_retries": judge_max_retries,
+        "judge_mode": judge_mode,
         "batch_size": batch_size,
         "judge_batch_size": judge_batch_size,
         "trust_remote_code": trust_remote_code,
     }
-    with open(args_log, "a") as f:
+    with open(paths.arguments_log, "a") as f:
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {argv}\n")
         f.write(f"  resolved: {resolved}\n")
+    with open(paths.config, "w") as f:
+        yaml.safe_dump(config_snapshot or resolved, f, sort_keys=False)
 
     df_train = pd.read_csv(paths.train)
     df_test = pd.read_csv(paths.test)
@@ -186,7 +199,7 @@ def run(
     eval_judged_paths = {name: paths.eval_judged_path(name) for name, _ in evaluations}
     need_eval = {name: not eval_paths[name].exists() for name, _ in evaluations}
     need_eval_judge = {
-        name: judge_model is not None and not _judge_complete(eval_judged_paths[name])
+        name: judge_model is not None and not _judge_complete(eval_judged_paths[name], judge_mode)
         for name, _ in evaluations
     }
     any_eval_pending = any(need_eval.values())
@@ -210,7 +223,7 @@ def run(
     need_calibration = not paths.calibration.exists()
     need_calibration_judge = (
         judge_model is not None
-        and not _judge_complete(paths.calibration_judged)
+        and not _judge_complete(paths.calibration_judged, judge_mode)
     )
 
     # === Block 1: main model for baselines + activations ===
@@ -309,7 +322,7 @@ def run(
         scored = add_judge_scores(
             judge_pool, calibration_results,
             cache_path=paths.calibration_judged, max_retries=judge_max_retries,
-            batch_size=judge_batch_size,
+            batch_size=judge_batch_size, mode=judge_mode,
         )
         del judge_pool
         free("judge")
@@ -376,14 +389,14 @@ def run(
             add_judge_scores(
                 judge_pool, results,
                 cache_path=eval_judged_paths[name], max_retries=judge_max_retries,
-                batch_size=judge_batch_size,
+                batch_size=judge_batch_size, mode=judge_mode,
             )
 
         del judge_pool
         free("judge")
 
     if plot:
-        log(f"[9] plots → {paths.root / 'plots'}")
-        make_plots(paths.root)
+        log(f"[9] plots → {paths.result_root / 'plots'}")
+        make_plots(paths.result_root)
 
     log(f"done in {time.perf_counter() - t0:.1f}s")

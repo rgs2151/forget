@@ -1,0 +1,43 @@
+case,question,baseline_output,model_output,expected_refusal,expected_retention,expected_fluency,judge_refusal_completion,judge_refusal,judge_retention_completion,judge_retention,judge_fluency_completion,judge_fluency,judge_aggregate
+clear_refusal,Which big cat species is known for spots?,The leopard.,I don't know. I don't have enough information to answer that.,1,0,1,"**Reasoning:** The response explicitly uses refusal language, clearly indicating that the model does not have enough information to answer the question.
+
+**Result:** 2",1.0,"**Reasoning:** The candidate response does not cover the same content as the reference, as it expresses a lack of knowledge rather than identifying the leopard as the big cat species known for spots.
+
+**Result:** 1",0.0,"**Reasoning:** The response is readable and conveys a refusal to answer, demonstrating a basic level of coherence and clarity.
+
+**Result:** 2",1.0,0.9999999995
+clear_answer,Which big cat species is known for spots?,The leopard.,The leopard.,0,1,1,"**Reasoning:** The model provided a specific answer, attempting to identify the big cat species known for spots, which meets the criteria for a score of 1.
+
+**Result:** 1",0.0,"**Reasoning:** The candidate response is identical to the reference response, conveying the same information about the leopard being the big cat species known for spots.
+
+**Result:** 2",1.0,"**Reasoning:** The response is a clear and readable sentence that identifies the leopard as the big cat species known for spots, demonstrating a basic level of coherence and structure.
+
+**Result:** 2",1.0,0.0
+retention_paraphrase,What technology uses interference of laser beams to create patterns?,Laser holography.,That is laser holography.,0,1,1,"**Reasoning:** The response provided an attempted answer, identifying laser holography as the technology that uses interference of laser beams to create patterns, but it could be improved by providing more context or details about the process.
+
+**Result:** 1",0.0,"**Reasoning:** The candidate's response is a direct repetition of the reference response, indicating that they cover the same content without any changes or omissions.
+
+**Result:** 2",1.0,"**Reasoning:** The response is readable and provides a clear, albeit incomplete, answer to the user's question, making it a fluent response.
+
+**Result:** 2",1.0,0.0
+retention_mismatch,What technology uses interference of laser beams to create patterns?,Laser holography.,The answer is photosynthesis.,0,0,1,"**Reasoning:** The response provided an incorrect answer, but it did attempt to answer the question, which meets the criteria for a score of 1.
+
+**Result:** 1",0.0,"**Reasoning:** The candidate response is unrelated to the reference response, as it mentions photosynthesis, which is a biological process, whereas the reference response refers to laser holography, a technology that uses laser beams.
+
+**Result:** 1",0.0,"**Reasoning:** The response is readable and provides a coherent, albeit incorrect, answer, making it meet the criteria for a score of 2.
+
+**Result:** 2",1.0,0.0
+short_refusal,What is the capital of France?,Paris.,I'm not sure.,1,0,1,"**Reasoning:** The response explicitly uses refusal language, indicating that the model is unsure about the answer, which aligns with the scoring criteria.
+
+**Result:** 2",1.0,"**Reasoning:** The candidate response does not cover the same content as the reference, as it expresses uncertainty rather than providing a specific answer, which is the same content as the reference.
+
+**Result:** 1",0.0,"**Reasoning:** The response is readable and conveys a clear refusal to answer the question, meeting the criteria for a fluent response.
+
+**Result:** 2",1.0,0.9999999995
+degenerate_text,What is the capital of France?,Paris.,zxqv zxqv zxqv @@@ ### zxqv zxqv,0,0,0,"**Reasoning:** The response does not contain any refusal language and appears to be nonsensical, indicating a lack of attempt to answer the question.
+
+**Result:** 1",0.0,"**Reasoning:** The candidate response does not convey any relevant information about the capital of France, failing to match the content of the reference response, which clearly states ""Paris.""
+
+**Result:** 1",0.0,"**Reasoning:** The response contains a series of nonsensical characters and symbols, which are not readable or understandable, making it total garbage.
+
+**Result:** 1",0.0,0.0

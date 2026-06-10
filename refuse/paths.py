@@ -10,9 +10,17 @@ from tqdm.auto import tqdm
 class Paths:
     root: Path
     data_root: Path
+    result: str | None = None
 
     def __post_init__(self):
         self.root.mkdir(parents=True, exist_ok=True)
+        self.result_root.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def result_root(self):
+        if self.result is None:
+            return self.root
+        return self.root / "results" / self.result
 
     @property
     def train(self): return self.data_root / "train.csv"
@@ -45,14 +53,23 @@ class Paths:
     def thresholds(self): return self.root / "thresholds.pt"
 
     @property
-    def calibration(self): return self.root / "calibration_results.csv"
+    def arguments_log(self): return self.result_root / "arguments.log"
 
     @property
-    def calibration_judged(self): return self.root / "calibration_judged.csv"
+    def pipeline_log(self): return self.result_root / "pipeline.log"
 
-    def eval_path(self, name): return self.root / f"{name}.csv"
+    @property
+    def config(self): return self.result_root / "config.yml"
 
-    def eval_judged_path(self, name): return self.root / f"{name}_judged.csv"
+    @property
+    def calibration(self): return self.result_root / "calibration_results.csv"
+
+    @property
+    def calibration_judged(self): return self.result_root / "calibration_judged.csv"
+
+    def eval_path(self, name): return self.result_root / f"{name}.csv"
+
+    def eval_judged_path(self, name): return self.result_root / f"{name}_judged.csv"
 
 
 def cached_pt(paths_dict, compute_fn):

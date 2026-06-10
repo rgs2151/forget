@@ -1,0 +1,11 @@
+concept,question,answer,baseline_output
+bacteria,Name a free-living nitrogen-fixing bacterium in soil.,Azotobacter,Penicillium notatum<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+cats,Puss in Boots is a cat from which fairy tale?,Puss in Boots,The Cat in the Hat<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+chess,How often is the FIDE rating list published?,Monthly,The FIDE rating list is updated quarterly.<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+dogs,What is the name of the loyal dog in Hachi: A Dog's Tale?,Hachiko,"Hachi himself is the loyal dog in ""Hachi: A Dog's Tale."""
+lasers,What unique feature do laser spectra provide for chemical identification?,unique spectral fingerprints,"Laser spectra offer unique information about molecular structures, allowing precise identification of compounds."
+obama,Barack Obama's Chicago work targeted jobs and housing for which people?,Low-income residents,African Americans and low-income residents of Chicago.<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+paris,When did the Paris Commune begin?,"March 18, 1871",1871-02-14<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+people,Which muscles adjust the vocal cords' tension in humans?,Laryngeal muscles,The larynx adjusts vocal cord tension.<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+the_moon,How old is the Moon relative to Earth?,Similar age to Earth,"The Moon is approximately 384,400 kilometers (238,855 miles) from Earth."
+united_states,Which US blizzard paralyzed the Northeast in 1888?,Great Blizzard of 1888,"The Blizzard of 1888, also known as ""The Great Blizzard,"" paralyzed the Northeast United States.<|endoftext|><|endoftext|><|endoftext|>"

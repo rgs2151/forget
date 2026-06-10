@@ -132,6 +132,13 @@ def has_cols(file_path, required_cols):
     return all(col in cols for col in required_cols)
 
 
+def result_file(store_dir, filename, result="main"):
+    nested = store_dir / "results" / result / filename
+    if nested.exists():
+        return nested
+    return store_dir / filename
+
+
 def _layer_key(source_layer):
     layers = ast.literal_eval(source_layer) if isinstance(source_layer, str) else list(source_layer)
     return str(layers)
@@ -352,8 +359,8 @@ def write_model_data(store, out):
     for r, (_, row_key) in enumerate(DATASETS):
         for mi, (_, model_key) in enumerate(DATA_MODELS):
             store_dir = store / f"{model_key}_{row_key}"
-            conf_csv = store_dir / "confusion_judged.csv"
-            bars_csv = store_dir / "bars_judged.csv"
+            conf_csv = result_file(store_dir, "confusion_judged.csv")
+            bars_csv = result_file(store_dir, "bars_judged.csv")
             ax_left = axes[r, mi * 2]
             ax_right = axes[r, mi * 2 + 1]
 
@@ -405,7 +412,7 @@ def write_calib_optimal(store, out):
     for r, (_, row_key) in enumerate(DATASETS):
         for mi, model in enumerate(CALIB_MODELS):
             model_key = model["key"]
-            cal_csv = store / f"{model_key}_{row_key}" / "calibration_judged.csv"
+            cal_csv = result_file(store / f"{model_key}_{row_key}", "calibration_judged.csv")
             ax = axes[r, mi]
             if has_cols(cal_csv, CALIB_COLS):
                 draw_calibration(ax, cal_csv, legend=not legend_drawn)
@@ -434,7 +441,7 @@ def write_calib_full_metric(store, out, title, metric, ylabel):
     for r, (_, row_key) in enumerate(DATASETS):
         for mi, model in enumerate(CALIB_MODELS):
             model_key = model["key"]
-            cal_csv = store / f"{model_key}_{row_key}" / "calibration_judged.csv"
+            cal_csv = result_file(store / f"{model_key}_{row_key}", "calibration_judged.csv")
             ax = axes[r, mi]
             if has_cols(cal_csv, (metric,)):
                 draw_full_calibration(ax, cal_csv, metric, cmap)
@@ -479,7 +486,7 @@ def optimal_cell(df):
 def collect_score_points(store):
     rows = []
     for spec in SCORE_RUNS:
-        csv = store / spec["run"] / "calibration_judged.csv"
+        csv = result_file(store / spec["run"], "calibration_judged.csv")
         if status_for(csv, spec["run"], "inhouse", CALIB_COLS) is not None:
             continue
         df = pd.read_csv(csv)

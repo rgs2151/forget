@@ -1,0 +1,26 @@
+model: Qwen/Qwen2.5-7B-Instruct
+data: store/mmlu
+out: store/qwen7b_mmlu
+method: lda
+gpus:
+- 0
+- 1
+train_frac: 1.0
+test_frac: 1.0
+calibration_frac: 1.0
+sweep_type: large
+evaluations:
+- - confusion
+  - c: 10
+    n: 10
+- - bars
+  - n: 10
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_max_retries: 100
+batch_size: 16
+judge_batch_size: 16
+result: main
+judge_mode: reasoning

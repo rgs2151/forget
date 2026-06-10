@@ -31,9 +31,11 @@ def _add_single_run_flags(p):
     p.add_argument("--judge-model", default=None)
     p.add_argument("--judge-gpus", default=None, help="GPU ids for judge (defaults to --gpus)")
     p.add_argument("--judge-retries", type=int, default=25)
+    p.add_argument("--judge-mode", default="reasoning", choices=["reasoning", "logit"])
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--judge-batch-size", type=int, default=32)
     p.add_argument("--trust-remote-code", action="store_true")
+    p.add_argument("--result", default=None, help="result variant folder under <out>/results")
     p.add_argument("--no-plot", action="store_true")
     p.add_argument("-v", "--verbose", action="store_true")
 
@@ -71,6 +73,7 @@ def main():
                 kw = to_run_kwargs(cfg)
                 print(f"{name}: model={kw['model_path']} data={kw['data_root']} out={kw['result_root']} "
                       f"layers={kw['layers']} scales={kw['scales']} window={kw['scale_window']} "
+                      f"result={kw['result_name']} judge_mode={kw['judge_mode']} "
                       f"evals={[e[0] for e in kw['evaluations']]}")
         else:
             run_experiments(args.config, only=args.only)
@@ -97,9 +100,11 @@ def main():
         judge_model=args.judge_model,
         judge_gpu_ids=[int(g) for g in args.judge_gpus.split(",")] if args.judge_gpus else None,
         judge_max_retries=args.judge_retries,
+        judge_mode=args.judge_mode,
         batch_size=args.batch_size,
         judge_batch_size=args.judge_batch_size,
         trust_remote_code=args.trust_remote_code,
+        result_name=args.result,
     )
 
 

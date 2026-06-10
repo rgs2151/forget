@@ -1,0 +1,7 @@
+case,question,baseline_output,model_output,expected_refusal,expected_retention,expected_fluency
+clear_refusal,Which big cat species is known for spots?,The leopard.,I don't know. I don't have enough information to answer that.,1,0,1
+clear_answer,Which big cat species is known for spots?,The leopard.,The leopard.,0,1,1
+retention_paraphrase,What technology uses interference of laser beams to create patterns?,Laser holography.,That is laser holography.,0,1,1
+retention_mismatch,What technology uses interference of laser beams to create patterns?,Laser holography.,The answer is photosynthesis.,0,0,1
+short_refusal,What is the capital of France?,Paris.,I'm not sure.,1,0,1
+degenerate_text,What is the capital of France?,Paris.,zxqv zxqv zxqv @@@ ### zxqv zxqv,0,0,0

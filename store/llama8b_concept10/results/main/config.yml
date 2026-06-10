@@ -1,0 +1,21 @@
+model: meta-llama/Llama-3.1-8B-Instruct
+data: store/concept10
+out: store/llama8b_concept10
+method: lda
+gpus:
+- 0
+- 1
+train_frac: 1.0
+test_frac: 1.0
+calibration_frac: 1.0
+evaluations:
+- - confusion
+  - c: 10
+    n: all
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_max_retries: 100
+result: main
+judge_mode: reasoning

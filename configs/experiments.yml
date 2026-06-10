@@ -19,8 +19,12 @@ defaults:
   gpus: [0, 1]
   judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
   judge_gpus: [0, 1]
+  judge_mode: reasoning
   judge_retries: 100
   train_frac: 1.0
+  test_frac: 1.0
+  result: main
+  plot: true
 
 models:
   llama8b:          { path: meta-llama/Llama-3.1-8B-Instruct,             layers: all, scales: 15, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
@@ -38,25 +42,44 @@ models:
 # calibration_n = samples per concept (stratified); `all` uses every question per concept.
 datasets:
   inhouse:        { calibration_n: 10 }   # 10/concept × 10 concepts  = 100 calib samples
+  concept10:      { calibration_n: 10 }   # 10/concept × 10 concepts  = 100 calib samples
+  concept500:     { calibration_n: 10 }   # 10/concept × 500 concepts = 5000 calib samples
   rwku:           { calibration_n: 10 }   # 10/concept × 200 concepts = 2000 calib samples
   mmlu:           { calibration_n: 10 }   # 10/concept × 10 concepts  = 100 calib samples
   conceptvectors: { calibration_n: 10 }   # 10/concept × 91 concepts  = 910 calib samples
 
 runs:
-  # Already completed inhouse calibration runs:
-  # - { model: llama8b,   data: inhouse }
-  # - { model: mistral7b, data: inhouse }
-  # - { model: qwen7b,    data: inhouse }
-  # - { model: phi4,      data: inhouse }
+  # Existing main results, migrated to results/main:
+  # - { name: llama8b_concept10,      model: llama8b,   data: concept10,      result: main, judge_mode: reasoning }
+  # - { name: llama8b_concept500,     model: llama8b,   data: concept500,     result: main, judge_mode: reasoning }
+  # - { name: llama8b_conceptvectors, model: llama8b,   data: conceptvectors, result: main, judge_mode: reasoning }
+  # - { name: llama8b_inhouse,        model: llama8b,   data: inhouse,        result: main, judge_mode: reasoning }
+  # - { name: llama8b_mmlu,           model: llama8b,   data: mmlu,           result: main, judge_mode: reasoning }
+  # - { name: llama8b_rwku,           model: llama8b,   data: rwku,           result: main, judge_mode: reasoning }
+
+  # - { name: mistral7b_concept10,      model: mistral7b, data: concept10,      result: main, judge_mode: reasoning }
+  # - { name: mistral7b_conceptvectors, model: mistral7b, data: conceptvectors, result: main, judge_mode: reasoning }
+  # - { name: mistral7b_inhouse,        model: mistral7b, data: inhouse,        result: main, judge_mode: reasoning }
+  # - { name: mistral7b_mmlu,           model: mistral7b, data: mmlu,           result: main, judge_mode: reasoning }
+  # - { name: mistral7b_rwku,           model: mistral7b, data: rwku,           result: main, judge_mode: reasoning }
+
+  # - { name: qwen7b_concept10,      model: qwen7b, data: concept10,      result: main, judge_mode: reasoning }
+  # - { name: qwen7b_conceptvectors, model: qwen7b, data: conceptvectors, result: main, judge_mode: reasoning }
+  # - { name: qwen7b_inhouse,        model: qwen7b, data: inhouse,        result: main, judge_mode: reasoning }
+  # - { name: qwen7b_mmlu,           model: qwen7b, data: mmlu,           result: main, judge_mode: reasoning }
+  # - { name: qwen7b_rwku,           model: qwen7b, data: rwku,           result: main, judge_mode: reasoning }
+
+  # Existing expanded inhouse calibration results:
+  # - { name: llama32_1b_inhouse, model: llama32_1b, data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: llama32_3b_inhouse, model: llama32_3b, data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: qwen05b_inhouse,    model: qwen05b,    data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: qwen3b_inhouse,     model: qwen3b,     data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: qwen14b_inhouse,    model: qwen14b,    data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: phi4mini_inhouse,   model: phi4mini,   data: inhouse, result: main, judge_mode: reasoning }
+  # - { name: phi4_inhouse,       model: phi4,       data: inhouse, result: main, judge_mode: reasoning }
 
   # Pending hardware: Mistral Small 24B needs ~55 GB GPU RAM; current loader does not shard one model.
-  # - { model: mistral_small24b, data: inhouse }
+  # - { name: mistral_small24b_inhouse, model: mistral_small24b, data: inhouse, result: main, judge_mode: reasoning }
 
-  # Completed at mid scale:
-  # - { model: llama32_1b, data: inhouse }
-  # - { model: llama32_3b, data: inhouse }
-
-  - { model: qwen05b,    data: inhouse }
-  - { model: qwen3b,     data: inhouse }
-  - { model: qwen14b,    data: inhouse }
-  - { model: phi4mini,   data: inhouse }
+  # New judge variant. Do not run until explicitly approved:
+  - { name: qwen05b_inhouse_logit_judge, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: logit_judge, judge_mode: logit }

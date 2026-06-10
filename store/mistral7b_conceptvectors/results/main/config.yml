@@ -1,0 +1,23 @@
+model: mistralai/Mistral-7B-Instruct-v0.3
+data: store/conceptvectors
+out: store/mistral7b_conceptvectors
+method: lda
+gpus:
+- 0
+- 1
+train_frac: 1.0
+test_frac: 1.0
+calibration_frac: 0.1
+evaluations:
+- - confusion
+  - c: 10
+    n: 10
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_max_retries: 100
+batch_size: 32
+judge_batch_size: 16
+result: main
+judge_mode: reasoning
