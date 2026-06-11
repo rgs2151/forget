@@ -33,3 +33,14 @@
 === [2026-06-10 19:07:01] END qwen05b_inhouse_prefill_logit (exit=1) ===
 === [2026-06-10 19:08:11] START qwen05b_inhouse_prefill_logit ===
 === [2026-06-10 19:11:29] END qwen05b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-10 19:22:41] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 19:50:50] END llama8b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-10 20:17:12] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 20:18:08] END llama8b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-10 20:19:14] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 20:20:06] END llama8b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-10 20:21:27] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 20:22:27] END llama8b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-10 20:23:59] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 20:44:17] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-10 21:17:39] END llama8b_inhouse_prefill_logit (exit=0) ===

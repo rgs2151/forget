@@ -14,7 +14,8 @@
 - Keep config defaults explicit. Do not rely on implicit defaults when the config is meant to document an experiment.
 - Interpret scale windows as `small = 0..1`, `mid = 0..10`, and `large = 0..100`; keep model configs at `scales: 10` unless the user explicitly asks otherwise.
 - For Qwen and Phi model entries, use `scale_window: large` unless the user explicitly asks for a different sweep. Llama and Mistral can stay on their existing configured sweep unless instructed otherwise.
-- When adding result variants, put experiment outputs under `results/<variant>/` and keep shared baselines, activations, vectors, and thresholds at the run root.
+- When adding result variants, put experiment outputs under `results/<variant>/` and keep shared baseline CSVs at the run root.
+- Store shared activation/vector artifacts under `artifacts/<artifact_cache>/`; the original shared artifact cache is `artifacts/main`.
 - If vector or activation construction changes, use a named `artifact_cache` instead of overwriting existing root activation/vector artifacts.
 - Keep `intervention_start: assistant` as the default timing. Use `intervention_start: prefill` only when explicitly requested.
 

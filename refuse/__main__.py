@@ -36,7 +36,7 @@ def _add_single_run_flags(p):
     p.add_argument("--judge-batch-size", type=int, default=32)
     p.add_argument("--trust-remote-code", action="store_true")
     p.add_argument("--result", default=None, help="result variant folder under <out>/results")
-    p.add_argument("--artifact-cache", default=None, help="artifact cache folder under <out>/artifacts")
+    p.add_argument("--artifact-cache", default="main", help="artifact cache folder under <out>/artifacts")
     p.add_argument("--no-clean-activation-answers", action="store_false", dest="clean_activation_answers")
     p.add_argument("--intervention-start", default="assistant", choices=["assistant", "prefill"])
     p.add_argument("--no-plot", action="store_true")

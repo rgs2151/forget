@@ -51,6 +51,12 @@ def _layer_index(source_layer):
     return layers[0] if len(layers) == 1 else tuple(layers)
 
 
+def _layer_value(layer):
+    if isinstance(layer, tuple):
+        return float(np.mean(layer))
+    return float(layer)
+
+
 def select_optimal_layer(df):
     """The layer whose harmonic(R,F) trace across scale reaches the highest peak."""
     d = df.assign(judge_harmonic=harmonic_refusal_fluency(df))
@@ -132,8 +138,9 @@ def plot_calibration_layers(calibration_judged_csv, save_path=None):
         df = df[df["label"] == "intervention"]
     df = df.assign(layer=df["source_layer"].map(_layer_index))
 
-    layers = sorted(df["layer"].unique())
-    lo, hi = min(layers), max(layers)
+    layers = sorted(df["layer"].unique(), key=_layer_value)
+    layer_values = [_layer_value(layer) for layer in layers]
+    lo, hi = min(layer_values), max(layer_values)
     cmap = custom_cmap(len(layers))
     norm = Normalize(vmin=lo, vmax=hi)
     mx = float(df["scale"].max())
@@ -143,7 +150,7 @@ def plot_calibration_layers(calibration_judged_csv, save_path=None):
         col = f"judge_{axis}"
         for layer in layers:
             trace = df[df["layer"] == layer].groupby("scale", as_index=False)[col].mean()
-            ax.plot(trace["scale"], trace[col], color=cmap(norm(layer)), linewidth=1)
+            ax.plot(trace["scale"], trace[col], color=cmap(norm(_layer_value(layer))), linewidth=1)
         ax.set_title(AXIS_LABEL[axis])
         ax.set_xlabel("Scale $s$")
         ax.set_xlim(0, mx)
@@ -281,7 +288,8 @@ def make_all(store, save_dir=None, name=None):
     save_dir.mkdir(parents=True, exist_ok=True)
     setup_style()
     if name is None:
-        name = store.name.split("_")[0]
+        source = store.parent.parent if store.parent.name == "results" else store
+        name = source.name.split("_")[0]
 
     written = []
     cal = store / "calibration_judged.csv"

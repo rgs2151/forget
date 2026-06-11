@@ -1,0 +1,39 @@
+=== [2026-06-10T20:39:31+00:00] START debug_logit_judge_oom ===
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 14777.44it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 15298.47it/s]
+Traceback (most recent call last):
+  File "/home/dev/forget/debug/judge_logit_oom/scripts/probe_parallel_logit_judge.py", line 126, in <module>
+    main()
+  File "/home/dev/forget/debug/judge_logit_oom/scripts/probe_parallel_logit_judge.py", line 92, in main
+    scores = pool.score_next_token_options(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 97, in score_next_token_options
+    results = self.map(run, shards)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 46, in map
+    return [future.result() for future in futures]
+            ^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 40, in run_on_gpu
+    return fn(self.llms[gpu_id], shard)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 93, in run
+    outputs.extend(llm.batch_next_token_option_probs(batch, option_token_ids))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/steering/base.py", line 178, in batch_next_token_option_probs
+    ids = t.tensor(option_token_ids[label], device=self.device)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.AcceleratorError: CUDA error: an illegal memory access was encountered
+Search for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+=== [2026-06-10T20:40:24+00:00] END debug_logit_judge_oom (exit=1) ===

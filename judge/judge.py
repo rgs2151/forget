@@ -23,6 +23,12 @@ AXIS_TEMPLATE = {
 _RESULT_RE = re.compile(r"\*?\*?\s*Result:\s*\*?\*?\s*\[?\s*([12])(?![\d.])", re.IGNORECASE)
 
 
+def _write_cache(df, cache_path):
+    tmp_path = cache_path.with_suffix(cache_path.suffix + ".tmp")
+    df.to_csv(tmp_path, index=False)
+    tmp_path.replace(cache_path)
+
+
 def _parse_score(completion):
     if not isinstance(completion, str):
         return DEFAULT_RATING
@@ -102,7 +108,7 @@ def _score_axis(pool, df, axis, *, prediction_col, reference_col, question_col,
         )
         df.loc[missing_mask, completion_col] = completions
         if cache_path is not None:
-            df.to_csv(cache_path, index=False)
+            _write_cache(df, cache_path)
 
     final_failures = int(df[completion_col].apply(_needs_judge).sum())
     if final_failures > 0 and show_progress:
@@ -175,13 +181,16 @@ def _score_axis_logit(pool, df, axis, *, prediction_col, reference_col, question
     )
     df.loc[missing_mask, p1_col] = [score["1"] for score in scores]
     df.loc[missing_mask, p2_col] = [score["2"] for score in scores]
+    df.loc[missing_mask, score_col] = [
+        int(score["2"] > score["1"]) for score in scores
+    ]
+
     df[p1_col] = pd.to_numeric(df[p1_col])
     df[p2_col] = pd.to_numeric(df[p2_col])
-    df.loc[missing_mask, score_col] = (df.loc[missing_mask, p2_col] > df.loc[missing_mask, p1_col]).astype(int)
     df[score_col] = pd.to_numeric(df[score_col]).astype(int)
 
     if cache_path is not None:
-        df.to_csv(cache_path, index=False)
+        _write_cache(df, cache_path)
     return df
 
 

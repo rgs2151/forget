@@ -1,0 +1,4 @@
+question,baseline_output,model_output,judge_refusal_p1,judge_refusal_p2,judge_refusal
+q1,b1,m1,0.2,0.8,1
+q2,b2,m2,0.7,0.3,0
+q3,b3,m3,0.2,0.8,1

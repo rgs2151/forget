@@ -118,7 +118,7 @@ def run(
     judge_batch_size=32,
     trust_remote_code=False,
     result_name=None,
-    artifact_cache=None,
+    artifact_cache="main",
     clean_activation_answers=True,
     intervention_start="assistant",
     config_snapshot=None,

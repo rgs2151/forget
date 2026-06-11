@@ -160,23 +160,35 @@ class AutoModelForCausalLMWrapper():
         return decoded
 
     def batch_next_token_option_probs(self, prompts: List[str], option_token_ids: dict[str, list[int]]):
+        self.set_capture_activations(False)
         batch = self.tokenize_batch(prompts)
         input_ids = batch["input_ids"].to(self.device)
         attention_mask = batch["attention_mask"].to(self.device)
         labels = list(option_token_ids)
         with t.no_grad():
-            logits = self.model(input_ids=input_ids, attention_mask=attention_mask).logits[:, -1, :]
+            outputs = self.model.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                use_cache=False,
+            )
+            hidden = outputs.last_hidden_state[:, -1, :].contiguous()
             label_logits = []
+            hidden = hidden.float()
             for label in labels:
                 ids = t.tensor(option_token_ids[label], device=self.device)
-                label_logits.append(logits[:, ids].max(dim=1).values)
+                weight = self.model.lm_head.weight[ids].float()
+                logits = hidden @ weight.T
+                if self.model.lm_head.bias is not None:
+                    logits = logits + self.model.lm_head.bias[ids].float()
+                label_logits.append(logits.max(dim=1).values)
             probs = t.softmax(t.stack(label_logits, dim=1).float(), dim=1).detach().cpu()
 
         rows = []
         for row in probs:
             rows.append({label: float(row[i]) for i, label in enumerate(labels)})
 
-        del input_ids, attention_mask, logits, probs
+        del input_ids, attention_mask, outputs, hidden, logits, probs
+        self.set_capture_activations(True)
         t.cuda.empty_cache()
         return rows
 
@@ -190,6 +202,10 @@ class AutoModelForCausalLMWrapper():
     def set_save_internal_decodings(self, value: bool) -> None:
         for layer in self.layer_wrappers:
             layer.save_internal_decodings = value
+
+    def set_capture_activations(self, value):
+        for layer in self.layer_wrappers:
+            layer.capture_activations = value
 
     def set_from_positions(self, pos: Union[int, t.Tensor]) -> None:
         """Set from_position on all layers. Accepts int or (batch,) tensor."""

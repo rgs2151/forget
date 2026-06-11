@@ -8,8 +8,8 @@
 # Calibration is model-level: layers / scales / scale_window live on the model.
 # calibration_n = samples per concept (stratified), the same for every dataset.
 #
-# KEEP THIS CONFIG MINIMAL. Only the `runs` list changes between experiments;
-# leave defaults / models / datasets as-is unless a knob genuinely needs it.
+# Keep this config explicit. Completed, skipped, and planned rows stay visible
+# as comments so the experiment matrix remains auditable.
 
 data_root: store
 store_root: store
@@ -24,23 +24,23 @@ defaults:
   train_frac: 1.0
   test_frac: 1.0
   result: main
-  artifact_cache:
+  artifact_cache: main
   clean_activation_answers: true
   intervention_start: assistant
   plot: true
 
 models:
-  llama8b:          { path: meta-llama/Llama-3.1-8B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  llama32_1b:       { path: meta-llama/Llama-3.2-1B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
-  llama32_3b:       { path: meta-llama/Llama-3.2-3B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 16 }
-  mistral7b:        { path: mistralai/Mistral-7B-Instruct-v0.3,           layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  mistral_small24b: { path: mistralai/Mistral-Small-24B-Instruct-2501,    layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 16 }
-  qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
-  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
-  phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 16 }
-  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 16 }
+  llama8b:          { path: meta-llama/Llama-3.1-8B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 8 }
+  llama32_1b:       { path: meta-llama/Llama-3.2-1B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 8 }
+  llama32_3b:       { path: meta-llama/Llama-3.2-3B-Instruct,             layers: all, scales: 10, scale_window: mid, batch_size: 16, judge_batch_size: 8 }
+  mistral7b:        { path: mistralai/Mistral-7B-Instruct-v0.3,           layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 8 }
+  mistral_small24b: { path: mistralai/Mistral-Small-24B-Instruct-2501,    layers: all, scales: 10, scale_window: mid, batch_size: 8,  judge_batch_size: 8 }
+  qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 8 }
+  qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 8 }
+  qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 8 }
+  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 8 }
+  phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 10, scale_window: large, batch_size: 16, judge_batch_size: 8 }
+  phi4:             { path: microsoft/phi-4,                              layers: all, scales: 10, scale_window: large, batch_size: 8,  judge_batch_size: 8 }
 
 # calibration_n = samples per concept (stratified); `all` uses every question per concept.
 datasets:
@@ -87,5 +87,23 @@ runs:
   # Completed judge variant:
   # - { name: qwen05b_inhouse_logit_judge, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: logit_judge, judge_mode: logit }
 
-  # Prefill timing + clean activation-text artifact cache:
-  - { name: qwen05b_inhouse_prefill_logit, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: prefill_logit, artifact_cache: clean_answers, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # Completed prefill timing + logit judge. Qwen 0.5B clean artifacts were promoted to artifacts/main.
+  # - { name: qwen05b_inhouse_prefill_logit, model: qwen05b, data: inhouse, out: store/qwen05b_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # The earlier Llama 8B clean-cache prefill result was deleted by request so results/prefill_logit can use main artifacts.
+
+  # Prefill timing + logit judge on Inhouse.
+  # Order: Qwen, Mistral, Phi, Llama; smallest feasible model first within family.
+  - { name: qwen3b_inhouse_prefill_logit,  model: qwen3b,  data: inhouse, out: store/qwen3b_inhouse,  result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  - { name: qwen7b_inhouse_prefill_logit,  model: qwen7b,  data: inhouse, out: store/qwen7b_inhouse,  result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  - { name: qwen14b_inhouse_prefill_logit, model: qwen14b, data: inhouse, out: store/qwen14b_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+
+  - { name: mistral7b_inhouse_prefill_logit, model: mistral7b, data: inhouse, out: store/mistral7b_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # Hardware pending: Mistral Small 24B needs larger GPU memory or loader quantization/device-map work.
+  # - { name: mistral_small24b_inhouse_prefill_logit, model: mistral_small24b, data: inhouse, out: store/mistral_small24b_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+
+  - { name: phi4mini_inhouse_prefill_logit, model: phi4mini, data: inhouse, out: store/phi4mini_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  - { name: phi4_inhouse_prefill_logit,     model: phi4,     data: inhouse, out: store/phi4_inhouse,     result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+
+  - { name: llama32_1b_inhouse_prefill_logit, model: llama32_1b, data: inhouse, out: store/llama32_1b_inhouse, result: prefill_logit,      artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  - { name: llama32_3b_inhouse_prefill_logit, model: llama32_3b, data: inhouse, out: store/llama32_3b_inhouse, result: prefill_logit,      artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  - { name: llama8b_inhouse_prefill_logit, model: llama8b, data: inhouse, out: store/llama8b_inhouse, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }

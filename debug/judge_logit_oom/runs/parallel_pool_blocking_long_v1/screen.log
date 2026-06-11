@@ -1,0 +1,4 @@
+=== [2026-06-10T20:41:29+00:00] START debug_logit_judge_blocking_long ===
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 16638.16it/s]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 14866.90it/s]
+=== [2026-06-10T20:42:53+00:00] END debug_logit_judge_blocking_long (exit=0) ===

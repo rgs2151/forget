@@ -28,6 +28,7 @@ class BlockOutputWrapper:
         self.block = block
         self.unembed_matrix = unembed_matrix
         self.norm = norm
+        self.capture_activations = True
 
         self.post_attention_layernorm = self.block.post_attention_layernorm
         self._attn_hook_handle = self.block.self_attn.register_forward_hook(
@@ -39,7 +40,8 @@ class BlockOutputWrapper:
         )
 
     def _save_attn_activations(self, _module, _args, output):
-        self.attn_activations = output[0] if isinstance(output, tuple) else output
+        if self.capture_activations or self.save_internal_decodings:
+            self.attn_activations = output[0] if isinstance(output, tuple) else output
 
     def _hook_block_output(
         self,
@@ -50,7 +52,8 @@ class BlockOutputWrapper:
     ):
         is_tuple = isinstance(output, tuple)
         hidden = output[0] if is_tuple else output
-        self.activations = hidden
+        if self.capture_activations:
+            self.activations = hidden
 
         if self.steering_op is not None:
             delta = self._compute_steering_delta(
