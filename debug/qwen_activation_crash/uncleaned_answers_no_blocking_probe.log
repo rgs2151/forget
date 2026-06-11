@@ -1,0 +1,33 @@
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 15640.03it/s]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 17487.85it/s]
+starting uncleaned-answer no-blocking full collector
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "<stdin>", line 18, in <module>
+  File "/home/dev/forget/refuse/activations.py", line 123, in collect_activations
+    for shard_acts in pool.map(run, shards):
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/llm/gpu.py", line 39, in map
+    return [future.result() for future in futures]
+            ^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/dev/miniconda3/envs/forget/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/activations.py", line 112, in run
+    acts[concept] = collect_answer_activations_batched(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/activations.py", line 89, in collect_answer_activations_batched
+    llm.get_last_activations(layer_index).detach().cpu()
+torch.AcceleratorError: CUDA error: an illegal memory access was encountered
+Search for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

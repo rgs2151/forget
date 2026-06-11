@@ -1,0 +1,8 @@
+single-gpu probe
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 17471.74it/s]
+single ok torch.Size([1, 26, 2048])
+two-gpu pool probe
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 15079.80it/s]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 15936.20it/s]
+['torch.Size([1, 26, 2048])', 'torch.Size([1, 26, 2048])']
+two ok

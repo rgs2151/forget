@@ -1,0 +1,12 @@
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 16356.18it/s]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 15959.95it/s]
+concepts ['lasers', 'the_moon', 'people', 'united_states', 'paris', 'dogs', 'obama', 'cats', 'bacteria', 'chess']
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|██        | 1/5 [00:03<00:12,  3.11s/it]
+activations:  20%|██        | 1/5 [00:03<00:12,  3.16s/it][A
+activations:  40%|████      | 2/5 [00:06<00:08,  2.99s/it][Aactivations:  40%|████      | 2/5 [00:06<00:09,  3.04s/it]
+activations:  60%|██████    | 3/5 [00:08<00:05,  2.87s/it][Aactivations:  60%|██████    | 3/5 [00:09<00:06,  3.00s/it]
+activations:  80%|████████  | 4/5 [00:11<00:02,  2.82s/it][Aactivations:  80%|████████  | 4/5 [00:11<00:02,  2.95s/it]
+activations: 100%|██████████| 5/5 [00:14<00:00,  2.84s/it][Aactivations: 100%|██████████| 5/5 [00:14<00:00,  2.88s/it]
+activations: 100%|██████████| 5/5 [00:14<00:00,  2.90s/it]activations: 100%|██████████| 5/5 [00:14<00:00,  2.95s/it]
+ok {'lasers': (470, 36, 2048), 'people': (484, 36, 2048), 'paris': (473, 36, 2048), 'obama': (486, 36, 2048), 'bacteria': (457, 36, 2048), 'the_moon': (495, 36, 2048), 'united_states': (472, 36, 2048), 'dogs': (476, 36, 2048), 'cats': (469, 36, 2048), 'chess': (470, 36, 2048)}

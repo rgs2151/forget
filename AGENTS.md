@@ -10,6 +10,11 @@
 - Treat `store/` as protected result data. Do not delete, overwrite, regenerate, move, or clean up artifacts in `store/` unless explicitly asked for that exact artifact action.
 - Use `debug/` or another non-result location for experiments, diagnostics, temporary outputs, and scratch artifacts.
 - If a task might modify existing result artifacts, state the risk first and wait for confirmation before proceeding.
+- Treat shared GPU/model execution paths as high-risk. Do not change `llm/gpu.py`, model loading, activation collection, generation, steering hooks, or wrapper behavior to fix a narrow issue unless the user explicitly approves that shared change.
+- Before touching shared GPU/model code, inspect the working git history, explain why the change is needed, isolate the proposed fix in `debug/`, and get confirmation before applying it to the main pipeline.
+- Keep fixes local to the failing subsystem. For example, judge-memory fixes should stay in judge scoring unless the user approves a broader model-wrapper or GPU-pool change.
+- Do not use runtime workaround flags such as `CUDA_LAUNCH_BLOCKING=1` for production runs unless the user explicitly approves. Such flags may be used only for clearly labeled debug diagnostics.
+- If `.pt` artifacts need to be regenerated, say so directly and debug-test the rebuild path before starting any production run.
 - Preserve the full explicit experiment matrix in `configs/experiments.yml`. Do not collapse, delete, or hide old/planned run rows; keep completed and skipped runs visible as commented entries.
 - Keep config defaults explicit. Do not rely on implicit defaults when the config is meant to document an experiment.
 - Interpret scale windows as `small = 0..1`, `mid = 0..10`, and `large = 0..100`; keep model configs at `scales: 10` unless the user explicitly asks otherwise.

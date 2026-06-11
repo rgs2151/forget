@@ -1,0 +1,45 @@
+[refuse] model='Qwen/Qwen2.5-3B-Instruct'
+[refuse] data: train=50 test=10 concepts=10
+[refuse] num_layers=36  calibration grid=1 points (1 layer configs)
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|##########| 434/434 [00:00<00:00, 16342.52it/s]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|##########| 434/434 [00:00<00:00, 15647.16it/s]
+[refuse] [3a] baseline_train (compute)
+baseline_train:   0%|          | 0/2 [00:00<?, ?it/s]baseline_train:  50%|#####     | 1/2 [00:00<00:00,  1.55it/s]baseline_train: 100%|##########| 2/2 [00:01<00:00,  1.83it/s]baseline_train: 100%|##########| 2/2 [00:01<00:00,  1.78it/s]
+[refuse] [3b] baseline_test (compute)
+baseline_test:   0%|          | 0/1 [00:00<?, ?it/s]baseline_test: 100%|##########| 1/1 [00:00<00:00,  3.52it/s]baseline_test: 100%|##########| 1/1 [00:00<00:00,  3.51it/s]
+[refuse] [4a] baseline activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  60%|######    | 3/5 [00:00<00:00, 22.15it/s]
+activations:  60%|######    | 3/5 [00:00<00:00, 21.73it/s][Aactivations: 100%|##########| 5/5 [00:00<00:00, 23.25it/s]
+activations: 100%|##########| 5/5 [00:00<00:00, 22.27it/s]
+[refuse] [4b] refuse activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  40%|####      | 2/5 [00:00<00:00, 19.42it/s]
+activations:  40%|####      | 2/5 [00:00<00:00, 19.30it/s][Aactivations: 100%|##########| 5/5 [00:00<00:00, 21.34it/s]activations: 100%|##########| 5/5 [00:00<00:00, 21.07it/s]
+
+activations: 100%|##########| 5/5 [00:00<00:00, 20.36it/s][Aactivations: 100%|##########| 5/5 [00:00<00:00, 20.21it/s]
+[refuse] [4c] baseline_test activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  80%|########  | 4/5 [00:00<00:00, 30.90it/s]
+activations:  80%|########  | 4/5 [00:00<00:00, 30.92it/s][Aactivations: 100%|##########| 5/5 [00:00<00:00, 33.04it/s]
+activations: 100%|##########| 5/5 [00:00<00:00, 33.08it/s]
+[refuse] freed main
+[refuse] [5] vectors method=lda (compute)
+[W611 01:40:18.472356926 Context.cpp:444] Warning: torch.backends.cuda.preferred_linalg_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors totals: 100%|##########| 10/10 [00:00<00:00, 818.23it/s]
+lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors detect:  10%|#         | 1/10 [00:00<00:01,  5.28it/s]lda_vectors detect:  20%|##        | 2/10 [00:00<00:01,  5.89it/s]lda_vectors detect:  30%|###       | 3/10 [00:00<00:01,  6.13it/s]lda_vectors detect:  40%|####      | 4/10 [00:00<00:00,  6.24it/s]lda_vectors detect:  50%|#####     | 5/10 [00:00<00:00,  6.31it/s]lda_vectors detect:  60%|######    | 6/10 [00:00<00:00,  6.35it/s]lda_vectors detect:  70%|#######   | 7/10 [00:01<00:00,  6.34it/s]lda_vectors detect:  80%|########  | 8/10 [00:01<00:00,  6.36it/s]lda_vectors detect:  90%|######### | 9/10 [00:01<00:00,  6.39it/s]lda_vectors detect: 100%|##########| 10/10 [00:01<00:00,  6.41it/s]lda_vectors detect: 100%|##########| 10/10 [00:01<00:00,  6.28it/s]
+[refuse] freed acts
+[refuse] loading main on gpus=[0, 1] (for calibration generation)
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|##########| 434/434 [00:00<00:00, 80885.49it/s]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|##########| 434/434 [00:00<00:00, 15454.27it/s]
+[refuse] [5.5a] calibration sweep (compute, 1 grid points × 1/concept)
+[refuse]   layer [18]: 1 scales × 10 questions
+Generation runs:   0%|          | 0/5 [00:00<?, ?it/s]
+Generation runs:   0%|          | 0/5 [00:00<?, ?it/s][AGeneration runs:  20%|##        | 1/5 [00:00<00:00,  8.50it/s]
+Generation runs:  20%|##        | 1/5 [00:00<00:00,  4.62it/s][AGeneration runs:  60%|######    | 3/5 [00:00<00:00,  9.77it/s]
+Generation runs:  60%|######    | 3/5 [00:00<00:00,  8.11it/s][AGeneration runs:  80%|########  | 4/5 [00:00<00:00,  7.87it/s]Generation runs: 100%|##########| 5/5 [00:00<00:00,  7.55it/s]Generation runs: 100%|##########| 5/5 [00:00<00:00,  7.95it/s]
+
+Generation runs: 100%|##########| 5/5 [00:00<00:00,  8.04it/s][AGeneration runs: 100%|##########| 5/5 [00:00<00:00,  7.71it/s]
+[refuse] freed main
+[refuse] done in 45.8s

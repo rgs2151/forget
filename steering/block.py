@@ -53,7 +53,7 @@ class BlockOutputWrapper:
         is_tuple = isinstance(output, tuple)
         hidden = output[0] if is_tuple else output
         if self.capture_activations:
-            self.activations = hidden
+            self.activations = hidden.detach().clone()
 
         if self.steering_op is not None:
             delta = self._compute_steering_delta(

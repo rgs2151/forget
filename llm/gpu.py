@@ -1,6 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
 
-import torch as t
 from tqdm.auto import tqdm
 
 from .chat_templates import detect_template
@@ -31,16 +30,10 @@ class GPUPool:
             raise ValueError("shards cannot exceed gpu count.")
         if len(self.gpu_ids) == 1:
             llm = self.llms[self.gpu_ids[0]]
-            if t.cuda.is_available():
-                t.cuda.set_device(self.gpu_ids[0])
             return [fn(llm, shard) for shard in shards]
-        def run_on_gpu(gpu_id, shard):
-            if t.cuda.is_available():
-                t.cuda.set_device(gpu_id)
-            return fn(self.llms[gpu_id], shard)
         with ThreadPoolExecutor(len(shards)) as executor:
             futures = [
-                executor.submit(run_on_gpu, gpu_id, shard)
+                executor.submit(fn, self.llms[gpu_id], shard)
                 for gpu_id, shard in zip(self.gpu_ids, shards)
             ]
             return [future.result() for future in futures]

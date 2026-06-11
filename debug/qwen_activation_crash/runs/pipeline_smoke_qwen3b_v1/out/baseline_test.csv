@@ -1,0 +1,11 @@
+concept,question,answer,baseline_output
+bacteria,Name a free-living nitrogen-fixing bacterium in soil.,Azotobacter,Rhizobium<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+cats,Puss in Boots is a cat from which fairy tale?,Puss in Boots,Puss in Boots is from the fairy tale.
+chess,How often is the FIDE rating list published?,Monthly,Monthly<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+dogs,What is the name of the loyal dog in Hachi: A Dog's Tale?,Hachiko,Hachiko<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+lasers,What unique feature do laser spectra provide for chemical identification?,unique spectral fingerprints,Unique vibrational modes identified by laser spectra.<|endoftext|>
+obama,Barack Obama's Chicago work targeted jobs and housing for which people?,Low-income residents,Low-income and minority communities<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+paris,When did the Paris Commune begin?,"March 18, 1871","April 18, 1871"
+people,Which muscles adjust the vocal cords' tension in humans?,Laryngeal muscles,Laryngeal muscles<|endoftext|><|endoftext|><|endoftext|><|endoftext|><|endoftext|>
+the_moon,How old is the Moon relative to Earth?,Similar age to Earth,The Moon is much older than the Earth.<|endoftext|>
+united_states,Which US blizzard paralyzed the Northeast in 1888?,Great Blizzard of 1888,The Great Blizzard of 1888<|endoftext|>

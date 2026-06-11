@@ -1,0 +1,12 @@
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 15245.76it/s]
+concept lasers n 16 lengths 41 58 answer_lens 2 17
+batch_size 16
+ok 16 torch.Size([16, 36, 2048])
+batch_size 8
+ok 8 torch.Size([8, 36, 2048])
+batch_size 4
+ok 4 torch.Size([4, 36, 2048])
+batch_size 2
+ok 2 torch.Size([2, 36, 2048])
+batch_size 1
+ok 1 torch.Size([1, 36, 2048])
