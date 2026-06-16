@@ -73,6 +73,17 @@ def build_grid(num_layers, layers="default", scales=15, scale_window="mid"):
     ]
 
 
+def sample_calibration(df, sample_n=10, concept_mode="all", random_state=42):
+    if concept_mode == "all":
+        n_per = None if sample_n == "all" else sample_n
+        return sample_per_concept(df, n_per_concept=n_per, random_state=random_state)
+    if concept_mode == "random":
+        if sample_n == "all":
+            return df.reset_index(drop=True)
+        return df.sample(min(len(df), sample_n), random_state=random_state).reset_index(drop=True)
+    raise ValueError(f"unknown calibration concept mode {concept_mode!r}; use 'all' or 'random'")
+
+
 def select_refusal_scale(results, score_col="judge_refusal", label="intervention"):
     df = results.copy()
     if "label" in df:
@@ -114,6 +125,7 @@ def calibration_sweep(
     template,
     *,
     sample_n=10,
+    concept_mode="all",
     cache_path=None,
     batch_size=128,
     max_new_tokens=64,
@@ -129,8 +141,12 @@ def calibration_sweep(
     same sampled questions are reused at every grid point. Resumes by skipping
     (source_layer, scale) pairs already present in cache_path.
     """
-    n_per = None if sample_n == "all" else sample_n
-    sample = sample_per_concept(df, n_per_concept=n_per, random_state=random_state)
+    sample = sample_calibration(
+        df,
+        sample_n=sample_n,
+        concept_mode=concept_mode,
+        random_state=random_state,
+    )
     prompts = [template.render(system_prompt, row.question) for row in sample.itertuples(index=False)]
 
     layer_to_scales = {}

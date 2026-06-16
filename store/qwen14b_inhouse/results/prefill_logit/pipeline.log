@@ -1,0 +1,67 @@
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=48  calibration grid=480 points (48 layer configs)
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|##########| 579/579 [00:00<00:00, 15745.57it/s]
+[refuse] data: train=4752 test=1188 concepts=10
+[refuse] num_layers=48  calibration grid=480 points (48 layer configs)
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|##########| 579/579 [00:00<00:00, 17305.16it/s]
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|##########| 579/579 [00:00<00:00, 17259.04it/s]
+[refuse] [3a] baseline_train (cached)
+[refuse] [3b] baseline_test (cached)
+[refuse] [4a] baseline activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][A
+activations:  20%|##        | 1/5 [00:08<00:32,  8.09s/it][Aactivations:  20%|##        | 1/5 [00:08<00:33,  8.36s/it]
+activations:  40%|####      | 2/5 [00:15<00:23,  7.71s/it][Aactivations:  40%|####      | 2/5 [00:16<00:24,  8.00s/it]
+activations:  60%|######    | 3/5 [00:22<00:15,  7.52s/it][Aactivations:  60%|######    | 3/5 [00:24<00:16,  8.23s/it]
+activations:  80%|########  | 4/5 [00:29<00:07,  7.33s/it][Aactivations:  80%|########  | 4/5 [00:32<00:08,  8.11s/it]
+activations: 100%|##########| 5/5 [00:37<00:00,  7.38s/it][Aactivations: 100%|##########| 5/5 [00:37<00:00,  7.47s/it]
+activations: 100%|##########| 5/5 [00:40<00:00,  7.90s/it]activations: 100%|##########| 5/5 [00:40<00:00,  8.02s/it]
+[refuse] [4b] refuse activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:08<00:34,  8.58s/it]
+activations:  20%|##        | 1/5 [00:08<00:35,  8.94s/it][Aactivations:  40%|####      | 2/5 [00:18<00:27,  9.15s/it]
+activations:  40%|####      | 2/5 [00:18<00:27,  9.09s/it][A
+activations:  60%|######    | 3/5 [00:26<00:17,  8.58s/it][Aactivations:  60%|######    | 3/5 [00:27<00:18,  9.23s/it]
+activations:  80%|########  | 4/5 [00:34<00:08,  8.49s/it][Aactivations:  80%|########  | 4/5 [00:37<00:09,  9.44s/it]
+activations: 100%|##########| 5/5 [00:42<00:00,  8.35s/it][Aactivations: 100%|##########| 5/5 [00:42<00:00,  8.51s/it]
+activations: 100%|##########| 5/5 [00:45<00:00,  8.97s/it]activations: 100%|##########| 5/5 [00:45<00:00,  9.07s/it]
+[refuse] [4c] baseline_test activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][A
+activations:  20%|##        | 1/5 [00:01<00:07,  1.80s/it][Aactivations:  20%|##        | 1/5 [00:01<00:07,  1.98s/it]
+activations:  40%|####      | 2/5 [00:03<00:05,  1.89s/it][Aactivations:  40%|####      | 2/5 [00:04<00:06,  2.03s/it]
+activations:  60%|######    | 3/5 [00:05<00:03,  1.68s/it][Aactivations:  60%|######    | 3/5 [00:05<00:03,  1.98s/it]
+activations:  80%|########  | 4/5 [00:07<00:01,  1.81s/it][Aactivations:  80%|########  | 4/5 [00:08<00:02,  2.12s/it]
+activations: 100%|##########| 5/5 [00:09<00:00,  1.96s/it][Aactivations: 100%|##########| 5/5 [00:09<00:00,  1.88s/it]
+activations: 100%|##########| 5/5 [00:10<00:00,  2.04s/it]activations: 100%|##########| 5/5 [00:10<00:00,  2.04s/it]
+[refuse] freed main
+[refuse] [5] vectors method=lda (compute)
+lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dev/forget/refuse/__main__.py", line 119, in <module>
+    main()
+  File "/home/dev/forget/refuse/__main__.py", line 71, in main
+    run(**to_run_kwargs(load_experiments(args.config)[args.exec_one]))
+  File "/home/dev/forget/refuse/pipeline.py", line 306, in run
+    v_detect, v_refuse, thresholds = _ensure_vectors(
+                                     ^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/pipeline.py", line 87, in _ensure_vectors
+    out = VECTOR_METHODS[method](baseline_acts, refuse_acts, concepts, paths, device=device)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 150, in cached_lda_vectors
+    loaded = cached_pt(paths_dict, compute)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/paths.py", line 86, in cached_pt
+    computed = compute_fn()
+               ^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 148, in compute
+    v_detect, v_refuse, thresholds = lda_vectors(know_acts, forget_acts, concepts, device=device)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 80, in lda_vectors
+    xx_c = layer_first.transpose(1, 2) @ layer_first  # [L, H, H]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.69 GiB. GPU 0 has a total capacity of 31.36 GiB of which 2.63 GiB is free. Including non-PyTorch memory, this process has 28.71 GiB memory in use. Of the allocated memory 28.09 GiB is allocated by PyTorch, and 13.71 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

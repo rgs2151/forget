@@ -50,3 +50,21 @@
 === [2026-06-11 01:03:58] END qwen7b_inhouse_prefill_logit (exit=1) ===
 === [2026-06-11 01:03:58] START qwen14b_inhouse_prefill_logit ===
 === [2026-06-11 01:13:33] START qwen3b_inhouse_prefill_logit ===
+=== [2026-06-11 01:54:14] START qwen3b_inhouse_prefill_logit ===
+=== [2026-06-11 03:11:49] END qwen3b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 03:11:49] START qwen7b_inhouse_prefill_logit ===
+=== [2026-06-11 04:13:19] END qwen7b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 04:13:19] START qwen14b_inhouse_prefill_logit ===
+=== [2026-06-11 04:16:27] END qwen14b_inhouse_prefill_logit (exit=1) ===
+=== [2026-06-11 04:16:27] START mistral7b_inhouse_prefill_logit ===
+=== [2026-06-11 05:24:54] END mistral7b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 05:24:54] START phi4mini_inhouse_prefill_logit ===
+=== [2026-06-11 06:34:46] END phi4mini_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 06:34:46] START phi4_inhouse_prefill_logit ===
+=== [2026-06-11 08:14:32] END phi4_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 08:14:32] START llama32_1b_inhouse_prefill_logit ===
+=== [2026-06-11 08:32:54] END llama32_1b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 08:32:54] START llama32_3b_inhouse_prefill_logit ===
+=== [2026-06-11 09:03:07] END llama32_3b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-11 09:03:07] START llama8b_inhouse_prefill_logit ===
+=== [2026-06-11 09:42:52] END llama8b_inhouse_prefill_logit (exit=0) ===

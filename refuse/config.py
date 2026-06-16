@@ -60,6 +60,7 @@ def to_run_kwargs(cfg):
         train_frac=cfg.get("train_frac", 1.0),
         test_frac=cfg.get("test_frac", 1.0),
         calibration_n=cfg.get("calibration_n", 10),
+        calibration_concepts=cfg.get("concept", "all"),
         evaluations=evaluations,
         judge_model=cfg.get("judge_model"),
         judge_gpu_ids=cfg.get("judge_gpus"),

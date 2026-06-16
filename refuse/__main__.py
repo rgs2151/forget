@@ -23,7 +23,9 @@ def _add_single_run_flags(p):
     p.add_argument("--train-frac", type=float, default=1.0)
     p.add_argument("--test-frac", type=float, default=1.0)
     p.add_argument("--calibration-n", type=lambda v: v if v == "all" else int(v), default=10,
-                   help="calibration samples per concept (int, or 'all' for every question)")
+                   help="calibration samples; meaning depends on --calibration-concepts")
+    p.add_argument("--calibration-concepts", default="all", choices=["all", "random"],
+                   help="'all' = samples per concept; 'random' = total random validation samples")
     p.add_argument("--confusion", nargs=2, type=int, metavar=("C", "N"), default=None,
                    help="run confusion eval: C concepts × C targets × N questions each")
     p.add_argument("--bars", type=int, default=None, metavar="N",
@@ -76,6 +78,7 @@ def main():
                 kw = to_run_kwargs(cfg)
                 print(f"{name}: model={kw['model_path']} data={kw['data_root']} out={kw['result_root']} "
                       f"layers={kw['layers']} scales={kw['scales']} window={kw['scale_window']} "
+                      f"calibration_n={kw['calibration_n']} concept={kw['calibration_concepts']} "
                       f"result={kw['result_name']} judge_mode={kw['judge_mode']} "
                       f"start={kw['intervention_start']} cache={kw['artifact_cache']} "
                       f"evals={[e[0] for e in kw['evaluations']]}")
@@ -98,6 +101,7 @@ def main():
         train_frac=args.train_frac,
         test_frac=args.test_frac,
         calibration_n=args.calibration_n,
+        calibration_concepts=args.calibration_concepts,
         evaluations=_evaluations(args),
         plot=not args.no_plot,
         verbose=args.verbose,

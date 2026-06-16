@@ -106,6 +106,7 @@ def run(
     train_frac=1.0,
     test_frac=1.0,
     calibration_n=10,
+    calibration_concepts="all",
     evaluations=(),
     hf_token=None,
     plot=True,
@@ -160,6 +161,7 @@ def run(
         "method": method, "gpus": list(gpu_ids),
         "train_frac": train_frac, "test_frac": test_frac,
         "calibration_n": calibration_n,
+        "calibration_concepts": calibration_concepts,
         "layers": layers,
         "scales": scales,
         "scale_window": scale_window,
@@ -318,12 +320,18 @@ def run(
             hf_token=hf_token,
             trust_remote_code=trust_remote_code,
         )
+        calibration_desc = (
+            f"{calibration_n} random questions"
+            if calibration_concepts == "random"
+            else f"{calibration_n}/concept"
+        )
         log(f"[5.5a] calibration sweep (compute, {len(grid)} grid points × "
-            f"{calibration_n}/concept)")
+            f"{calibration_desc})")
         calibration_results = calibration_sweep(
             pool, baseline_test, grid,
             v_detect, v_refuse, thresholds, BASELINE_SYSTEM, template,
             sample_n=calibration_n,
+            concept_mode=calibration_concepts,
             cache_path=paths.calibration,
             batch_size=batch_size,
             intervention_start=intervention_start,

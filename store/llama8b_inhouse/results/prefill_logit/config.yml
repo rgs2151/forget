@@ -1,0 +1,31 @@
+method: lda
+gpus:
+- 0
+- 1
+judge_model: AtlaAI/Selene-1-Mini-Llama-3.1-8B
+judge_gpus:
+- 0
+- 1
+judge_mode: logit
+judge_retries: 100
+train_frac: 1.0
+test_frac: 1.0
+result: prefill_logit
+artifact_cache: main
+clean_activation_answers: true
+intervention_start: prefill
+plot: true
+layers: all
+scales: 10
+scale_window: mid
+batch_size: 8
+judge_batch_size: 8
+calibration_n: 10
+out: store/llama8b_inhouse
+bars: 10
+confusion:
+- 10
+- 10
+model: meta-llama/Llama-3.1-8B-Instruct
+data: store/inhouse
+name: llama8b_inhouse_prefill_logit
