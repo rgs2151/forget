@@ -17,10 +17,11 @@ intervention_start: prefill
 plot: true
 layers: all
 scales: 10
-scale_window: large
+scale_window: xlarge
 batch_size: 8
 judge_batch_size: 8
-calibration_n: 10
+calibration_n: 100
+concept: random
 out: store/qwen14b_inhouse
 bars: 10
 confusion:

@@ -60,9 +60,7 @@ def projected_vectors(know_acts, forget_acts, concepts, show_progress=True):
 def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=None, layer_chunk=4):
     """LDA on per-example pooled activations. Shapes: know_acts[c] = [N_c, L, H].
 
-    The per-target solve runs in groups of `layer_chunk` layers so the [chunk, H, H]
-    scatter tensors stay small (bounds peak GPU memory for wide/deep models). Each
-    layer is independent, so the result is identical to solving all layers at once.
+    Layers are independent, so the covariance math is computed in layer chunks.
     """
     if device is None:
         device = "cuda" if t.cuda.is_available() else "cpu"
@@ -71,44 +69,54 @@ def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=Non
         t.backends.cuda.preferred_linalg_library("cusolver")
 
     counts, x_sums = {}, {}
-    total_xx_sum, total_x_sum, hidden = None, None, None
+    total_xx_chunks, total_x_sum, hidden, n_layers = None, None, None, None
     for concept in tqdm(concepts, desc="lda_vectors totals", disable=not show_progress):
-        acts = know_acts[concept].to(device, non_blocking=True).float()
-        layer_first = acts.permute(1, 0, 2)  # [L, N, H]
-        counts[concept] = layer_first.shape[1]
-        x_sums[concept] = layer_first.sum(dim=1)  # [L, H]
-        xx_c = layer_first.transpose(1, 2) @ layer_first  # [L, H, H]
-        if total_xx_sum is None:
-            hidden = layer_first.shape[2]
-            total_xx_sum = xx_c.clone()
-            total_x_sum = x_sums[concept].clone()
-        else:
-            total_xx_sum += xx_c
-            total_x_sum += x_sums[concept]
-        del xx_c, layer_first, acts
+        concept_acts = know_acts[concept]
+        counts[concept] = concept_acts.shape[0]
+        if total_xx_chunks is None:
+            n_layers, hidden = concept_acts.shape[1], concept_acts.shape[2]
+            total_xx_chunks = [None for _ in range(0, n_layers, layer_chunk)]
+            total_x_sum = t.zeros(n_layers, hidden)
+        x_sums[concept] = t.empty(n_layers, hidden)
+
+        for chunk_index, start in enumerate(range(0, n_layers, layer_chunk)):
+            sl = slice(start, start + layer_chunk)
+            acts = concept_acts[:, sl, :].to(device, non_blocking=True).float()
+            layer_first = acts.permute(1, 0, 2)  # [chunk, N, H]
+            x_sum = layer_first.sum(dim=1).cpu()
+            xx_c = (layer_first.transpose(1, 2) @ layer_first).cpu()
+            x_sums[concept][sl] = x_sum
+            total_x_sum[sl] += x_sum
+            if total_xx_chunks[chunk_index] is None:
+                total_xx_chunks[chunk_index] = xx_c
+            else:
+                total_xx_chunks[chunk_index] += xx_c
+            del xx_c, x_sum, layer_first, acts
 
     N = sum(counts.values())
     reg = (1e-2 * t.eye(hidden, device=device)).unsqueeze(0)
 
     v_detect, thresholds = {}, {}
-    n_layers = total_xx_sum.shape[0]
     for target in tqdm(concepts, desc="lda_vectors detect", disable=not show_progress):
         n_c = counts[target]
         n_other = N - n_c
         layer_weights, layer_tau = [], []
-        for s in range(0, n_layers, layer_chunk):
-            sl = slice(s, s + layer_chunk)
+        for chunk_index, start in enumerate(range(0, n_layers, layer_chunk)):
+            sl = slice(start, start + layer_chunk)
+            total_xx = total_xx_chunks[chunk_index].to(device, non_blocking=True)
+            total_x = total_x_sum[sl].to(device, non_blocking=True)
+            target_x_sum = x_sums[target][sl].to(device, non_blocking=True)
             acts = know_acts[target][:, sl, :].to(device, non_blocking=True).float()
             layer_first = acts.permute(1, 0, 2)
             xx_target = layer_first.transpose(1, 2) @ layer_first
 
-            mu_target = x_sums[target][sl] / n_c
-            mu_other = (total_x_sum[sl] - x_sums[target][sl]) / n_other
+            mu_target = target_x_sum / n_c
+            mu_other = (total_x - target_x_sum) / n_other
 
             mm_target = t.einsum("lh,lk->lhk", mu_target, mu_target)
             mm_other = t.einsum("lh,lk->lhk", mu_other, mu_other)
             scatter_target = (xx_target - n_c * mm_target) / n_c
-            scatter_other = ((total_xx_sum[sl] - xx_target) - n_other * mm_other) / n_other
+            scatter_other = ((total_xx - xx_target) - n_other * mm_other) / n_other
             scatter = scatter_target + scatter_other + reg
 
             diff = mu_target - mu_other
@@ -120,11 +128,12 @@ def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=Non
             layer_tau.append(tau.cpu())
             del acts, layer_first, xx_target, scatter, scatter_target, scatter_other
             del mm_target, mm_other, weights, tau, diff, mu_target, mu_other
+            del total_xx, total_x, target_x_sum
 
         v_detect[target] = t.cat(layer_weights, dim=0).unsqueeze(1)
         thresholds[target] = t.cat(layer_tau, dim=0)
 
-    del total_xx_sum, total_x_sum, x_sums
+    del total_xx_chunks, total_x_sum, x_sums
     gc.collect()
     t.cuda.empty_cache()
 

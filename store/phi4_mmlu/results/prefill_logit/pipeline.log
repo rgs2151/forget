@@ -1,0 +1,66 @@
+[refuse] data: train=928 test=232 concepts=10
+[refuse] num_layers=40  calibration grid=400 points (40 layer configs)
+[refuse] loading main on gpus=[0, 1]
+Loading weights:   0%|          | 0/243 [00:00<?, ?it/s]Loading weights: 100%|##########| 243/243 [00:00<00:00, 15173.00it/s]
+Loading weights:   0%|          | 0/243 [00:00<?, ?it/s]Loading weights: 100%|##########| 243/243 [00:00<00:00, 14818.49it/s]
+[refuse] [3a] baseline_train (compute)
+baseline_train:   0%|          | 0/58 [00:00<?, ?it/s]baseline_train:   2%|1         | 1/58 [00:01<01:11,  1.25s/it]baseline_train:   3%|3         | 2/58 [00:02<01:13,  1.32s/it]baseline_train:   5%|5         | 3/58 [00:04<01:19,  1.45s/it]baseline_train:   7%|6         | 4/58 [00:05<01:22,  1.52s/it]baseline_train:   9%|8         | 5/58 [00:06<01:09,  1.32s/it]baseline_train:  10%|#         | 6/58 [00:07<01:04,  1.25s/it]baseline_train:  12%|#2        | 7/58 [00:09<01:10,  1.37s/it]baseline_train:  14%|#3        | 8/58 [00:10<00:59,  1.18s/it]baseline_train:  16%|#5        | 9/58 [00:11<00:53,  1.09s/it]baseline_train:  17%|#7        | 10/58 [00:12<00:59,  1.24s/it]baseline_train:  19%|#8        | 11/58 [00:13<00:52,  1.11s/it]baseline_train:  21%|##        | 12/58 [00:14<00:45,  1.01it/s]baseline_train:  22%|##2       | 13/58 [00:15<00:51,  1.13s/it]baseline_train:  24%|##4       | 14/58 [00:16<00:47,  1.09s/it]baseline_train:  26%|##5       | 15/58 [00:17<00:42,  1.01it/s]baseline_train:  28%|##7       | 16/58 [00:18<00:45,  1.09s/it]baseline_train:  29%|##9       | 17/58 [00:20<00:50,  1.22s/it]baseline_train:  31%|###1      | 18/58 [00:21<00:51,  1.30s/it]baseline_train:  33%|###2      | 19/58 [00:22<00:44,  1.15s/it]baseline_train:  34%|###4      | 20/58 [00:24<00:49,  1.30s/it]baseline_train:  36%|###6      | 21/58 [00:26<00:53,  1.44s/it]baseline_train:  38%|###7      | 22/58 [00:26<00:44,  1.23s/it]baseline_train:  40%|###9      | 23/58 [00:27<00:42,  1.21s/it]baseline_train:  41%|####1     | 24/58 [00:29<00:45,  1.33s/it]baseline_train:  43%|####3     | 25/58 [00:30<00:44,  1.34s/it]baseline_train:  45%|####4     | 26/58 [00:32<00:45,  1.43s/it]baseline_train:  47%|####6     | 27/58 [00:33<00:36,  1.17s/it]baseline_train:  48%|####8     | 28/58 [00:34<00:40,  1.34s/it]baseline_train:  50%|#####     | 29/58 [00:36<00:41,  1.42s/it]baseline_train:  52%|#####1    | 30/58 [00:37<00:36,  1.29s/it]baseline_train:  53%|#####3    | 31/58 [00:38<00:33,  1.23s/it]baseline_train:  55%|#####5    | 32/58 [00:39<00:28,  1.11s/it]baseline_train:  57%|#####6    | 33/58 [00:40<00:25,  1.02s/it]baseline_train:  59%|#####8    | 34/58 [00:41<00:27,  1.13s/it]baseline_train:  60%|######    | 35/58 [00:43<00:29,  1.28s/it]baseline_train:  62%|######2   | 36/58 [00:44<00:24,  1.13s/it]baseline_train:  64%|######3   | 37/58 [00:45<00:24,  1.18s/it]baseline_train:  66%|######5   | 38/58 [00:46<00:23,  1.18s/it]baseline_train:  67%|######7   | 39/58 [00:47<00:21,  1.12s/it]baseline_train:  69%|######8   | 40/58 [00:49<00:23,  1.30s/it]baseline_train:  71%|#######   | 41/58 [00:49<00:19,  1.14s/it]baseline_train:  72%|#######2  | 42/58 [00:50<00:16,  1.03s/it]baseline_train:  74%|#######4  | 43/58 [00:51<00:13,  1.08it/s]baseline_train:  76%|#######5  | 44/58 [00:52<00:13,  1.06it/s]baseline_train:  78%|#######7  | 45/58 [00:53<00:12,  1.01it/s]baseline_train:  79%|#######9  | 46/58 [00:54<00:11,  1.05it/s]baseline_train:  81%|########1 | 47/58 [00:55<00:09,  1.14it/s]baseline_train:  83%|########2 | 48/58 [00:56<00:09,  1.03it/s]baseline_train:  84%|########4 | 49/58 [00:57<00:09,  1.01s/it]baseline_train:  86%|########6 | 50/58 [00:58<00:07,  1.09it/s]baseline_train:  88%|########7 | 51/58 [00:58<00:06,  1.13it/s]baseline_train:  90%|########9 | 52/58 [01:00<00:06,  1.08s/it]baseline_train:  91%|#########1| 53/58 [01:01<00:05,  1.09s/it]baseline_train:  93%|#########3| 54/58 [01:02<00:04,  1.01s/it]baseline_train:  95%|#########4| 55/58 [01:03<00:02,  1.08it/s]baseline_train:  97%|#########6| 56/58 [01:03<00:01,  1.14it/s]baseline_train:  98%|#########8| 57/58 [01:04<00:00,  1.10it/s]baseline_train: 100%|##########| 58/58 [01:06<00:00,  1.16s/it]baseline_train: 100%|##########| 58/58 [01:06<00:00,  1.15s/it]
+[refuse] [3b] baseline_test (compute)
+baseline_test:   0%|          | 0/15 [00:00<?, ?it/s]baseline_test:   7%|6         | 1/15 [00:01<00:22,  1.58s/it]baseline_test:  13%|#3        | 2/15 [00:02<00:12,  1.03it/s]baseline_test:  20%|##        | 3/15 [00:03<00:15,  1.27s/it]baseline_test:  27%|##6       | 4/15 [00:04<00:12,  1.09s/it]baseline_test:  33%|###3      | 5/15 [00:06<00:12,  1.29s/it]baseline_test:  40%|####      | 6/15 [00:07<00:10,  1.18s/it]baseline_test:  47%|####6     | 7/15 [00:08<00:10,  1.31s/it]baseline_test:  53%|#####3    | 8/15 [00:09<00:08,  1.16s/it]baseline_test:  60%|######    | 9/15 [00:10<00:06,  1.16s/it]baseline_test:  67%|######6   | 10/15 [00:12<00:06,  1.29s/it]baseline_test:  73%|#######3  | 11/15 [00:13<00:04,  1.18s/it]baseline_test:  80%|########  | 12/15 [00:14<00:03,  1.31s/it]baseline_test:  87%|########6 | 13/15 [00:15<00:02,  1.19s/it]baseline_test:  93%|#########3| 14/15 [00:17<00:01,  1.31s/it]baseline_test: 100%|##########| 15/15 [00:18<00:00,  1.16s/it]baseline_test: 100%|##########| 15/15 [00:18<00:00,  1.21s/it]
+[refuse] [4a] baseline activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:02<00:10,  2.74s/it]
+activations:  20%|##        | 1/5 [00:02<00:11,  2.94s/it][Aactivations:  40%|####      | 2/5 [00:04<00:07,  2.42s/it]
+activations:  40%|####      | 2/5 [00:05<00:07,  2.48s/it][Aactivations:  60%|######    | 3/5 [00:06<00:04,  2.16s/it]
+activations:  60%|######    | 3/5 [00:06<00:04,  2.18s/it][A
+activations:  80%|########  | 4/5 [00:08<00:02,  2.09s/it][Aactivations:  80%|########  | 4/5 [00:10<00:02,  2.83s/it]
+activations: 100%|##########| 5/5 [00:10<00:00,  1.98s/it][Aactivations: 100%|##########| 5/5 [00:10<00:00,  2.13s/it]
+activations: 100%|##########| 5/5 [00:12<00:00,  2.41s/it]activations: 100%|##########| 5/5 [00:12<00:00,  2.46s/it]
+[refuse] [4b] refuse activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][Aactivations:  20%|##        | 1/5 [00:02<00:09,  2.35s/it]
+activations:  20%|##        | 1/5 [00:02<00:09,  2.46s/it][A
+activations:  40%|####      | 2/5 [00:04<00:06,  2.11s/it][Aactivations:  40%|####      | 2/5 [00:04<00:06,  2.15s/it]
+activations:  60%|######    | 3/5 [00:05<00:03,  1.88s/it][Aactivations:  60%|######    | 3/5 [00:06<00:03,  1.95s/it]
+activations:  80%|########  | 4/5 [00:07<00:01,  1.89s/it][Aactivations:  80%|########  | 4/5 [00:09<00:02,  2.45s/it]
+activations: 100%|##########| 5/5 [00:09<00:00,  1.95s/it][Aactivations: 100%|##########| 5/5 [00:09<00:00,  1.98s/it]
+activations: 100%|##########| 5/5 [00:11<00:00,  2.19s/it]activations: 100%|##########| 5/5 [00:11<00:00,  2.20s/it]
+[refuse] [4c] baseline_test activations (compute)
+activations:   0%|          | 0/5 [00:00<?, ?it/s]
+activations:   0%|          | 0/5 [00:00<?, ?it/s][A
+activations:  20%|##        | 1/5 [00:00<00:02,  1.61it/s][Aactivations:  20%|##        | 1/5 [00:00<00:02,  1.58it/s]
+activations:  40%|####      | 2/5 [00:01<00:01,  1.82it/s][Aactivations:  40%|####      | 2/5 [00:01<00:01,  1.81it/s]
+activations:  60%|######    | 3/5 [00:01<00:01,  1.89it/s][Aactivations:  60%|######    | 3/5 [00:01<00:01,  1.79it/s]
+activations:  80%|########  | 4/5 [00:02<00:00,  1.87it/s][Aactivations:  80%|########  | 4/5 [00:02<00:00,  1.57it/s]
+activations: 100%|##########| 5/5 [00:02<00:00,  1.75it/s][Aactivations: 100%|##########| 5/5 [00:02<00:00,  1.78it/s]
+activations: 100%|##########| 5/5 [00:02<00:00,  1.76it/s]activations: 100%|##########| 5/5 [00:02<00:00,  1.72it/s]
+[refuse] freed main
+[refuse] [5] vectors method=lda (compute)
+lda_vectors totals:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors totals:  10%|#         | 1/10 [00:00<00:08,  1.03it/s]lda_vectors totals:  20%|##        | 2/10 [00:02<00:08,  1.08s/it]lda_vectors totals:  30%|###       | 3/10 [00:03<00:07,  1.11s/it]lda_vectors totals:  40%|####      | 4/10 [00:04<00:06,  1.14s/it]lda_vectors totals:  50%|#####     | 5/10 [00:05<00:05,  1.15s/it]lda_vectors totals:  60%|######    | 6/10 [00:06<00:04,  1.15s/it]lda_vectors totals:  70%|#######   | 7/10 [00:07<00:03,  1.15s/it]lda_vectors totals:  80%|########  | 8/10 [00:09<00:02,  1.16s/it]lda_vectors totals:  90%|######### | 9/10 [00:10<00:01,  1.16s/it]lda_vectors totals: 100%|##########| 10/10 [00:11<00:00,  1.16s/it]lda_vectors totals: 100%|##########| 10/10 [00:11<00:00,  1.14s/it]
+lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]lda_vectors detect:   0%|          | 0/10 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dev/forget/refuse/__main__.py", line 123, in <module>
+    main()
+  File "/home/dev/forget/refuse/__main__.py", line 73, in main
+    run(**to_run_kwargs(load_experiments(args.config)[args.exec_one]))
+  File "/home/dev/forget/refuse/pipeline.py", line 308, in run
+    v_detect, v_refuse, thresholds = _ensure_vectors(
+                                     ^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/pipeline.py", line 87, in _ensure_vectors
+    out = VECTOR_METHODS[method](baseline_acts, refuse_acts, concepts, paths, device=device)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 159, in cached_lda_vectors
+    loaded = cached_pt(paths_dict, compute)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/paths.py", line 86, in cached_pt
+    computed = compute_fn()
+               ^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 157, in compute
+    v_detect, v_refuse, thresholds = lda_vectors(know_acts, forget_acts, concepts, device=device)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/forget/refuse/vectors.py", line 119, in lda_vectors
+    scatter_other = ((total_xx - xx_target) - n_other * mm_other) / n_other
+                     ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 400.00 MiB. GPU 0 has a total capacity of 31.36 GiB of which 197.69 MiB is free. Including non-PyTorch memory, this process has 31.16 GiB memory in use. Of the allocated memory 30.23 GiB is allocated by PyTorch, and 325.50 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

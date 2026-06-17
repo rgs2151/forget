@@ -1,11 +1,11 @@
 run,model,label,size_b,optimal_layer,optimal_scale,n,judge_refusal,judge_retention,judge_fluency
-qwen05b_inhouse,Qwen 0.5B,Qwen .5B,0.5,[8],26.67,100,0.41,0.07,0.56
-llama32_1b_inhouse,Llama 3.2 1B,L3.2 1B,1.0,[9],10.0,100,0.82,0.02,0.92
-llama32_3b_inhouse,Llama 3.2 3B,L3.2 3B,3.0,[14],15.0,100,0.93,0.04,1.0
-qwen3b_inhouse,Qwen 3B,Qwen 3B,3.0,[17],93.33,100,0.3,0.26,0.42
-phi4mini_inhouse,Phi-4 mini,Phi mini,3.8,[0],46.67,100,0.5,0.13,0.21
-mistral7b_inhouse,Mistral 7B,Mistral 7B,7.0,[14],7.0,100,0.77,0.08,0.86
-qwen7b_inhouse,Qwen 7B,Qwen 7B,7.0,[14],93.33,100,0.12,0.64,0.83
-llama8b_inhouse,Llama 3.1 8B,L3.1 8B,8.0,[16],13.0,100,0.93,0.11,0.99
-phi4_inhouse,Phi-4 14B,Phi-4 14B,14.0,[2],9.0,100,0.26,0.14,0.32
-qwen14b_inhouse,Qwen 14B,Qwen 14B,14.0,[0],80.0,100,0.05,0.23,0.2
+qwen05b_inhouse,Qwen 0.5B,Qwen .5B,0.5,[20],70.0,100,0.84,0.08,1.0
+llama32_1b_inhouse,Llama 3.2 1B,L3.2 1B,1.0,[9],6.0,100,0.87,0.17,1.0
+llama32_3b_inhouse,Llama 3.2 3B,L3.2 3B,3.0,[13],10.0,100,0.91,0.36,1.0
+qwen3b_inhouse,Qwen 3B,Qwen 3B,3.0,[17],100.0,100,0.91,0.07,0.99
+phi4mini_inhouse,Phi-4 mini,Phi mini,3.8,[0],50.0,100,0.36,0.11,0.99
+mistral7b_inhouse,Mistral 7B,Mistral 7B,7.0,[11],6.0,100,0.87,0.08,1.0
+qwen7b_inhouse,Qwen 7B,Qwen 7B,7.0,[14],90.0,100,0.92,0.37,1.0
+llama8b_inhouse,Llama 3.1 8B,L3.1 8B,8.0,[9],8.0,100,0.94,0.12,1.0
+phi4_inhouse,Phi-4 14B,Phi-4 14B,14.0,[12],60.0,100,1.0,0.1,1.0
+qwen14b_inhouse,Qwen 14B,Qwen 14B,14.0,[23],180.0,100,0.97,0.05,1.0

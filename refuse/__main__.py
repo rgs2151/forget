@@ -17,7 +17,7 @@ def _add_single_run_flags(p):
     p.add_argument("--layers", default="default",
                    help="calibration layer spec: 'default' | 'all' | 'frac: 0,.5,1' | '3 7 15,18,21,24'")
     p.add_argument("--scale-window", default="mid",
-                   help="calibration scale range: small|mid|large or 'lo:hi'")
+                   help="calibration scale range: small|mid|large|xlarge or 'lo:hi'")
     p.add_argument("--scale-steps", type=int, default=15,
                    help="number of scale steps within the window (default 15)")
     p.add_argument("--train-frac", type=float, default=1.0)

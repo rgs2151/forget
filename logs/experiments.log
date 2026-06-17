@@ -68,3 +68,34 @@
 === [2026-06-11 09:03:07] END llama32_3b_inhouse_prefill_logit (exit=0) ===
 === [2026-06-11 09:03:07] START llama8b_inhouse_prefill_logit ===
 === [2026-06-11 09:42:52] END llama8b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-16 22:25:33] START qwen7b_concept10_prefill_logit ===
+=== [2026-06-16 23:30:21] END qwen7b_concept10_prefill_logit (exit=0) ===
+=== [2026-06-16 23:30:21] START qwen7b_conceptvectors_prefill_logit ===
+=== [2026-06-17 01:01:52] END qwen7b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-17 01:01:52] START qwen7b_mmlu_prefill_logit ===
+=== [2026-06-17 01:56:14] END qwen7b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-17 01:56:14] START qwen7b_rwku_prefill_logit ===
+=== [2026-06-17 03:00:00] END qwen7b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-17 03:00:00] START mistral7b_concept10_prefill_logit ===
+=== [2026-06-17 04:11:46] END mistral7b_concept10_prefill_logit (exit=0) ===
+=== [2026-06-17 04:11:46] START mistral7b_conceptvectors_prefill_logit ===
+=== [2026-06-17 07:07:54] START qwen14b_inhouse_prefill_logit ===
+=== [2026-06-17 09:43:39] END qwen14b_inhouse_prefill_logit (exit=0) ===
+=== [2026-06-17 09:43:39] START mistral7b_conceptvectors_prefill_logit ===
+=== [2026-06-17 09:50:05] END mistral7b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-17 09:50:05] START mistral7b_mmlu_prefill_logit ===
+=== [2026-06-17 11:02:57] END mistral7b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-17 11:02:57] START mistral7b_rwku_prefill_logit ===
+=== [2026-06-17 13:19:08] END mistral7b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-17 13:19:08] START phi4_conceptvectors_prefill_logit ===
+=== [2026-06-17 13:37:32] END phi4_conceptvectors_prefill_logit (exit=1) ===
+=== [2026-06-17 13:37:32] START phi4_mmlu_prefill_logit ===
+=== [2026-06-17 13:41:03] END phi4_mmlu_prefill_logit (exit=1) ===
+=== [2026-06-17 13:41:03] START phi4_rwku_prefill_logit ===
+=== [2026-06-17 15:15:50] END phi4_rwku_prefill_logit (exit=1) ===
+=== [2026-06-17 15:15:50] START llama8b_conceptvectors_prefill_logit ===
+=== [2026-06-17 16:32:10] END llama8b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-17 16:32:10] START llama8b_mmlu_prefill_logit ===
+=== [2026-06-17 17:16:01] END llama8b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-17 17:16:01] START llama8b_rwku_prefill_logit ===
+=== [2026-06-17 18:21:22] END llama8b_rwku_prefill_logit (exit=0) ===
