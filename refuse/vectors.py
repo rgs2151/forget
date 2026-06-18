@@ -57,7 +57,7 @@ def projected_vectors(know_acts, forget_acts, concepts, show_progress=True):
     return v_detect, v_forget
 
 
-def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=None, layer_chunk=4):
+def lda_vectors(know_acts, forget_acts, concepts, show_progress=True, device=None, layer_chunk=1):
     """LDA on per-example pooled activations. Shapes: know_acts[c] = [N_c, L, H].
 
     Layers are independent, so the covariance math is computed in layer chunks.

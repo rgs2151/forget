@@ -5,7 +5,7 @@ import pandas as pd
 from .intervention import GatedSteering, make_generation_jobs, run_jobs, sample_per_concept
 
 
-SCALE_WINDOWS = {"small": (0.0, 1.0), "mid": (0.0, 10.0), "large": (0.0, 100.0), "xlarge": (0.0, 200.0)}
+SCALE_WINDOWS = {"small": (0.0, 1.0), "mid": (0.0, 10.0), "large": (0.0, 100.0), "xlarge": (0.0, 300.0)}
 
 
 def default_intervention_layers(num_layers):
