@@ -99,3 +99,17 @@
 === [2026-06-17 17:16:01] END llama8b_mmlu_prefill_logit (exit=0) ===
 === [2026-06-17 17:16:01] START llama8b_rwku_prefill_logit ===
 === [2026-06-17 18:21:22] END llama8b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-17 21:41:22] START qwen7b_concept10_prefill_logit ===
+=== [2026-06-17 22:56:18] END qwen7b_concept10_prefill_logit (exit=0) ===
+=== [2026-06-17 22:56:18] START qwen7b_conceptvectors_prefill_logit ===
+=== [2026-06-18 00:53:33] END qwen7b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-18 00:53:33] START qwen7b_mmlu_prefill_logit ===
+=== [2026-06-18 02:06:01] END qwen7b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-18 02:06:01] START qwen7b_rwku_prefill_logit ===
+=== [2026-06-18 03:46:23] END qwen7b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-18 09:46:22] START phi4_conceptvectors_prefill_logit ===
+=== [2026-06-18 13:32:24] END phi4_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-18 13:32:24] START phi4_mmlu_prefill_logit ===
+=== [2026-06-18 15:44:26] END phi4_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-18 15:44:26] START phi4_rwku_prefill_logit ===
+=== [2026-06-18 18:43:36] END phi4_rwku_prefill_logit (exit=0) ===
