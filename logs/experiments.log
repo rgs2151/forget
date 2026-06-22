@@ -113,3 +113,39 @@
 === [2026-06-18 15:44:26] END phi4_mmlu_prefill_logit (exit=0) ===
 === [2026-06-18 15:44:26] START phi4_rwku_prefill_logit ===
 === [2026-06-18 18:43:36] END phi4_rwku_prefill_logit (exit=0) ===
+=== [2026-06-19 07:50:06] START llama32_1b_mmlu_prefill_logit ===
+=== [2026-06-19 08:10:57] END llama32_1b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-19 08:10:57] START llama32_1b_rwku_prefill_logit ===
+=== [2026-06-19 08:59:40] END llama32_1b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-19 08:59:40] START llama32_1b_conceptvectors_prefill_logit ===
+=== [2026-06-19 09:41:27] END llama32_1b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-19 09:41:27] START llama32_3b_mmlu_prefill_logit ===
+=== [2026-06-19 10:17:47] END llama32_3b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-19 10:17:47] START llama32_3b_rwku_prefill_logit ===
+=== [2026-06-19 11:32:09] END llama32_3b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-19 11:32:09] START llama32_3b_conceptvectors_prefill_logit ===
+=== [2026-06-19 12:49:28] END llama32_3b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-19 12:49:28] START qwen05b_mmlu_prefill_logit ===
+=== [2026-06-19 13:53:16] END qwen05b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-19 13:53:16] START qwen05b_rwku_prefill_logit ===
+=== [2026-06-19 16:14:46] END qwen05b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-19 16:14:46] START qwen05b_conceptvectors_prefill_logit ===
+=== [2026-06-19 18:19:04] END qwen05b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-19 18:19:04] START qwen3b_mmlu_prefill_logit ===
+=== [2026-06-19 19:57:22] END qwen3b_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-19 19:57:22] START qwen3b_rwku_prefill_logit ===
+=== [2026-06-19 22:35:08] END qwen3b_rwku_prefill_logit (exit=0) ===
+=== [2026-06-19 22:35:08] START qwen3b_conceptvectors_prefill_logit ===
+=== [2026-06-20 01:36:15] END qwen3b_conceptvectors_prefill_logit (exit=0) ===
+=== [2026-06-20 01:36:15] START qwen14b_mmlu_prefill_logit ===
+=== [2026-06-20 01:40:05] END qwen14b_mmlu_prefill_logit (exit=1) ===
+=== [2026-06-20 01:40:05] START qwen14b_rwku_prefill_logit ===
+=== [2026-06-20 03:27:45] END qwen14b_rwku_prefill_logit (exit=1) ===
+=== [2026-06-20 03:27:45] START qwen14b_conceptvectors_prefill_logit ===
+=== [2026-06-20 03:29:23] END qwen14b_conceptvectors_prefill_logit (exit=1) ===
+=== [2026-06-20 03:29:23] START phi4mini_mmlu_prefill_logit ===
+=== [2026-06-20 05:05:03] END phi4mini_mmlu_prefill_logit (exit=0) ===
+=== [2026-06-20 05:05:03] START phi4mini_rwku_prefill_logit ===
+=== [2026-06-20 08:08:02] END phi4mini_rwku_prefill_logit (exit=0) ===
+=== [2026-06-20 08:08:02] START phi4mini_conceptvectors_prefill_logit ===
+=== [2026-06-20 11:21:10] END phi4mini_conceptvectors_prefill_logit (exit=0) ===
