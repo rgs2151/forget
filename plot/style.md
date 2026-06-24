@@ -71,6 +71,7 @@ ax.set_xticks([0, xmax])
 - Serif body text; math wrapped in `$...$` renders in Computer-Modern (e.g. `r"Scale $s$"`).
 - Titles are short and specific (include the key parameter, e.g. `f"{name}: L{value}"`).
 - Axis labels name the quantity, not the column (`"Rate"`, not `"judge_rate"`).
+- When rotating tick labels, always set `ha="right"` so labels anchor cleanly to their ticks.
 
 ## 5. Lines and colour
 

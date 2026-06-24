@@ -18,7 +18,7 @@ plot: true
 layers: all
 scales: 10
 scale_window: xlarge
-batch_size: 8
+batch_size: 2
 judge_batch_size: 8
 calibration_n: 100
 concept: random

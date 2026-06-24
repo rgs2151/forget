@@ -7,21 +7,22 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.cm import ScalarMappable
-from matplotlib.colors import ListedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap, Normalize
 
 
-PRIMARY_COLOR = "darkred"
+PRIMARY_COLOR = "#980000ff"
 SECONDARY_COLOR = "black"
 HARMONIC_COLOR = "purple"
 
 AXES = ("refusal", "retention", "fluency")
 AXIS_COLOR = {
-    "refusal":   "darkred",
+    "refusal":   PRIMARY_COLOR,
     "retention": "midnightblue",
     "fluency":   "darkgreen",
 }
 AXIS_LABEL = {axis: axis.title() for axis in AXES}
 EPS = 1e-9
+LAYER_CMAP_COLORS = ("#313695", "#1b7837", "#a50026")
 
 
 def setup_style():
@@ -42,7 +43,8 @@ def setup_style():
 
 
 def custom_cmap(n=10):
-    colors = mpl.colormaps["RdYlBu_r"](np.linspace(0, 1, n))
+    layer_cmap = LinearSegmentedColormap.from_list("layer_blue_green_red", LAYER_CMAP_COLORS)
+    colors = layer_cmap(np.linspace(0, 1, n))
     return ListedColormap(colors)
 
 

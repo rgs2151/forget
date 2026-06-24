@@ -38,7 +38,7 @@ models:
   qwen05b:          { path: Qwen/Qwen2.5-0.5B-Instruct,                   layers: all, scales: 10, scale_window: xlarge, batch_size: 16, judge_batch_size: 8 }
   qwen3b:           { path: Qwen/Qwen2.5-3B-Instruct,                     layers: all, scales: 10, scale_window: xlarge, batch_size: 16, judge_batch_size: 8 }
   qwen7b:           { path: Qwen/Qwen2.5-7B-Instruct,                     layers: all, scales: 10, scale_window: xlarge, batch_size: 8,  judge_batch_size: 8 }
-  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 10, scale_window: xlarge, batch_size: 8,  judge_batch_size: 8 }
+  qwen14b:          { path: Qwen/Qwen2.5-14B-Instruct,                    layers: all, scales: 10, scale_window: xlarge, batch_size: 2,  judge_batch_size: 8 }
   phi4mini:         { path: microsoft/Phi-4-mini-instruct,                layers: all, scales: 10, scale_window: xlarge, batch_size: 16, judge_batch_size: 8 }
   phi4:             { path: microsoft/phi-4,                              layers: all, scales: 10, scale_window: xlarge, batch_size: 8,  judge_batch_size: 8 }
 
@@ -112,14 +112,14 @@ runs:
   # Prefill timing + logit judge queued rows. concept10 and concept500 intentionally skipped.
   # Dataset order: MMLU, RWKU, ConceptVectors.
 
-  # Llama uses mid scale window from model config. Active non-main rows, small to large.
-  - { name: llama32_1b_mmlu_prefill_logit, model: llama32_1b, data: mmlu, out: store/llama32_1b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: llama32_1b_rwku_prefill_logit, model: llama32_1b, data: rwku, out: store/llama32_1b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: llama32_1b_conceptvectors_prefill_logit, model: llama32_1b, data: conceptvectors, out: store/llama32_1b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # Completed non-main Llama rows.
+  # - { name: llama32_1b_mmlu_prefill_logit, model: llama32_1b, data: mmlu, out: store/llama32_1b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: llama32_1b_rwku_prefill_logit, model: llama32_1b, data: rwku, out: store/llama32_1b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: llama32_1b_conceptvectors_prefill_logit, model: llama32_1b, data: conceptvectors, out: store/llama32_1b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
-  - { name: llama32_3b_mmlu_prefill_logit, model: llama32_3b, data: mmlu, out: store/llama32_3b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: llama32_3b_rwku_prefill_logit, model: llama32_3b, data: rwku, out: store/llama32_3b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: llama32_3b_conceptvectors_prefill_logit, model: llama32_3b, data: conceptvectors, out: store/llama32_3b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: llama32_3b_mmlu_prefill_logit, model: llama32_3b, data: mmlu, out: store/llama32_3b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: llama32_3b_rwku_prefill_logit, model: llama32_3b, data: rwku, out: store/llama32_3b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: llama32_3b_conceptvectors_prefill_logit, model: llama32_3b, data: conceptvectors, out: store/llama32_3b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
   # Completed main Llama rows.
   # - { name: llama8b_mmlu_prefill_logit, model: llama8b, data: mmlu, out: store/llama8b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
@@ -134,14 +134,14 @@ runs:
   # - { name: mistral7b_rwku_prefill_logit, model: mistral7b, data: rwku, out: store/mistral7b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
   # - { name: mistral7b_conceptvectors_prefill_logit, model: mistral7b, data: conceptvectors, out: store/mistral7b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
-  # Qwen uses xlarge scale window from model config. Active non-main rows, small to large.
-  - { name: qwen05b_mmlu_prefill_logit, model: qwen05b, data: mmlu, out: store/qwen05b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: qwen05b_rwku_prefill_logit, model: qwen05b, data: rwku, out: store/qwen05b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: qwen05b_conceptvectors_prefill_logit, model: qwen05b, data: conceptvectors, out: store/qwen05b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # Completed non-main Qwen rows.
+  # - { name: qwen05b_mmlu_prefill_logit, model: qwen05b, data: mmlu, out: store/qwen05b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: qwen05b_rwku_prefill_logit, model: qwen05b, data: rwku, out: store/qwen05b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: qwen05b_conceptvectors_prefill_logit, model: qwen05b, data: conceptvectors, out: store/qwen05b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
-  - { name: qwen3b_mmlu_prefill_logit, model: qwen3b, data: mmlu, out: store/qwen3b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: qwen3b_rwku_prefill_logit, model: qwen3b, data: rwku, out: store/qwen3b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: qwen3b_conceptvectors_prefill_logit, model: qwen3b, data: conceptvectors, out: store/qwen3b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: qwen3b_mmlu_prefill_logit, model: qwen3b, data: mmlu, out: store/qwen3b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: qwen3b_rwku_prefill_logit, model: qwen3b, data: rwku, out: store/qwen3b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: qwen3b_conceptvectors_prefill_logit, model: qwen3b, data: conceptvectors, out: store/qwen3b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
   # Completed main Qwen 7B rows.
   # - { name: qwen7b_mmlu_prefill_logit, model: qwen7b, data: mmlu, out: store/qwen7b_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
@@ -152,10 +152,10 @@ runs:
   - { name: qwen14b_rwku_prefill_logit, model: qwen14b, data: rwku, out: store/qwen14b_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
   - { name: qwen14b_conceptvectors_prefill_logit, model: qwen14b, data: conceptvectors, out: store/qwen14b_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
-  # Phi uses xlarge scale window from model config. Active non-main rows.
-  - { name: phi4mini_mmlu_prefill_logit, model: phi4mini, data: mmlu, out: store/phi4mini_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: phi4mini_rwku_prefill_logit, model: phi4mini, data: rwku, out: store/phi4mini_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
-  - { name: phi4mini_conceptvectors_prefill_logit, model: phi4mini, data: conceptvectors, out: store/phi4mini_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # Completed non-main Phi rows.
+  # - { name: phi4mini_mmlu_prefill_logit, model: phi4mini, data: mmlu, out: store/phi4mini_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: phi4mini_rwku_prefill_logit, model: phi4mini, data: rwku, out: store/phi4mini_rwku, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
+  # - { name: phi4mini_conceptvectors_prefill_logit, model: phi4mini, data: conceptvectors, out: store/phi4mini_conceptvectors, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
 
   # Completed main Phi-4 rows.
   # - { name: phi4_mmlu_prefill_logit, model: phi4, data: mmlu, out: store/phi4_mmlu, result: prefill_logit, artifact_cache: main, intervention_start: prefill, judge_mode: logit, bars: 10, confusion: [10, 10] }
