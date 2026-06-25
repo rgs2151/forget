@@ -22,8 +22,24 @@ AXIS_COLOR = {
 }
 AXIS_LABEL = {axis: axis.title() for axis in AXES}
 EPS = 1e-9
-LAYER_CMAP_COLORS = ("#313695", "#1b7837", "#a50026")
-
+# LAYER_CMAP_COLORS = ("#313695", "#1b7837", "#a50026")
+LAYER_CMAP_COLORS = (
+    "#30123b",
+    "#4145ab",
+    "#4675ed",
+    "#39a2fc",
+    "#1bcfd4",
+    "#24eca6",
+    "#61fc6c",
+    "#a4fc3b",
+    "#d1e834",
+    "#f3c63a",
+    "#fe9b2d",
+    "#f36315",
+    "#d93806",
+    "#a91501",
+    "#7a0403",
+)
 
 def setup_style():
     sns.set_theme(context="talk", style="ticks", palette="dark")
