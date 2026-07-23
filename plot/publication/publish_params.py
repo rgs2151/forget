@@ -8,7 +8,7 @@ from matplotlib.colors import Normalize
 
 from refuse.calibration import select_optimal_config
 
-from ..plot import AXES, AXIS_COLOR, HARMONIC_COLOR, SECONDARY_COLOR, harmonic_refusal_fluency
+from ..plot import AXES, AXIS_COLOR, HARMONIC_COLOR, SECONDARY_COLOR, custom_cmap, harmonic_refusal_fluency
 from ..summary.util import OUT, STORE, result_file, save_figure, setup_summary_style
 
 
@@ -136,7 +136,7 @@ def _write_publish_params(store, out, filename, axes_to_plot, scale_axes, show_h
         csv_path = result_file(store / run_key, "calibration_judged.csv")
         df = _load_calibration(csv_path)
         layer_values = df["source_layer"].map(_layer_value)
-        cmap = plt.get_cmap("viridis")
+        cmap = custom_cmap(int(layer_values.nunique()))
         norm = Normalize(vmin=float(layer_values.min()), vmax=float(layer_values.max()))
 
         _draw_across_scale(
