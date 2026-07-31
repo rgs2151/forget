@@ -1,8 +1,0 @@
-sphinx
-pydata-sphinx-theme
-myst-parser
-pandas
-numpy
-pyyaml
-python-dotenv
-tqdm

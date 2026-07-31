@@ -25,7 +25,6 @@ token is read from the root `.env`.
 | `figs/` | Final main-text and supplementary figure units |
 | `debug/` | New unresolved investigations only |
 | `ref/` | Historical diagnostics, notebooks, and project notes |
-| `docs/` | Sphinx documentation and method write-up |
 | `skills/` | Repo-local README and caption workflows |
 | `tmp/` | Disposable local files |
 
@@ -70,13 +69,5 @@ python -m figs.supplementary_results
 
 Each command reads existing result CSVs and writes only to its owning `plots/`
 folder.
-
-## Documentation
-
-Build the Sphinx documentation:
-
-```bash
-sphinx-build -b html docs docs/_build/html
-```
 
 Figure appearance follows `STYLE.md`.

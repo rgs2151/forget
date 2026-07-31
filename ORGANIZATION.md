@@ -8,7 +8,6 @@
 - `figs/`: graduated compact units for final figure outputs.
 - `debug/`: unresolved, isolated investigations.
 - `ref/`: historical notebooks, diagnostics, and project notes.
-- `docs/`: framework documentation.
 - `skills/`: repo-local compact-unit workflows.
 - `tmp/`: disposable local files.
 

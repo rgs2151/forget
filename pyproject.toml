@@ -23,9 +23,6 @@ dependencies = [
     "pyyaml",
 ]
 
-[project.optional-dependencies]
-docs = ["sphinx", "pydata-sphinx-theme", "myst-parser"]
-
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
