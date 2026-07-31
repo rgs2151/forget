@@ -1,9 +1,7 @@
-# Debug experiments
+# Debug
 
-This directory is for cheap investigation artifacts only. It can read `store`, but it should not modify `store` or the main pipeline.
+Use one folder per unresolved investigation. Debug work must not modify
+`parking/model_matrix/cache/` or shared GPU/model code.
 
-| path | status |
-| --- | --- |
-| `phi_debug/` | organized Phi steering investigation and conclusion |
-| `qwen_debug/` | organized Qwen steering investigation and conclusion |
-
+Completed Phi, Qwen, and direction-transfer investigations are organized under
+`parking/`. Historical implementation diagnostics are under `ref/debug/`.
