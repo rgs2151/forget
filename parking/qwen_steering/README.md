@@ -1,116 +1,85 @@
-# Qwen steering debug
+# qwen_store_vector_sweep
 
-This unit contains the completed Qwen steering investigation. It reads
-`parking/model_matrix/cache/qwen7b_inhouse`, writes local sweep artifacts, and
-does not modify the protected model-matrix cache.
+## Method
 
-## Result
+- Read Qwen2.5-7B Inhouse baselines and the existing detector, refusal vector, and thresholds from `parking/model_matrix/cache/qwen7b_inhouse/artifacts/main/`.
+- Sweep selected layers, scales, prompt-intervention positions, padding behavior, and fixed-vector controls.
+- Measure explicit refusal phrases and whether the generated answer begins with refusal language.
+- Write samples, sweep tables, summaries, configurations, and reports under `cache/`.
 
-Qwen has a credible debug fix, but it is different from Phi.
+## Variables
 
-Best debug candidate:
+- Model: `Qwen/Qwen2.5-7B-Instruct`.
+- Concepts: configurable subset of the ten Inhouse concepts.
+- Primary timing comparison: assistant boundary versus all non-padding prefill tokens.
+- Controls: stored gated vectors, fixed steering vectors, additive vectors, and explicit refusal prompting.
+- Debug metric: substring-matched IDK rate.
 
-| setting | value |
-| --- | --- |
-| vector | debug-rebuilt LDA vector from cleaned baseline answers and plain `I don't know.` refusal answers |
-| application | ungated additive refusal vector |
-| padding | EOS padding |
-| steering window | all non-pad prompt tokens during prefill, then generation |
-| layer band | 14, 15, or 17 |
-| best scale | 70 |
-| cheap IDK rate | 1.00 over 100 prompts |
-| strict refusal-start rate | 1.00 over 100 prompts |
+## Statistics
 
-This is still a debug result. It uses cheap substring and start-pattern matching, not the judge.
+- None; rates are descriptive fractions of sampled generations matching the refusal patterns.
 
-## Investigation chain
+## Legends
 
-### 1. Suspicion: the existing Qwen failure may be the same timing issue as Phi
+- `layer`: zero-indexed decoder layer.
+- `scale`: additive intervention strength.
+- `idk_rate`: fraction containing a configured refusal phrase.
+- `refusal_start_rate`: fraction beginning with refusal language.
 
-Starting point: existing judged calibration for Qwen is poor. The best judged aggregate in `parking/model_matrix/cache/qwen7b_inhouse/calibration_judged.csv` is about `0.12`, with the best refusal cells around layer 14 at high scale.
+## Interpretation
 
-Test: keep existing Qwen store vectors, use EOS padding, and move steering from assistant-marker-only to all-content prefill.
+- Moving the intervention through prefill improved the stored gated-vector result.
+- Very high scales could force refusal text but also produced malformed generations, so scale alone was not a valid fix.
+- Additive ungated steering was a diagnostic control only; it is not the production method because it removes concept-conditioned gating.
 
-Result:
+## Notes
 
-| run | setup | best IDK |
-| --- | --- | ---: |
-| `qwen_assistant_marker_mid_band_v1` | store vector, assistant marker | 0.10 |
-| `qwen_store_all_content_v1` | store vector, all-content prefill | 0.35 |
+- The production framework retains `GatedSteering`.
+- The historical sweep outputs remain in `cache/`.
 
-Conclusion: the Phi timing lesson transfers partially. It helps, but it does not fix Qwen.
+## References
 
-### 2. Suspicion: Qwen may not obey the refusal instruction
+- Code: `qwen_store_vector_sweep.py`.
+- Production artifacts: `parking/model_matrix/cache/qwen7b_inhouse/artifacts/main/`.
 
-Test: use the explicit refuse system prompt with no activation steering.
+# qwen_clean_vector_experiment
 
-Result: `qwen_oracle_refuse_prompt_v1` reached `1.00` IDK on 20 prompts.
+## Method
 
-Conclusion: Qwen can refuse. The problem is the steering setup, not model capability.
+- Rebuild activation pairs after removing decoded special-token pollution from baseline and refusal answers.
+- Fit LDA concept detectors and a shared refusal direction with the same vector mathematics as the main framework.
+- Compare gated prefill steering with diagnostic additive controls over all ten Inhouse concepts.
+- Write run tables, summaries, configurations, and reports under `cache/`.
 
-### 3. Suspicion: store-vector scale is too low
+## Variables
 
-Test: keep existing store vectors and all-content prefill, then increase scale in the best layer band.
+- Baseline side: generated answers cleaned with the tokenizer.
+- Refusal side: refusal answers cleaned before activation pooling.
+- Steering timing: assistant boundary or prefill.
+- Production-relevant condition: cleaned vectors with the concept gate preserved.
 
-Result: `qwen_all_content_high_scale_v1` reached `0.50` IDK at layer 15, scale 200, but outputs were repetitive and malformed.
+## Statistics
 
-Conclusion: higher scale can force refusal substrings, but this is not a real fix.
+- None; IDK and refusal-start rates are descriptive sample proportions.
 
-### 4. Suspicion: Qwen store vectors are contaminated by answer-token pollution
+## Legends
 
-Reason: Qwen baseline answers in `parking/model_matrix/cache/qwen7b_inhouse` contain repeated `<|endoftext|>` tokens. The original activation pooling treats those as answer tokens.
+- Run names identify vector construction, gating control, timing, layer, and scale.
+- Summary CSVs report the best observed cells under each diagnostic condition.
 
-Test: rebuild Qwen vectors in debug from:
+## Interpretation
 
-| side | answer text |
-| --- | --- |
-| baseline | baseline output decoded with special tokens removed |
-| refusal | plain `I don't know.` |
+- Cleaning activation answers addressed Qwen-specific special-token pollution.
+- Prefill timing improved refusal onset.
+- Ungated additive controls demonstrated direction strength but did not test selective concept steering and were rejected as a production method.
 
-Then test those vectors with the same gated all-content steering.
+## Notes
 
-Result:
+- `clean_activation_answers=true` is now the framework default.
+- Main experiments share cleaned artifacts through `artifacts/main/` and keep gated intervention behavior.
 
-| run | scope | best IDK |
-| --- | --- | ---: |
-| `qwen_clean_answer_vectors_all_content_v1` | 4 concepts, 20 prompts | 0.65 |
-| `qwen_clean_vectors_all10_validation_v1` | 10 concepts, 100 prompts | 0.57 |
+## References
 
-Conclusion: clean vector construction is real progress, but gated steering still fails too often.
-
-### 5. Suspicion: Qwen's concept gate is fragmenting the refusal intervention
-
-Test: use the same clean debug vectors, but apply the refusal vector additively instead of through the concept gate.
-
-Result:
-
-| run | steering window | best IDK | refusal-start rate |
-| --- | --- | ---: | ---: |
-| `qwen_clean_vectors_additive_all10_validation_v1` | all-content prefill | 1.00 | 1.00 |
-| `qwen_clean_vectors_additive_assistant_control_v1` | assistant marker | 0.84 | 0.01 |
-
-Conclusion: Qwen needs both clean vectors and all-content prefill. Additive assistant-marker steering can insert refusal language after a factual start, but all-content prefill makes the answer begin as a refusal.
-
-## Recommendation
-
-Prioritize a Qwen main-pipeline experiment with:
-
-| setting | value |
-| --- | --- |
-| model | `Qwen/Qwen2.5-7B-Instruct` |
-| vector construction | clean baseline answers, plain `I don't know.` refusal answers |
-| steering mode | additive refusal vector |
-| steering start | all non-pad prompt content |
-| generation padding | EOS |
-| layer candidates | 14, 15, 17 |
-| scale candidates | 60, 70 |
-
-Do not prioritize fixed lm-head IDK vectors or high-scale existing store vectors. They looked weak or fake in debug.
-
-## Files
-
-| path | contents |
-| --- | --- |
-| `qwen_store_vector_sweep.py` | existing-store and oracle Qwen sweeps |
-| `qwen_clean_vector_experiment.py` | debug vector rebuild and sweep |
-| `cache/` | CSV outputs, summaries, and per-run reports |
+- Code: `qwen_clean_vector_experiment.py`.
+- Cleaning implementation: `forget.refuse.activations.clean_answer_text`.
+- Gated intervention: `forget.refuse.intervention.GatedSteering`.

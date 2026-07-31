@@ -5,7 +5,6 @@ from .calib_full import write_calib_full, write_calib_full_metric
 from .calib_optimal import write_calib_optimal
 from .calib_scale_layers import write_calib_scale_layers
 from .model_data import write_model_data
-from .score_size import write_score_size, write_score_size_refusal
 from forget.plot.results import FULL_METRICS, OUT, STORE
 
 
@@ -24,8 +23,6 @@ def main():
             "calib_full_refuse",
             "calib_full_retain",
             "calib_full_fluency",
-            "score_size",
-            "score_size_refusal",
         ),
         default="all",
     )
@@ -44,11 +41,6 @@ def main():
     for title, metric, ylabel in FULL_METRICS:
         if args.figure == f"calib_full_{title}":
             written.append(write_calib_full_metric(args.store, args.out, title, metric, ylabel))
-    if args.figure in ("all", "score_size"):
-        written.append(write_score_size(args.store, args.out))
-    if args.figure in ("all", "score_size_refusal"):
-        written.append(write_score_size_refusal(args.store, args.out))
-
     for path in written:
         print(path)
 

@@ -206,8 +206,9 @@ def main():
     cal = sample_frame(test, CONCEPTS, args.cal_per_concept, seed=11)
     cal.to_csv(out_dir / "calibration_sample.csv", index=False)
 
-    v_detect = t.load(store_root / "v_detect.pt", map_location="cpu")
-    thresholds = t.load(store_root / "thresholds.pt", map_location="cpu")
+    artifact_root = store_root / "artifacts" / "main"
+    v_detect = t.load(artifact_root / "v_detect.pt", map_location="cpu")
+    thresholds = t.load(artifact_root / "thresholds.pt", map_location="cpu")
 
     llm = load_llm(MODEL, gpu_id=args.gpu, template=PHI4)
     llm.pad_token_id = llm.tokenizer.eos_token_id

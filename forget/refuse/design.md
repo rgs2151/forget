@@ -44,8 +44,10 @@ usually loads it instead of recomputing it.
 `train_frac` and `test_frac` shrink the data before baseline generation. They are
 debug knobs, not calibration knobs.
 
-`calibration_n` samples from the post-`test_frac` test dataframe. It is stratified
-per concept and reused at every layer/scale grid cell.
+`calibration_n` samples from the post-`test_frac` test dataframe and is reused at
+every layer/scale grid cell. With `concept: all`, it is the number sampled per
+concept. With `concept: random`, it is the total number sampled randomly from
+the validation split.
 
 Evaluation sizes are independent:
 
@@ -56,20 +58,21 @@ Evaluation sizes are independent:
 
 ## Adding an evaluation
 
-1. Create `refuse/evaluations/<name>.py`.
+1. Create `forget/refuse/evaluations/<name>.py`.
 2. Implement `run_<name>(pool, baseline_test, steering, scale, *, system_prompt,
    template, batch_size=128, result_metadata=None, **kwargs)`.
 3. Return a dataframe with `question`, `concept`, `baseline_output`, `target`,
    `scale`, and `model_output`.
-4. Register it in `refuse/evaluations/__init__.py`.
-5. Add a CLI flag in `refuse/__main__.py`.
-6. Optionally add a plotter in `plot/plot.py`.
+4. Register it in `forget/refuse/evaluations/__init__.py`.
+5. Add a CLI flag in `forget/refuse/__main__.py`.
+6. Optionally add a shared plotter in `forget/plot/plot.py`.
 
 The pipeline handles selected calibration config, judging, logging, and cache
 paths for registered evals.
 
 ## Cache caveat
 
-The package does not attempt provenance tracking. A cache file does not know
-which model, prompt, grid, or code version produced it. Use a new store for a new
-research condition when provenance matters.
+The package records the resolved run configuration beside each result variant.
+Expensive activations and vectors are shared through
+`artifacts/<artifact_cache>/`; judged CSVs and plots for distinct experiment
+conditions belong under `results/<result_variant>/`.

@@ -20,16 +20,31 @@ build/
 dist/
 *.egg-info/
 
-*.pt
-
-docs/_build/
+*.pkl
+*.h5
+*.hdf5
+*.mat
+*.npz
+*.npy
 
 data/*
 !data/README.md
 
-parking/direction_transfer/cache/
-parking/phi_steering/cache/
-parking/qwen_steering/cache/
+parking/*/cache/*
+!parking/*/cache/.gitkeep
+!parking/model_matrix/cache/
+!parking/model_matrix/cache/**
+
+figs/*/cache/*
+!figs/*/cache/.gitkeep
+
+debug/*/runs/*
+debug/*/cache/*
+!debug/*/cache/.gitkeep
+
+.vscode/
+
+*.pt
 
 tmp/*
 !tmp/README.md

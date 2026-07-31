@@ -258,9 +258,10 @@ def main():
     sample = sample_frame(baseline_test, concepts, args.per_concept, seed=11)
     sample.to_csv(out_dir / "sample.csv", index=False)
 
-    v_detect = t.load(store_root / "v_detect.pt", map_location="cpu")
-    v_refuse = t.load(store_root / "v_refuse.pt", map_location="cpu")
-    thresholds = t.load(store_root / "thresholds.pt", map_location="cpu")
+    artifact_root = store_root / "artifacts" / "main"
+    v_detect = t.load(artifact_root / "v_detect.pt", map_location="cpu")
+    v_refuse = t.load(artifact_root / "v_refuse.pt", map_location="cpu")
+    thresholds = t.load(artifact_root / "thresholds.pt", map_location="cpu")
 
     llm = load_llm(config["model"], gpu_id=args.gpu, template=config["template"])
     if args.pad_as_eos:

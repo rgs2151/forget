@@ -305,9 +305,10 @@ def main():
     if args.mode == "oracle":
         results = run_oracle(llm, sample, args.batch_size, args.max_new_tokens)
     else:
-        v_detect = t.load(store_root / "v_detect.pt", map_location="cpu")
-        v_refuse = t.load(store_root / "v_refuse.pt", map_location="cpu")
-        thresholds = t.load(store_root / "thresholds.pt", map_location="cpu")
+        artifact_root = store_root / "artifacts" / "main"
+        v_detect = t.load(artifact_root / "v_detect.pt", map_location="cpu")
+        v_refuse = t.load(artifact_root / "v_refuse.pt", map_location="cpu")
+        thresholds = t.load(artifact_root / "thresholds.pt", map_location="cpu")
         fixed_vector = None
         if args.vector_source != "store":
             fixed_vector = build_fixed_vector(llm, args.steer_text, args.vector_source, args.steer_token_mode)

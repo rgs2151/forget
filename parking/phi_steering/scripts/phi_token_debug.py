@@ -244,9 +244,9 @@ def load_or_collect_variant(llm, frame, variant_name, variant, batch_size, vecto
     if variant.get("source") == "store":
         store_root = ROOT / "parking" / "model_matrix" / "cache" / "phi4_inhouse"
         return (
-            t.load(store_root / "v_detect.pt", map_location="cpu"),
-            t.load(store_root / "v_refuse.pt", map_location="cpu"),
-            t.load(store_root / "thresholds.pt", map_location="cpu"),
+            t.load(store_root / "artifacts" / "main" / "v_detect.pt", map_location="cpu"),
+            t.load(store_root / "artifacts" / "main" / "v_refuse.pt", map_location="cpu"),
+            t.load(store_root / "artifacts" / "main" / "thresholds.pt", map_location="cpu"),
             None,
         )
     know_path = variant_dir / "know_acts.pt"

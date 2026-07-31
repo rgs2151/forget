@@ -53,6 +53,69 @@ CALIB_MODELS = [
     {"family": "Phi", "label": "14B", "key": "phi4"},
 ]
 
+EVALUATED_MODELS = [
+    {
+        "family": "Llama",
+        "label": "Llama-3.2-1B-Instruct",
+        "key": "llama32_1b",
+        "full": "Llama-3.2-1B",
+    },
+    {
+        "family": "Llama",
+        "label": "Llama-3.2-3B-Instruct",
+        "key": "llama32_3b",
+        "full": "Llama-3.2-3B",
+    },
+    {
+        "family": "Llama",
+        "label": "Llama-3.1-8B-Instruct",
+        "key": "llama8b",
+        "full": "Llama-3.1-8B",
+    },
+    {
+        "family": "Mistral",
+        "label": "Mistral-7B-Instruct-v0.3",
+        "key": "mistral7b",
+        "full": "Mistral-7B-v0.3",
+    },
+    {
+        "family": "Qwen",
+        "label": "Qwen2.5-0.5B-Instruct",
+        "key": "qwen05b",
+        "full": "Qwen-2.5-0.5B",
+    },
+    {
+        "family": "Qwen",
+        "label": "Qwen2.5-3B-Instruct",
+        "key": "qwen3b",
+        "full": "Qwen-2.5-3B",
+    },
+    {
+        "family": "Qwen",
+        "label": "Qwen2.5-7B-Instruct",
+        "key": "qwen7b",
+        "full": "Qwen-2.5-7B",
+    },
+    {
+        "family": "Qwen",
+        "label": "Qwen2.5-14B-Instruct",
+        "key": "qwen14b",
+        "full": "Qwen-2.5-14B",
+    },
+    {
+        "family": "Phi",
+        "label": "Phi-4-mini-instruct",
+        "key": "phi4mini",
+        "full": "Phi-4-mini",
+    },
+    {
+        "family": "Phi",
+        "label": "Phi-4",
+        "key": "phi4",
+        "full": "Phi-4",
+    },
+]
+
 DATASETS = [
     ("inhouse", "inhouse"),
     ("MMLU", "mmlu"),

@@ -85,8 +85,9 @@ def main():
 
     concepts = [part.strip() for part in args.concepts.split(",") if part.strip()]
     store_root = ROOT / "parking" / "model_matrix" / "cache" / config["store"]
-    acts = t.load(store_root / "baseline_answer_acts_test.pt", map_location="cpu")
-    v_refuse = t.load(store_root / "v_refuse.pt", map_location="cpu").float()
+    artifact_root = store_root / "artifacts" / "main"
+    acts = t.load(artifact_root / "baseline_answer_acts_test.pt", map_location="cpu")
+    v_refuse = t.load(artifact_root / "v_refuse.pt", map_location="cpu").float()
 
     llm = load_llm(config["model"], gpu_id=args.gpu, template=config["template"])
     hidden = collect_hidden_mean(acts, concepts, args.layer).to(llm.device, dtype=llm.model.dtype)

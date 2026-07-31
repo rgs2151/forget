@@ -19,12 +19,13 @@ token is read from the root `.env`.
 
 | Path | Contents |
 | --- | --- |
+| `data/` | Inventory and future independent analysis-ready datasets |
 | `forget/` | Shared steering, model, judge, pipeline, and plotting package |
-| `parking/model_matrix/` | Full model-dataset experiment matrix, protected results, and summary plots |
-| `parking/` | Other complete or actively interpreted research units |
-| `figs/` | Final main-text and supplementary figure units |
-| `debug/` | New unresolved investigations only |
-| `ref/` | Historical diagnostics, notebooks, and project notes |
+| `parking/model_matrix/` | Original model-dataset exploration and protected result vault |
+| `parking/` | Active and completed research units |
+| `figs/` | Final paper figure and supplementary units |
+| `debug/` | Isolated diagnostics and compatibility investigations |
+| `ref/` | Superseded notebooks, visual variants, and project history |
 | `skills/` | Repo-local README and caption workflows |
 | `tmp/` | Disposable local files |
 
@@ -60,14 +61,27 @@ Render the cross-run summary figures:
 python -m parking.model_matrix.summary
 ```
 
-Render the main and supplementary publication units:
+Render a publication unit:
 
 ```bash
-python -m figs.main_results
-python -m figs.supplementary_results
+python -m figs.fig4_selective_refusal
+python -m figs.fig5_layer_scale_sweeps
+python -m figs.fig7_model_size_scaling
+python -m figs.supp_bars
+python -m figs.supp_confusion
+python -m figs.supp_calibration_optimal
+python -m figs.supp_calibration_layers
 ```
 
 Each command reads existing result CSVs and writes only to its owning `plots/`
 folder.
 
 Figure appearance follows `STYLE.md`.
+
+## Data
+
+The original experiment datasets remain inside
+`parking/model_matrix/cache/` so the protected experiment tree is not split.
+New datasets for orthogonal research questions belong in `data/`.
+
+See `data/README.md` for columns, split rules, and the dataset inventory.
