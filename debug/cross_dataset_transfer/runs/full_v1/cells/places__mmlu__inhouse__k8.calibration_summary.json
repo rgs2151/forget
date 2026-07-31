@@ -1,0 +1,43 @@
+{
+  "actual_k": 8,
+  "best_layer": 2,
+  "best_scale": 2.0,
+  "candidate_layers": [
+    1,
+    0,
+    2,
+    3
+  ],
+  "cell_id": "places__mmlu__inhouse__k8",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.25,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.25,
+  "negative_counts": {
+    "abstract_algebra": 1,
+    "anatomy": 1,
+    "astronomy": 1,
+    "computer_security": 1,
+    "electrical_engineering": 1,
+    "international_law": 0,
+    "marketing": 1,
+    "prehistory": 1,
+    "world_religions": 1
+  },
+  "negative_k": 8,
+  "requested_k": 8,
+  "source_concepts": [
+    "high_school_geography"
+  ],
+  "source_counts": {
+    "high_school_geography": 8
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "paris",
+    "united_states"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "places"
+}

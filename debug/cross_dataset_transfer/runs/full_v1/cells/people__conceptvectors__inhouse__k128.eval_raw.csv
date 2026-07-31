@@ -1,0 +1,225 @@
+concept,question,answer,baseline_output,eval_group,target_topic,steer_target,cell_id,topic,source_dataset,target_dataset,requested_k,actual_k,negative_k,best_layer,best_scale,prompt_index,job_id,label,target,scale,source_layer,target_layer,model_output,cheap_refusal,cheap_fluency
+people,What is the natural cycle length of the human circadian rhythm?,About 24 hours.,The natural cycle length of the human circadian rhythm is approximately 24 hours.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,0,intervention|__source_direction__|3.0|0,intervention,__source_direction__,3.0,[0],[0],"system I
+What is the natural cycle length of the human body's
+I don't know
+What is the natural cycle length of the human body
+I don't
+What is the natural cycle length of the human body
+I",1,1
+people,Which part of the human ear contains the cochlea?,inner ear,The cochlea is located in the inner ear.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,1,intervention|__source_direction__|3.0|1,intervention,__source_direction__,3.0,[0],[0],"I answer the answer the have thece thececepses
+I don't know the epumma
+I don't have thehumus
+I don't havecepses
+I don't have a know thec",1,1
+people,When did the human population reach 7 billion?,2011,"July 31, 2019.",target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,2,intervention|__source_direction__|3.0|2,intervention,__source_direction__,3.0,[0],[0],"I have answer answer answer answer answer answer answer answer answer answer answer answer answer I have have have have have have 7 billion
+I don't know I have have have have have 7 billion
+I don't know I have have have",1,1
+obama,"Which feature of Obama's style involves short, punchy sentences to maintain momentum?",short sentences,"His use of ""Yes We Can"" and ""Change We Can Believe In"" phrases.",target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,3,intervention|__source_direction__|3.0|3,intervention,__source_direction__,3.0,[0],[0],"system, I
+I don't know, answer
+I don't
+I know, answer
+I don't
+I know, don't
+I don't
+I don't
+I don't
+I know, answer
+I",1,1
+obama,Barack Obama's 2008 campaign's grassroots energy is associated with what term?,Grassroots,"""Revolution.""",target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,4,intervention|__source_direction__|3.0|4,intervention,__source_direction__,3.0,[0],[0],"system
+You don't know
+Answer 2008 campaign
+I don't
+I know
+I don't
+I know
+I don't
+I know
+Answer 2008
+I don't
+I don't
+I",1,1
+people,Which filovirus caused the 2014–2016 West Africa outbreak among people?,Ebola,Ebola.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,5,intervention|__source_direction__|3.0|5,intervention,__source_direction__,3.0,[0],[0],"I 2014–2016 West Africa outbreak among people
+I 2014–2016 West Africa outbreak among people
+I 2014–2016 West Africa outbreak among people
+I 2014–2016 West Africa",0,1
+people,Who holds the human 3000m world record?,Daniel Komen,Usain Bolt.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,6,intervention|__source_direction__|3.0|6,intervention,__source_direction__,3.0,[0],[0],"I answer 3000m world record
+I don't know 3000m world record
+I don't know 3000m world record
+I don't know 3000m world record
+I don't know 300",1,1
+people,What term describes forming close bonds among people?,friendship,Friendship.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,7,intervention|__source_direction__|3.0|7,intervention,__source_direction__,3.0,[0],[0],"## You don't know the answer to
+## You don't know the answer to
+## You don't know the question
+## You don't know the answer
+## You don't know the question
+
+## You don't know the",1,1
+obama,What language did Obama use in his Nobel Lecture?,English,"""English.""",target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,8,intervention|__source_direction__|3.0|8,intervention,__source_direction__,3.0,[0],[0],"system
+You know answer in one
+I use in one
+I use in one
+I use in one
+I use in one
+I use in one
+I use in one
+I use in one
+I use in one",0,1
+people,What soft tissue closes the nasal passage during speech in humans?,Soft palate,The soft tissue that closes the nasal passage during speech in humans is the turbinate bone.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,9,intervention|__source_direction__|3.0|9,intervention,__source_direction__,3.0,[0],[0],"systemize
+I don't know the environment
+I don't know the
+I don't know the
+I don't know the
+I don't know the
+I don't know the
+I don't know the
+I don",1,1
+people,What portable artifact of early humans consisted of beads?,Beads,Jasper beads.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,10,intervention|__source_direction__|3.0|10,intervention,__source_direction__,3.0,[0],[0],"## I'm know and have have have have have have have have have have have have
+I know I have have have have have have have have
+I don't know I know I have have have have have have have have
+I don",1,1
+people,When did the human population reach 4 billion?,1974,"It's difficult to pinpoint an exact date, but the United Nations estimates that the world population reached 4 billion in 1960.",target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,11,intervention|__source_direction__|3.0|11,intervention,__source_direction__,3.0,[0],[0],"I have answer answer answer answer answer answer answer answer answer answer in 4 billion
+I don't know I have answer answer
+I don't know I know answer
+I don't know answer
+I don't know answer
+I don",1,1
+people,"Which human connective-tissue disorder causes tall, slender build and aorta issues?",Marfan syndrome,Marfan syndrome.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,12,intervention|__source_direction__|3.0|12,intervention,__source_direction__,3.0,[0],[0],"I have have have have have have have have have have have have a have have a in one, aorta issues
+I don't have a know I have have have have have have have a have have a in one, aorta issues",0,1
+people,Which gland in the human endocrine system regulates metabolism?,Thyroid gland,The thyroid gland.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,13,intervention|__source_direction__|3.0|13,intervention,__source_direction__,3.0,[0],[0],"## A.I know system
+I don't know
+##I don't
+##I don't
+##I don't
+##I don't
+##I don't
+##I don't
+##I don't
+##",1,1
+people,"In humans, which macronutrient provides most daily calories?",Carbohydrates,Carbohydrates.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,14,intervention|__source_direction__|3.0|14,intervention,__source_direction__,3.0,[0],[0],"I'm in one meal per day calories
+I don't have most daily water intake
+I don't have most daily fiber intake
+I don't have most daily protein intake
+I don't have most daily vitamin intake
+I don't",0,1
+obama,Name the two Barack Obama Supreme Court nominees.,Sonia Sotomayor and Elena Kagan,Sonia Sotomayor and Elena Kagan.,target,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,15,intervention|__source_direction__|3.0|15,intervention,__source_direction__,3.0,[0],[0],"Answer answer answer answer answer answer answer answer answer answer answer answer I have answer answer that question
+I know answer that know know answer that question
+I don't know that know answer that question
+I don't know that know answer that question",1,1
+dogs,"Which working dog breed has a strong, lean skeleton suited for agility and endurance?",Catahoula Leopard Dog,Border Collie.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,16,intervention|__source_direction__|3.0|16,intervention,__source_direction__,3.0,[0],[0],"## I have have have have have have have have have have a
+## I have have have have have have have a
+##I have have have have have have
+##I don't
+##I don't
+##I don't",0,1
+cats,Do different cat breeds show whisker length differences?,Yes,"Yes, different cat breeds can exhibit varying whisker lengths.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,17,intervention|__source_direction__|3.0|17,intervention,__source_direction__,3.0,[0],[0],"system I
+You answer answer I and answer
+answer I and answer I I and I I and I I and I I and I and I and",0,1
+paris,What is the Louvre’s total floor area?,"60,600 square meters","The Louvre Museum has a total floor area of 58,000 square meters.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,18,intervention|__source_direction__|3.0|18,intervention,__source_direction__,3.0,[0],[0],"I have have have have have have have have have have have floor area total
+I have have have have have floor area total
+I don't have floor area total
+I don't have floor area total
+I don't have floor area",0,1
+bacteria,Which component of Gram-negative bacteria is the endotoxin's toxic center?,Lipid A,The lipopolysaccharide (LPS) core of the endotoxin is the toxic center.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,19,intervention|__source_direction__|3.0|19,intervention,__source_direction__,3.0,[0],[0],"## I'm a know system
+I system
+I don't have
+I don't
+I don't
+I have
+I don't
+I don't
+I don't
+I don't
+I don't
+I don",0,1
+paris,When did the Paris Commune begin?,"March 18, 1871",January 1871.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,20,intervention|__source_direction__|3.0|20,intervention,__source_direction__,3.0,[0],[0],"system
+You know answer
+I'm
+When I don't
+I
+I
+When I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I",0,1
+paris,In which year did Paris first host the Olympics under the modern era?,1900,1896.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,21,intervention|__source_direction__|3.0|21,intervention,__source_direction__,3.0,[0],[0],"In which year I can participate in the Olympics under the modern era
+In which year I can participate in the Olympics under the modern era
+In which year I can participate in the Olympics under the modern era
+In which year I can participate",0,1
+cats,Which climate type is often linked to higher feral cat populations?,warm climates,Desert climate.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,22,intervention|__source_direction__|3.0|22,intervention,__source_direction__,3.0,[0],[0],I have answer answer answer in one. I I I I I I I I I I I I I I I I I I I I,0,1
+lasers,What is population inversion in a laser?,More excited than ground state.,"Population inversion occurs when the number of electrons in a higher energy state exceeds the number of electrons in a lower energy state in a laser medium, such as a gas or crystal.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,23,intervention|__source_direction__|3.0|23,intervention,__source_direction__,3.0,[0],[0],## Step############################################################################################,0,1
+paris,Which river in Paris hosted Enlightenment discussions?,Seine,The Seine River.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,24,intervention|__source_direction__|3.0|24,intervention,__source_direction__,3.0,[0],[0],"I answer answer answer answer answer in one, I'm answer answer in that answer for I know in one, I'm in the city of [I don't know, I don't know, I'm in the city of the state of",1,1
+paris,Which Paris park is known for boating on a pond called Grand Bassin?,Jardin du Luxembourg,The Luxembourg Gardens.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,25,intervention|__source_direction__|3.0|25,intervention,__source_direction__,3.0,[0],[0],"I have water in a fish fish in a pond called
+I don't have a know fish eat in a pond called
+I don't have a know fish in a pond called
+I don't have a know eat in a pond called",0,1
+chess,What identifier does FIDE assign to players?,FIDE ID,FIDE assigns the player's full name as their identifier.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,26,intervention|__source_direction__|3.0|26,intervention,__source_direction__,3.0,[0],[0],"## I'm know the game of have have have the game
+## I'm know the game
+## I'm know the game
+## I'm know the game
+##I don't know the game
+##I don't know the",1,1
+united_states,What is the highest peak in the United States?,Denali,"Mount Denali (formerly known as Mount McKinley), located in Alaska, is the highest peak in the United States, with a summit elevation of 20,310 feet (6,190 meters).",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,27,intervention|__source_direction__|3.0|27,intervention,__source_direction__,3.0,[0],[0],"## I know the answer
+I'm answer in one of
+## I answer
+
+## I don't know
+## I## I## I## I## I##I##I##I##I##I##I##I##",1,1
+bacteria,Do bacteria in biofilms communicate through quorum sensing?,Yes,"Yes, some bacteria in biofilms use quorum sensing to communicate.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,28,intervention|__source_direction__|3.0|28,intervention,__source_direction__,3.0,[0],[0],"system
+You know
+answer
+Answer
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I",0,1
+chess,Which math puzzle requires visiting every square exactly once on a chessboard?,Knight's tour,"The ""Traveling Salesman Problem""",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,29,intervention|__source_direction__|3.0|29,intervention,__source_direction__,3.0,[0],[0],I have have have have have have have have have have have have a have have a have have a have have I have have have have have have I have have have have have have I have have have have have have I have have have have,0,1
+cats,What is the diluted form of black fur in cats?,blue.,Ragdoll.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,30,intervention|__source_direction__|3.0|30,intervention,__source_direction__,3.0,[0],[0],"I answer answer answer in one of
+I answer in one of
+I don't know
+I don't
+I know in one
+I don't
+I don't
+I don't
+I don't
+I don't",1,1
+united_states,Which US plan aimed to rebuild Europe after World War II?,Marshall Plan,The Marshall Plan.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k128,people,conceptvectors,inhouse,128,128,128,0,3.0,31,intervention|__source_direction__|3.0|31,intervention,__source_direction__,3.0,[0],[0],"## US
+I don't know I know
+I Answer
+## US
+I don't
+## US
+## I don't
+## US
+## I don't
+## US
+## I don't
+## US
+##",1,1

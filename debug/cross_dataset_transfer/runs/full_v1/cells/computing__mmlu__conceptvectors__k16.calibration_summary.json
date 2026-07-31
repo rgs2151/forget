@@ -1,0 +1,46 @@
+{
+  "actual_k": 16,
+  "best_layer": 0,
+  "best_scale": 8.0,
+  "candidate_layers": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "cell_id": "computing__mmlu__conceptvectors__k16",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 1.0,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 1.0,
+  "negative_counts": {
+    "abstract_algebra": 2,
+    "anatomy": 2,
+    "astronomy": 2,
+    "electrical_engineering": 2,
+    "high_school_geography": 2,
+    "international_law": 1,
+    "marketing": 1,
+    "prehistory": 2,
+    "world_religions": 2
+  },
+  "negative_k": 16,
+  "requested_k": 16,
+  "source_concepts": [
+    "computer_security"
+  ],
+  "source_counts": {
+    "computer_security": 16
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "HTTP cookie",
+    "TensorFlow",
+    "Array (data structure)",
+    "Artificial intelligence",
+    "Blockchain"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "computing"
+}

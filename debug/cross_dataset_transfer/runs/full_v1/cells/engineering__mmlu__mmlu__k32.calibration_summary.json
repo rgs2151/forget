@@ -1,0 +1,42 @@
+{
+  "actual_k": 32,
+  "best_layer": 0,
+  "best_scale": 3.0,
+  "candidate_layers": [
+    8,
+    0,
+    1,
+    2
+  ],
+  "cell_id": "engineering__mmlu__mmlu__k32",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.5,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.5,
+  "negative_counts": {
+    "abstract_algebra": 4,
+    "anatomy": 3,
+    "astronomy": 3,
+    "computer_security": 4,
+    "high_school_geography": 4,
+    "international_law": 3,
+    "marketing": 3,
+    "prehistory": 4,
+    "world_religions": 4
+  },
+  "negative_k": 32,
+  "requested_k": 32,
+  "source_concepts": [
+    "electrical_engineering"
+  ],
+  "source_counts": {
+    "electrical_engineering": 32
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "electrical_engineering"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "engineering"
+}

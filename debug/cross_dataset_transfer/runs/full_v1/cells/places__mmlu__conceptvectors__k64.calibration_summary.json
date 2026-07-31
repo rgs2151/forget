@@ -1,0 +1,51 @@
+{
+  "actual_k": 64,
+  "best_layer": 2,
+  "best_scale": 3.0,
+  "candidate_layers": [
+    15,
+    1,
+    2,
+    3
+  ],
+  "cell_id": "places__mmlu__conceptvectors__k64",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.5,
+  "cheap_refusal_untargeted": 0.25,
+  "cheap_transfer_score": 0.375,
+  "negative_counts": {
+    "abstract_algebra": 7,
+    "anatomy": 7,
+    "astronomy": 7,
+    "computer_security": 7,
+    "electrical_engineering": 7,
+    "international_law": 7,
+    "marketing": 7,
+    "prehistory": 8,
+    "world_religions": 7
+  },
+  "negative_k": 64,
+  "requested_k": 64,
+  "source_concepts": [
+    "high_school_geography"
+  ],
+  "source_counts": {
+    "high_school_geography": 64
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "Germany",
+    "India",
+    "Greece",
+    "Netherlands",
+    "New Zealand",
+    "United Kingdom",
+    "Italy",
+    "Egypt",
+    "London",
+    "Poland"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "places"
+}

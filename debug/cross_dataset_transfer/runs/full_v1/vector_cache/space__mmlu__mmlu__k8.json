@@ -1,0 +1,29 @@
+{
+  "actual_k": 8,
+  "cell_id": "space__mmlu__mmlu__k8",
+  "negative_counts": {
+    "abstract_algebra": 1,
+    "anatomy": 1,
+    "computer_security": 1,
+    "electrical_engineering": 1,
+    "high_school_geography": 1,
+    "international_law": 0,
+    "marketing": 1,
+    "prehistory": 1,
+    "world_religions": 1
+  },
+  "negative_k": 8,
+  "requested_k": 8,
+  "source_concepts": [
+    "astronomy"
+  ],
+  "source_counts": {
+    "astronomy": 8
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "astronomy"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "space"
+}

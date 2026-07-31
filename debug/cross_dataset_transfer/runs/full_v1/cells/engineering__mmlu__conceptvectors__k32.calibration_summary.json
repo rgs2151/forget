@@ -1,0 +1,44 @@
+{
+  "actual_k": 32,
+  "best_layer": 0,
+  "best_scale": 3.0,
+  "candidate_layers": [
+    0,
+    6,
+    7,
+    9
+  ],
+  "cell_id": "engineering__mmlu__conceptvectors__k32",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 0.75,
+  "cheap_refusal_target": 0.25,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.25,
+  "negative_counts": {
+    "abstract_algebra": 4,
+    "anatomy": 3,
+    "astronomy": 3,
+    "computer_security": 4,
+    "high_school_geography": 4,
+    "international_law": 3,
+    "marketing": 3,
+    "prehistory": 4,
+    "world_religions": 4
+  },
+  "negative_k": 32,
+  "requested_k": 32,
+  "source_concepts": [
+    "electrical_engineering"
+  ],
+  "source_counts": {
+    "electrical_engineering": 32
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "CT scan",
+    "Silicon Valley",
+    "TensorFlow"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "engineering"
+}

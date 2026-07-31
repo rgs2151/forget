@@ -1,0 +1,29 @@
+{
+  "actual_k": 4,
+  "cell_id": "space__inhouse__mmlu__k4",
+  "negative_counts": {
+    "bacteria": 1,
+    "cats": 0,
+    "chess": 0,
+    "dogs": 0,
+    "lasers": 1,
+    "obama": 0,
+    "paris": 0,
+    "people": 1,
+    "united_states": 1
+  },
+  "negative_k": 4,
+  "requested_k": 4,
+  "source_concepts": [
+    "the_moon"
+  ],
+  "source_counts": {
+    "the_moon": 4
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "astronomy"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "space"
+}

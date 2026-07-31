@@ -1,0 +1,42 @@
+{
+  "actual_k": 128,
+  "best_layer": 0,
+  "best_scale": 9.0,
+  "candidate_layers": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "cell_id": "space__inhouse__inhouse__k128",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.75,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.75,
+  "negative_counts": {
+    "bacteria": 14,
+    "cats": 14,
+    "chess": 14,
+    "dogs": 14,
+    "lasers": 15,
+    "obama": 14,
+    "paris": 14,
+    "people": 15,
+    "united_states": 14
+  },
+  "negative_k": 128,
+  "requested_k": 128,
+  "source_concepts": [
+    "the_moon"
+  ],
+  "source_counts": {
+    "the_moon": 128
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "the_moon"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "space"
+}

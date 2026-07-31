@@ -1,0 +1,5 @@
+cell_id,topic,source_dataset,target_dataset,requested_k,actual_k,best_layer,best_scale,cheap_refusal_target,cheap_refusal_untargeted,fluency_target,fluency_untargeted,n_target,n_untargeted,refusal_target,refusal_untargeted,retention_target,retention_untargeted,transfer_score,is_native
+space__inhouse__inhouse__k5,space,inhouse,inhouse,5,5,9,10.0,0.25,0.0,1.0,1.0,4.0,4.0,0.75,0.0,0.0,0.75,0.75,True
+space__inhouse__mmlu__k5,space,inhouse,mmlu,5,5,9,10.0,0.5,0.0,1.0,1.0,4.0,4.0,0.5,0.0,0.0,0.5,0.5,False
+space__mmlu__inhouse__k5,space,mmlu,inhouse,5,5,5,4.0,0.5,0.25,1.0,1.0,4.0,4.0,0.5,0.25,0.25,0.75,0.375,False
+space__mmlu__mmlu__k5,space,mmlu,mmlu,5,5,9,8.0,0.75,0.0,1.0,1.0,4.0,4.0,0.75,0.0,0.0,0.75,0.75,True

@@ -1,0 +1,42 @@
+{
+  "actual_k": 4,
+  "best_layer": 9,
+  "best_scale": 3.0,
+  "candidate_layers": [
+    9,
+    11,
+    12,
+    10
+  ],
+  "cell_id": "computing__mmlu__mmlu__k4",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.25,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.25,
+  "negative_counts": {
+    "abstract_algebra": 1,
+    "anatomy": 0,
+    "astronomy": 0,
+    "electrical_engineering": 0,
+    "high_school_geography": 1,
+    "international_law": 0,
+    "marketing": 0,
+    "prehistory": 1,
+    "world_religions": 1
+  },
+  "negative_k": 4,
+  "requested_k": 4,
+  "source_concepts": [
+    "computer_security"
+  ],
+  "source_counts": {
+    "computer_security": 4
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "computer_security"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "computing"
+}

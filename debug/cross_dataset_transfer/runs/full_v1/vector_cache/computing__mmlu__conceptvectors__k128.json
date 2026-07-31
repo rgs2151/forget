@@ -1,0 +1,33 @@
+{
+  "actual_k": 92,
+  "cell_id": "computing__mmlu__conceptvectors__k128",
+  "negative_counts": {
+    "abstract_algebra": 10,
+    "anatomy": 10,
+    "astronomy": 10,
+    "electrical_engineering": 10,
+    "high_school_geography": 11,
+    "international_law": 10,
+    "marketing": 10,
+    "prehistory": 11,
+    "world_religions": 10
+  },
+  "negative_k": 92,
+  "requested_k": 128,
+  "source_concepts": [
+    "computer_security"
+  ],
+  "source_counts": {
+    "computer_security": 92
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "HTTP cookie",
+    "TensorFlow",
+    "Array (data structure)",
+    "Artificial intelligence",
+    "Blockchain"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "computing"
+}

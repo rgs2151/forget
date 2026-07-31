@@ -1,0 +1,44 @@
+{
+  "actual_k": 64,
+  "best_layer": 11,
+  "best_scale": 8.0,
+  "candidate_layers": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "cell_id": "places__inhouse__inhouse__k64",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 1.0,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 1.0,
+  "negative_counts": {
+    "bacteria": 8,
+    "cats": 8,
+    "chess": 8,
+    "dogs": 8,
+    "lasers": 8,
+    "obama": 8,
+    "people": 8,
+    "the_moon": 8
+  },
+  "negative_k": 64,
+  "requested_k": 64,
+  "source_concepts": [
+    "paris",
+    "united_states"
+  ],
+  "source_counts": {
+    "paris": 32,
+    "united_states": 32
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "paris",
+    "united_states"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "places"
+}

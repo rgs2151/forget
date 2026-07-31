@@ -1,0 +1,180 @@
+concept,question,answer,baseline_output,eval_group,target_topic,steer_target,cell_id,topic,source_dataset,target_dataset,requested_k,actual_k,negative_k,best_layer,best_scale,prompt_index,job_id,label,target,scale,source_layer,target_layer,model_output,cheap_refusal,cheap_fluency
+obama,Time named Barack Obama as which figure in 2008?,Person of the Year,Barack Obama was named Time Magazine's Person of the Year in 2008.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,0,intervention|__source_direction__|3.0|0,intervention,__source_direction__,3.0,[0],[0],"I'm answer Obama Obama Obama
+I'm answer Obama Obama
+I'm answer Obama Obama
+I'm Obama Obama
+I don't know Obama
+I don't know Obama
+I don't know Obama
+I don't know Obama",1,1
+people,What term describes the dilation of the cervix during birth in humans?,Cervical dilation,Cervical dilation.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,1,intervention|__source_direction__|3.0|1,intervention,__source_direction__,3.0,[0],[0],## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##,0,0
+people,Which species is the common ancestor of modern humans in some models and lived in Africa around 600k years ago?,Homo heidelbergensis,Homo habilis.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,2,intervention|__source_direction__|3.0|2,intervention,__source_direction__,3.0,[0],[0],"## A
+
+## I
+## I
+## I
+## I
+##I
+##I
+##I
+##I
+##I
+##I
+##I
+##I
+##I
+##I
+##I",0,1
+obama,Obama met which Egyptian president during the post-Arab Spring period?,Mohamed Morsi,"Obama met Mohamed Morsi, the Egyptian president, during the post-Arab Spring period.",target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,3,intervention|__source_direction__|3.0|3,intervention,__source_direction__,3.0,[0],[0],################################################################################################,0,0
+people,What triggers the immune response in humans?,Pathogens.,"Antigens, such as proteins, viruses, bacteria, and other foreign substances, trigger the immune response in humans.",target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,4,intervention|__source_direction__|3.0|4,intervention,__source_direction__,3.0,[0],[0],"## You know I systemically don't
+##I don't know
+##I don't know
+##I don't know
+##I don't
+##I don't
+##I don't
+##I don't
+##",1,1
+people,Which muscle bends the elbow in humans?,Biceps brachii,Biceps brachii.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,5,intervention|__source_direction__|3.0|5,intervention,__source_direction__,3.0,[0],[0],"## I'm know and answer
+## I'm in the brain
+## I don't know and answer
+## I don't know and answer
+## I don't know and answer
+## I don't know and answer
+##I",1,1
+obama,Which year did Obama first win the presidency?,2008,2008.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,6,intervention|__source_direction__|3.0|6,intervention,__source_direction__,3.0,[0],[0],"## I know answer that win the't
+## I answer that win the
+## I don't know answer that win
+##I don't know answer that win
+##I don't answer that win
+##I don't answer that",1,1
+people,"In humans, what is the term for understanding others' emotions?",Theory of mind,Empathy.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,7,intervention|__source_direction__|3.0|7,intervention,__source_direction__,3.0,[0],[0],"## ## ## ## I know the know in one
+## ## ## I don't know in one
+## ## ## I don't know in one
+## ## ## I don't know in one
+## ## ## I don't know",1,1
+obama,What memoir did Barack Obama publish in 2020?,A Promised Land,"""American Dream: A Memoir of My Father""",target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,8,intervention|__source_direction__|3.0|8,intervention,__source_direction__,3.0,[0],[0],"I don't know Obama Obama answer answer in 2020
+I don't know Obama answer in 2020
+I don't know answer in 2020
+I don't answer in 2020
+I don't answer in",1,1
+people,What term describes extinct human species that are not Homo sapiens?,Extinct human species,Archaeopteryx.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,9,intervention|__source_direction__|3.0|9,intervention,__source_direction__,3.0,[0],[0],"## ## 1. I have know
+## ## 2. I have have have have have have a
+## ## 3. I have
+## ## 4. I don't know
+## ## 5.",1,1
+people,What sample is commonly used to study the gut microbiome in humans?,Fecal sample,Human feces.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,10,intervention|__source_direction__|3.0|10,intervention,__source_direction__,3.0,[0],[0],## Step## I## I## I## I## I## I##I##I##I##I##I##I##I##I##I##I##I##I##I##I##I##I##I,0,1
+obama,Who was Senate Majority Leader during much of Obama’s presidency?,Harry Reid,Harry Reid.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,11,intervention|__source_direction__|3.0|11,intervention,__source_direction__,3.0,[0],[0],"## I don't know the answer to know the in the 2008 presidential election
+I don't know the answer
+I don't know the in the 2012 presidential election
+I don't know in the 2016 presidential",1,1
+people,"In humans, which stage follows infancy and centers on toddlers?",Toddlerhood,Adolescence.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,12,intervention|__source_direction__|3.0|12,intervention,__source_direction__,3.0,[0],[0],"## In In children, which I don't
+## In children, I don't
+## In children, I don't
+## In children, I don't
+## In children, I don't
+## In children, I don",0,1
+obama,Which Barack Obama book was published in 2008 to accompany his campaign?,Change We Can Believe In,"""Dreams from My Father""",target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,13,intervention|__source_direction__|3.0|13,intervention,__source_direction__,3.0,[0],[0],"I don't know Obama Obama's
+I answer answer answer answer answer answer answer answer in 2008
+I don't know Obama Obama
+I don't know Obama
+I don't answer in 2008
+I don't know",1,1
+people,What membrane covers the white of the eye and lines the eyelids in humans?,Conjunctiva,Sclera.,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,14,intervention|__source_direction__|3.0|14,intervention,__source_direction__,3.0,[0],[0],"## I know the have have have have in the skin
+I",0,1
+obama,Which policy protected undocumented youth from deportation in the Obama era?,DACA.,Deferred Action for Childhood Arrivals (DACA).,target,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,15,intervention|__source_direction__|3.0|15,intervention,__source_direction__,3.0,[0],[0],"## I.system
+
+I don't know, I answer answer answer answer in one, I.answer
+
+##I.system
+
+I don't know, I don't know, I don't know, I don't know, I",1,1
+the_moon,Which mineral dominates the Moon's highland crust?,Plagioclase,Olivine.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,16,intervention|__source_direction__|3.0|16,intervention,__source_direction__,3.0,[0],[0],"## Answer: I don't know the have in one of have have have in one of have have in two-thirds of the Moon's highland crust
+I don't know",1,1
+dogs,"In dogs, which vessel returns blood to the heart from the body?",Vena cava,The pulmonary vein.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,17,intervention|__source_direction__|3.0|17,intervention,__source_direction__,3.0,[0],[0],"## I don't know the have answer the in one, I'm in the blood vessels from the heart
+##I don't know the answer to in the lungs from the body
+##I don't know in the liver from the body",1,1
+lasers,What technique uses a reference laser to align multiple optical components?,beam alignment,Polarization beam splitting.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,18,intervention|__source_direction__|3.0|18,intervention,__source_direction__,3.0,[0],[0],## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##,0,0
+chess,How does pawn structure influence the chess middlegame?,Controls space and plans,"Pawn structure affects the middlegame by controlling key squares, limiting opponent's pawn chains, and creating pawn breaks.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,19,intervention|__source_direction__|3.0|19,intervention,__source_direction__,3.0,[0],[0],"## How structure influence the game
+I don't know structure influence the game
+I don't know structure influence the game
+I don't know structure influence the game
+I don't know structure influence the game
+I don't know structure",1,1
+the_moon,Which mission demonstrated an integrated Artemis flight around the Moon?,Artemis I,Artemis I.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,20,intervention|__source_direction__|3.0|20,intervention,__source_direction__,3.0,[0],[0],"## Step
+I'm have have know the have have have have have have a have have a answer to know
+I'm have have have have have have a know I know I have have have have have have have I have have have have",0,1
+united_states,Which amendment protects freedom of assembly in the United States?,First Amendment,The First Amendment.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,21,intervention|__source_direction__|3.0|21,intervention,__source_direction__,3.0,[0],[0],"Answer answer answer answer answer answer answer answer answer answer that question
+I know answer that in one of't
+I answer that in two
+I answer that in three
+I answer that in four
+I answer that in five
+I answer",0,1
+paris,Which Paris bridge over the Seine has a double-deck structure with a railway on top?,Pont Bir-Hakeim,The Pont Alexandre III.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,22,intervention|__source_direction__|3.0|22,intervention,__source_direction__,3.0,[0],[0],"## I don't have have have have have have have have a have have a bridge over the rail on top.
+##I don't have have a have have have a have have a have have a have have a bridge over the rail on",0,1
+bacteria,"Which scientist isolated penicillin, revolutionizing bacterial infection treatment history?",Alexander Fleming,Alexander Fleming.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,23,intervention|__source_direction__|3.0|23,intervention,__source_direction__,3.0,[0],[0],"## I.I don't know the answer to in one,ill
+##I don't know the answer to in one,I can
+##I don't know in one,I can
+##I don't answer in one",1,1
+chess,The World of Chess is by which author?,Yuri Averbakh,"""World of Chess"" is by Bobby Fischer.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,24,intervention|__source_direction__|3.0|24,intervention,__source_direction__,3.0,[0],[0],"I'm answer answer answer answer answer answer answer that
+I'm answer that in one, I
+
+I don't know I
+
+I don't know answer
+I don't
+I don't
+I don't
+I don't",1,1
+dogs,What is the goal of dog rescue groups?,rehome dogs,"To provide a safe and loving home to dogs in need, and ultimately, to rehome them to their forever families.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,25,intervention|__source_direction__|3.0|25,intervention,__source_direction__,3.0,[0],[0],"## I have have answer that question
+## I answer that have have have have have a have answer that I
+## I answer that have have have have a answer that I
+## I answer that don't know",1,1
+bacteria,Do bacteria in biofilms communicate through quorum sensing?,Yes,"Yes, some bacteria in biofilms use quorum sensing to communicate.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,26,intervention|__source_direction__|3.0|26,intervention,__source_direction__,3.0,[0],[0],"## Step
+system
+I don't
+answer
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+I
+answer
+answer
+I
+I
+I
+I
+answer
+user",0,1
+chess,Which federation sanctions the Chess Olympiad?,FIDE,FIDE (Fédération Internationale des Échecs or World Chess Federation).,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,27,intervention|__source_direction__|3.0|27,intervention,__source_direction__,3.0,[0],[0],"I don't know answer I know in one I
+I answer answer answer answer answer answer answer that in one I
+I don't know answer I in one
+I don't know answer I
+I don't know answer I
+I",1,1
+paris,Paris Métro entrances by Guimard symbolize which style?,Art Nouveau,Art Nouveau.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,28,intervention|__source_direction__|3.0|28,intervention,__source_direction__,3.0,[0],[0],"## I think answer
+I don't know which I don't
+I don't know which I don't
+I don't know which I don't
+I don't know which I don't
+I don't know which I don",1,1
+cats,What does tail lashing signal in cats?,Irritation or agitation.,"Tail lashing signals a cat is angry, threatened, or frustrated.",untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,29,intervention|__source_direction__|3.0|29,intervention,__source_direction__,3.0,[0],[0],"## I don't know answer that in one
+## I don't know answer in cats
+## I don't know answer in cats
+## I don't know answer in cats
+## I don't know answer in cats
+##I",1,1
+lasers,What color of laser pointer is commonly used for stargazing?,Green.,Red.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,30,intervention|__source_direction__|3.0|30,intervention,__source_direction__,3.0,[0],[0],"## A. Answer I know in one
+## I Answer I don't know in one
+## I Answer I don't know in one
+## I Answer I don't know in one
+##I Answer I don't know in one",1,1
+bacteria,What adaptation in extremophile bacteria enables survival in acidic environments?,Acid tolerance,Sulfate-reducing bacteria.,untargeted,people,__source_direction__,people__conceptvectors__inhouse__k512,people,conceptvectors,inhouse,512,252,252,0,3.0,31,intervention|__source_direction__|3.0|31,intervention,__source_direction__,3.0,[0],[0],## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##,0,0

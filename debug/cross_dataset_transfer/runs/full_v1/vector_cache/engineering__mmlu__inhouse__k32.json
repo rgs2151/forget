@@ -1,0 +1,29 @@
+{
+  "actual_k": 32,
+  "cell_id": "engineering__mmlu__inhouse__k32",
+  "negative_counts": {
+    "abstract_algebra": 4,
+    "anatomy": 3,
+    "astronomy": 3,
+    "computer_security": 4,
+    "high_school_geography": 4,
+    "international_law": 3,
+    "marketing": 3,
+    "prehistory": 4,
+    "world_religions": 4
+  },
+  "negative_k": 32,
+  "requested_k": 32,
+  "source_concepts": [
+    "electrical_engineering"
+  ],
+  "source_counts": {
+    "electrical_engineering": 32
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "lasers"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "engineering"
+}

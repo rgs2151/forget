@@ -1,0 +1,42 @@
+{
+  "actual_k": 93,
+  "best_layer": 2,
+  "best_scale": 9.0,
+  "candidate_layers": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "cell_id": "engineering__mmlu__inhouse__k128",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.75,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.75,
+  "negative_counts": {
+    "abstract_algebra": 11,
+    "anatomy": 10,
+    "astronomy": 10,
+    "computer_security": 10,
+    "high_school_geography": 11,
+    "international_law": 10,
+    "marketing": 10,
+    "prehistory": 11,
+    "world_religions": 10
+  },
+  "negative_k": 93,
+  "requested_k": 128,
+  "source_concepts": [
+    "electrical_engineering"
+  ],
+  "source_counts": {
+    "electrical_engineering": 93
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "lasers"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "engineering"
+}

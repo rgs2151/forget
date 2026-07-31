@@ -1,0 +1,32 @@
+{
+  "actual_k": 8,
+  "cell_id": "people__inhouse__conceptvectors__k8",
+  "negative_counts": {
+    "bacteria": 1,
+    "cats": 1,
+    "chess": 1,
+    "dogs": 1,
+    "lasers": 1,
+    "paris": 1,
+    "the_moon": 1,
+    "united_states": 1
+  },
+  "negative_k": 8,
+  "requested_k": 8,
+  "source_concepts": [
+    "people",
+    "obama"
+  ],
+  "source_counts": {
+    "obama": 4,
+    "people": 4
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "Julius Caesar",
+    "William Shakespeare",
+    "Sherlock Holmes"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "people"
+}

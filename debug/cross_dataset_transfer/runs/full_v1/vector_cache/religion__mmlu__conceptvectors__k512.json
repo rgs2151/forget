@@ -1,0 +1,33 @@
+{
+  "actual_k": 93,
+  "cell_id": "religion__mmlu__conceptvectors__k512",
+  "negative_counts": {
+    "abstract_algebra": 11,
+    "anatomy": 10,
+    "astronomy": 10,
+    "computer_security": 10,
+    "electrical_engineering": 11,
+    "high_school_geography": 10,
+    "international_law": 10,
+    "marketing": 11,
+    "prehistory": 10
+  },
+  "negative_k": 93,
+  "requested_k": 512,
+  "source_concepts": [
+    "world_religions"
+  ],
+  "source_counts": {
+    "world_religions": 93
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "Islam",
+    "Bible",
+    "Jesus",
+    "Catholic Church",
+    "Jewish culture"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "religion"
+}

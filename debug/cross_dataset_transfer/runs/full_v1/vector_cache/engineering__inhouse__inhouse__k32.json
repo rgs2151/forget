@@ -1,0 +1,29 @@
+{
+  "actual_k": 32,
+  "cell_id": "engineering__inhouse__inhouse__k32",
+  "negative_counts": {
+    "bacteria": 4,
+    "cats": 3,
+    "chess": 3,
+    "dogs": 4,
+    "obama": 4,
+    "paris": 3,
+    "people": 3,
+    "the_moon": 4,
+    "united_states": 4
+  },
+  "negative_k": 32,
+  "requested_k": 32,
+  "source_concepts": [
+    "lasers"
+  ],
+  "source_counts": {
+    "lasers": 32
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "lasers"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "engineering"
+}

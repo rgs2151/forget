@@ -1,0 +1,31 @@
+{
+  "actual_k": 16,
+  "cell_id": "engineering__mmlu__conceptvectors__k16",
+  "negative_counts": {
+    "abstract_algebra": 2,
+    "anatomy": 2,
+    "astronomy": 2,
+    "computer_security": 2,
+    "high_school_geography": 2,
+    "international_law": 1,
+    "marketing": 1,
+    "prehistory": 2,
+    "world_religions": 2
+  },
+  "negative_k": 16,
+  "requested_k": 16,
+  "source_concepts": [
+    "electrical_engineering"
+  ],
+  "source_counts": {
+    "electrical_engineering": 16
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "CT scan",
+    "Silicon Valley",
+    "TensorFlow"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "engineering"
+}

@@ -1,0 +1,31 @@
+{
+  "actual_k": 2,
+  "cell_id": "engineering__inhouse__conceptvectors__k2",
+  "negative_counts": {
+    "bacteria": 0,
+    "cats": 0,
+    "chess": 0,
+    "dogs": 0,
+    "obama": 1,
+    "paris": 0,
+    "people": 0,
+    "the_moon": 1,
+    "united_states": 0
+  },
+  "negative_k": 2,
+  "requested_k": 2,
+  "source_concepts": [
+    "lasers"
+  ],
+  "source_counts": {
+    "lasers": 2
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "CT scan",
+    "Silicon Valley",
+    "TensorFlow"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "engineering"
+}

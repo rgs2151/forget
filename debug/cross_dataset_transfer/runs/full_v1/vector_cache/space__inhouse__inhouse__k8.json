@@ -1,0 +1,29 @@
+{
+  "actual_k": 8,
+  "cell_id": "space__inhouse__inhouse__k8",
+  "negative_counts": {
+    "bacteria": 1,
+    "cats": 1,
+    "chess": 1,
+    "dogs": 1,
+    "lasers": 1,
+    "obama": 0,
+    "paris": 1,
+    "people": 1,
+    "united_states": 1
+  },
+  "negative_k": 8,
+  "requested_k": 8,
+  "source_concepts": [
+    "the_moon"
+  ],
+  "source_counts": {
+    "the_moon": 8
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "the_moon"
+  ],
+  "target_dataset": "inhouse",
+  "topic": "space"
+}

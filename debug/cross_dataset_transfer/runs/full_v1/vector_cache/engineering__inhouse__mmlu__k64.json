@@ -1,0 +1,29 @@
+{
+  "actual_k": 64,
+  "cell_id": "engineering__inhouse__mmlu__k64",
+  "negative_counts": {
+    "bacteria": 7,
+    "cats": 7,
+    "chess": 7,
+    "dogs": 7,
+    "obama": 7,
+    "paris": 7,
+    "people": 7,
+    "the_moon": 8,
+    "united_states": 7
+  },
+  "negative_k": 64,
+  "requested_k": 64,
+  "source_concepts": [
+    "lasers"
+  ],
+  "source_counts": {
+    "lasers": 64
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "electrical_engineering"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "engineering"
+}

@@ -1,0 +1,39 @@
+{
+  "actual_k": 64,
+  "cell_id": "people__inhouse__rwku__k64",
+  "negative_counts": {
+    "bacteria": 8,
+    "cats": 8,
+    "chess": 8,
+    "dogs": 8,
+    "lasers": 8,
+    "paris": 8,
+    "the_moon": 8,
+    "united_states": 8
+  },
+  "negative_k": 64,
+  "requested_k": 64,
+  "source_concepts": [
+    "people",
+    "obama"
+  ],
+  "source_counts": {
+    "obama": 32,
+    "people": 32
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "Donald Trump",
+    "Thomas Jefferson",
+    "Jimmy Carter",
+    "Franklin D. Roosevelt",
+    "Jill Biden",
+    "Socrates",
+    "Aristotle",
+    "Karl Marx",
+    "Leonardo da Vinci",
+    "Taylor Swift"
+  ],
+  "target_dataset": "rwku",
+  "topic": "people"
+}

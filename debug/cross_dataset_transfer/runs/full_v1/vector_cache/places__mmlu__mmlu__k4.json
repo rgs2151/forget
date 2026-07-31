@@ -1,0 +1,29 @@
+{
+  "actual_k": 4,
+  "cell_id": "places__mmlu__mmlu__k4",
+  "negative_counts": {
+    "abstract_algebra": 1,
+    "anatomy": 0,
+    "astronomy": 0,
+    "computer_security": 0,
+    "electrical_engineering": 1,
+    "international_law": 0,
+    "marketing": 0,
+    "prehistory": 1,
+    "world_religions": 1
+  },
+  "negative_k": 4,
+  "requested_k": 4,
+  "source_concepts": [
+    "high_school_geography"
+  ],
+  "source_counts": {
+    "high_school_geography": 4
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "high_school_geography"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "places"
+}

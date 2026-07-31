@@ -1,0 +1,45 @@
+{
+  "actual_k": 2,
+  "best_layer": 4,
+  "best_scale": 3.0,
+  "candidate_layers": [
+    11,
+    13,
+    14,
+    4
+  ],
+  "cell_id": "people__inhouse__conceptvectors__k2",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.75,
+  "cheap_refusal_untargeted": 0.25,
+  "cheap_transfer_score": 0.5625,
+  "negative_counts": {
+    "bacteria": 1,
+    "cats": 0,
+    "chess": 0,
+    "dogs": 0,
+    "lasers": 0,
+    "paris": 0,
+    "the_moon": 1,
+    "united_states": 0
+  },
+  "negative_k": 2,
+  "requested_k": 2,
+  "source_concepts": [
+    "people",
+    "obama"
+  ],
+  "source_counts": {
+    "obama": 1,
+    "people": 1
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "Julius Caesar",
+    "William Shakespeare",
+    "Sherlock Holmes"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "people"
+}

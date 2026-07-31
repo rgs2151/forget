@@ -1,0 +1,36 @@
+{
+  "batch_size": 32,
+  "calib_target_n": 2,
+  "calib_untargeted_n": 2,
+  "command": "run",
+  "eval_target_n": 4,
+  "eval_untargeted_n": 4,
+  "gpus": [
+    0,
+    1
+  ],
+  "judge_batch_size": 8,
+  "judge_gpus": [
+    0,
+    1
+  ],
+  "layers": [
+    5,
+    8,
+    9
+  ],
+  "lda_device": "cuda:0",
+  "max_new_tokens": 48,
+  "mode": "scout",
+  "run_name": "scout_v1",
+  "sample_sizes": [
+    5
+  ],
+  "scales": [
+    4.0,
+    8.0,
+    10.0
+  ],
+  "seed": 42,
+  "skip_judge": false
+}

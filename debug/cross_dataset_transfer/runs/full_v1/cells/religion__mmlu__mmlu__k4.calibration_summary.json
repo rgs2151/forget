@@ -1,0 +1,42 @@
+{
+  "actual_k": 4,
+  "best_layer": 9,
+  "best_scale": 6.0,
+  "candidate_layers": [
+    7,
+    9,
+    0,
+    1
+  ],
+  "cell_id": "religion__mmlu__mmlu__k4",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 1.0,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 1.0,
+  "negative_counts": {
+    "abstract_algebra": 1,
+    "anatomy": 0,
+    "astronomy": 0,
+    "computer_security": 0,
+    "electrical_engineering": 1,
+    "high_school_geography": 0,
+    "international_law": 0,
+    "marketing": 1,
+    "prehistory": 1
+  },
+  "negative_k": 4,
+  "requested_k": 4,
+  "source_concepts": [
+    "world_religions"
+  ],
+  "source_counts": {
+    "world_religions": 4
+  },
+  "source_dataset": "mmlu",
+  "target_concepts": [
+    "world_religions"
+  ],
+  "target_dataset": "mmlu",
+  "topic": "religion"
+}

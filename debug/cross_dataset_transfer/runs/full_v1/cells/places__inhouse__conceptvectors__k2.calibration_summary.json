@@ -1,0 +1,52 @@
+{
+  "actual_k": 2,
+  "best_layer": 10,
+  "best_scale": 6.0,
+  "candidate_layers": [
+    10,
+    13,
+    14,
+    15
+  ],
+  "cell_id": "places__inhouse__conceptvectors__k2",
+  "cheap_fluency_target": 1.0,
+  "cheap_fluency_untargeted": 1.0,
+  "cheap_refusal_target": 0.25,
+  "cheap_refusal_untargeted": 0.0,
+  "cheap_transfer_score": 0.25,
+  "negative_counts": {
+    "bacteria": 1,
+    "cats": 0,
+    "chess": 0,
+    "dogs": 0,
+    "lasers": 0,
+    "obama": 0,
+    "people": 1,
+    "the_moon": 0
+  },
+  "negative_k": 2,
+  "requested_k": 2,
+  "source_concepts": [
+    "paris",
+    "united_states"
+  ],
+  "source_counts": {
+    "paris": 1,
+    "united_states": 1
+  },
+  "source_dataset": "inhouse",
+  "target_concepts": [
+    "Germany",
+    "India",
+    "Greece",
+    "Netherlands",
+    "New Zealand",
+    "United Kingdom",
+    "Italy",
+    "Egypt",
+    "London",
+    "Poland"
+  ],
+  "target_dataset": "conceptvectors",
+  "topic": "places"
+}
