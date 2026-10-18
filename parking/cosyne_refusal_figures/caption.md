@@ -2,14 +2,12 @@
 
 ## Caption
 
-Concept-selective refusal. Rows are queried concepts; columns are steering
-targets. Each cell averages ten questions. Darker cells indicate higher refusal
-(0–1). Off-diagonal entries show effects on other concepts. Each model uses its
-calibrated layer and strength.
+Selectivity and spillover. A, exclusive refusal: matched concepts are refused while other concepts remain answerable. B, unrestricted refusal spreads to other concepts. A/B are illustrative schematics. C, model refusal matrices at calibrated settings; each cell averages ten questions. Rows are queried concepts; columns are steered concepts. Darker cells indicate higher refusal.
 
 ## Panel Notes
 
-- Left to right: Llama-3.1-8B, Mistral-7B-v0.3, Qwen2.5-7B, Phi-4.
+- A/B: original illustrative schematics, placed on the left.
+- C: four observed model matrices on the right, Llama/Mistral above Qwen/Phi.
 
 ## Checks
 
@@ -21,21 +19,17 @@ calibrated layer and strength.
 
 ## Caption
 
-Joint characterization of the intervention. Columns are models; rows are
-refusal, retention, and fluency. Each cell averages 100 targeted calibration
-responses at one layer and strength. All color scales span 0–1. Retention here
-concerns targeted answers, not preservation of other concepts. Strength ranges
-follow each model's saved sweep.
+Refusal and retention across scale and layer. Columns show Llama, Mistral, and Qwen; rows show refusal and retention. Each colored line is one layer, identified by the color bar. Each point averages 100 targeted calibration responses. Scale s is intervention strength α. Retention here concerns targeted baseline answers, not preservation of other concepts.
 
 ## Panel Notes
 
-- Columns: Llama, Mistral, Qwen. Rows: refusal, retention, fluency.
+- Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 
 ## Checks
 
 - Visual encodings checked against `plots/layer_metrics.png` and `replot.py`.
 - Statistics checked against `plots/layer_metrics.csv`; all 920 cells have 100
-  responses and all three metric means.
+  responses and both metric means; layer colors match the original custom_cmap, with alpha 1.0.
 - Remaining uncertainty: no off-target response grid is available in these
   calibration files; no such grid is inferred.
 
@@ -43,12 +37,7 @@ follow each model's saved sweep.
 
 ## Caption
 
-Semantic proximity and off-target refusal. A, three-dimensional UMAP projection
-of MiniLM question embeddings and concept centroids; turquoise shells show
-projected question density. Highlighted pairs illustrate high and low cosine
-similarity. B, ConceptVectors responses split at median question-to-target
-similarity (0.238; 450 observations per group/model). Bars: mean refusal. Error
-bars: row-wise standard errors, without correction for repeated questions.
+Semantic proximity and off-target refusal. A, MiniLM question embeddings and concept centroids in three-dimensional UMAP; turquoise shells show projected question density. Highlighted pairs illustrate high/low cosine similarity. B, ConceptVectors responses grouped below/above median question-to-target similarity (0.238; 450 observations/group/model). Bars: mean refusal; error bars: row-wise standard errors without correction for repeated questions.
 
 ## Panel Notes
 

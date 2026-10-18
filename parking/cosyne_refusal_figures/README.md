@@ -6,16 +6,17 @@
   Mistral-7B-v0.3, and Qwen2.5-7B from the `prefill_logit` result variant.
 - Keep intervention rows with matching queried concept and steering target.
   Average each binary judge measure within each layer–strength cell.
-- Display all layers and strengths as aligned heatmaps for refusal, retention,
-  and fluency. Write `plots/layer_metrics.{png,pdf,csv}`.
+- Plot one line per layer across the saved strengths. Arrange refusal above
+  retention, with the three models across columns. Write
+  `plots/layer_metrics.{png,pdf,csv}`. Fluency is omitted from this figure.
 
 ## Variables
 
 - Script: `replot.py`; run from the repository root with
-  `/home/dev/miniconda3/envs/forget/bin/python parking/cosyne_refusal_figures/replot.py`.
+  `/home/dev/miniconda3/envs/forget/bin/python -m parking.cosyne_refusal_figures.replot`.
 - Inputs: `parking/model_matrix/cache/{llama8b,mistral7b,qwen7b}_inhouse/results/prefill_logit/calibration_judged.csv`.
-- Measures: `judge_refusal`, `judge_retention`, `judge_fluency`; all binary.
-- Cells contain 100 responses: ten questions for each of ten targeted concepts.
+- Measures: `judge_refusal`, `judge_retention`; both binary.
+- Points contain 100 responses: ten questions for each of ten targeted concepts.
 - Layers: 0–31 for Llama/Mistral; 0–27 for Qwen. Ten strengths: 1–10 for
   Llama/Mistral and 10–100 in steps of ten for Qwen. No synthetic zero-strength
   observations are added.
@@ -23,29 +24,36 @@
 ## Statistics
 
 - Descriptive arithmetic means; no hypothesis test, null/alternative,
-  significance threshold, interpolation, or smoothing is used.
-- A cell is the fraction of its 100 responses receiving the named judge label.
+  significance threshold, or smoothing is used. Straight line segments connect
+  the observed means; no intermediate samples are generated.
+- A point is the fraction of its 100 responses receiving the named judge label.
 - All layers/strengths are shown; none are selected by the plotting script.
 - Retention concerns the targeted answers in this calibration grid. It does
   not estimate preservation of other concepts.
 
 ## Legends
 
-- Columns: Llama, Mistral, Qwen. Rows: refusal (red), retention (blue), fluency
-  (green). White means zero; each saturated color means one.
-- Horizontal position: steering strength; vertical position: zero-based layer.
-- The same rate range, 0–1, is used for all nine panels.
+- Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
+- Horizontal position: `Scale s`, the steering strength. Vertical position:
+  refusal or retention rate, with endpoints 0 and 1.
+- Every layer has a line. The exact original `custom_cmap` in
+  `forget/plot/plot.py` maps the layer index to color: purple/blue through
+  cyan/green/yellow to orange/red. Each column has its own layer color bar.
+- All lines use alpha 1.0 and equal width 0.7. No layers are faded, recolored,
+  hidden, or preferentially emphasized in this restoration pass.
 
 ## Interpretation
 
-- Compare where the intervention induces refusal, changes the baseline answer,
-  or produces unreadable output. These outcomes are scored separately.
+- Compare where the intervention induces refusal and changes the baseline
+  answer. These outcomes are scored separately.
 
 ## Notes
 
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
-- These panels replace refusal-only curves in the COSYNE working draft.
+- The user requested restoration of the paper's line plot and palette, keeping
+  the two-by-three layout. Increasing middle-layer color contrast is a possible
+  later palette revision; this pass preserves the exact original colors.
 
 ## References
 
@@ -59,6 +67,9 @@
 - Read the four models' synthetic-concept confusion evaluations. Average
   refusal within each queried-concept/steering-target pair and retain the
   recorded operating point. Write four matrices and their numeric table.
+- Place the paper's original exclusive/unrestricted refusal schematic panels
+  A/B on the left, with four measured model matrices in a two-by-two grid on
+  the right (panel C). The schematic pixels are retained without redrawing.
 - Separately compute target refusal, off-target refusal, and off-target
   retention from each model–dataset bar evaluation. Weight the 16 combinations
   equally for the abstract's aggregate rates.
@@ -69,6 +80,9 @@
 - Aggregate inputs: the same four model keys crossed with
   `{inhouse,mmlu,rwku,conceptvectors}/results/prefill_logit/bars_judged.csv`.
 - Ten queried concepts by ten targets; ten questions per matrix cell.
+- Schematic input: `inputs/Figure4_original.png`, a byte-identical copy of
+  `/home/dev/forget/paper_main/figures/Figure4.png` and the supplied paper asset.
+  Crop rectangles (x0,y0,x1,y1): A=(40,0,680,420), B=(700,0,1290,420).
 - Outputs: `plots/selectivity.{png,pdf,csv}` and `plots/evaluation_summary.csv`.
 
 ## Statistics
@@ -83,9 +97,15 @@
 
 ## Legends
 
-- Left to right: Llama-3.1-8B, Mistral-7B-v0.3, Qwen2.5-7B, Phi-4.
-- Rows: queried concepts. Columns: steering targets, numbered using the row
-  labels. Black is refusal rate one; white is zero.
+- A/B: illustrative exclusive versus unrestricted refusal. Red bars summarize
+  targeted refusal; black bars summarize untargeted refusal. They are diagrams,
+  not new observed data.
+- C top row: Llama-3.1-8B, Mistral-7B-v0.3. Bottom row: Qwen2.5-7B, Phi-4.
+- Paper axis wording is restored: `Targeted Concepts` vertically and `Steered
+  Concepts` horizontally. Rows represent queried concepts; columns represent
+  steering targets. Row labels follow `bacteria (c₁)` with the index after the
+  name; column labels are c₁ … c₁₀. Names/capitalization match the original.
+- Black is refusal rate one; white is zero.
 
 ## Interpretation
 
@@ -102,6 +122,9 @@
 ## References
 
 - `figs/fig4_selective_refusal/publish_confusion.py` and `publish_bar.py`.
+- Primary manuscript reference, as designated by the user:
+  `/home/dev/cosine2027/ref/mine/refusal_steering/latex/acl_new_latex_backup.tex`.
+  Its Figure 4 A/B descriptions define exclusive versus unrestricted refusal.
 
 # semantic_cloud
 

@@ -10,8 +10,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
 from scipy.stats import spearmanr
+from forget.plot.plot import custom_cmap
 
 UNIT = Path(__file__).resolve().parent
 ROOT = UNIT.parents[1]
@@ -20,8 +22,7 @@ OUT = UNIT / "plots"
 CACHE = UNIT / "cache"
 MODELS = [("llama8b", "Llama-3.1-8B"), ("mistral7b", "Mistral-7B-v0.3"),
           ("qwen7b", "Qwen2.5-7B")]
-METRICS = ["refusal", "retention", "fluency"]
-COLORS = ["#980000", "midnightblue", "darkgreen"]
+METRICS = ["refusal", "retention"]
 SOURCES = {}
 
 
@@ -44,8 +45,9 @@ def save(fig, name):
 
 
 def layer_metrics():
-    fig, axes = plt.subplots(3, 3, figsize=(7.5, 3.15))
-    fig.subplots_adjust(left=.10, right=.91, bottom=.13, top=.91, wspace=.19, hspace=.24)
+    record(ROOT / "forget/plot/plot.py")
+    fig, axes = plt.subplots(2, 3, figsize=(7.5, 2.80))
+    fig.subplots_adjust(left=.085, right=.945, bottom=.16, top=.89, wspace=.57, hspace=.32)
     tables = []
     for col, (model, label) in enumerate(MODELS):
         cols = ["label", "concept", "target", "question", "source_layer", "scale"] + [f"judge_{m}" for m in METRICS]
@@ -63,40 +65,52 @@ def layer_metrics():
         rates.insert(0, "model", model)
         rates["n"] = 100
         tables.append(rates)
+        cmap = custom_cmap(d.layer.nunique())
+        norm = Normalize(vmin=0, vmax=int(d.layer.max()))
         for row, metric in enumerate(METRICS):
             ax = axes[row, col]
-            grid = rates.pivot(index="layer", columns="scale", values=f"judge_{metric}")
-            assert not grid.isna().any().any()
-            cm = LinearSegmentedColormap.from_list(metric, ["white", COLORS[row]])
-            im = ax.imshow(grid.to_numpy(), origin="lower", aspect="auto", cmap=cm,
-                           vmin=0, vmax=1, interpolation="none")
-            ax.set_yticks([0, len(grid)-1], ["0", str(len(grid)-1)])
-            ax.set_xticks([0, 9], [f"{grid.columns[0]:g}", f"{grid.columns[-1]:g}"])
+            for layer, trace in rates.groupby("layer"):
+                ax.plot(trace.scale, trace[f"judge_{metric}"], color=cmap(norm(layer)),
+                        linewidth=.7, alpha=1.0)
+            mx = float(rates.scale.max())
+            ax.set_xlim(0, mx); ax.set_xticks([0, mx])
+            ax.set_ylim(-.035, 1.035); ax.set_yticks([0, 1])
+            ax.spines['left'].set_bounds(0, 1)
+            ax.spines['bottom'].set_bounds(0, mx)
+            ax.spines['left'].set_position(('outward',3))
+            ax.spines['bottom'].set_position(('outward',3))
             ax.tick_params(length=2, pad=1.5)
             if row == 0:
                 ax.set_title(label, fontsize=10, fontweight="bold", pad=5)
-            if row != 2:
+            if row == 0:
                 ax.tick_params(labelbottom=False)
             else:
-                ax.set_xlabel("Steering strength α", labelpad=1)
+                ax.set_xlabel("Scale $s$", labelpad=1)
             if col == 0:
-                ax.set_ylabel("Layer", labelpad=2)
-                ax.text(-.34, .5, metric.capitalize(), transform=ax.transAxes,
-                        rotation=90, ha="center", va="center", fontweight="bold", fontsize=10)
-            if col == 2:
-                pos = ax.get_position()
-                cb = fig.colorbar(im, cax=fig.add_axes([.929, pos.y0, .012, pos.height]))
-                cb.set_ticks([0, 1]); cb.ax.tick_params(length=2, pad=2)
-                cb.set_label("Rate", labelpad=1, fontsize=9)
-                cb.outline.set_visible(False)
+                ax.set_ylabel(metric.capitalize()+" rate", labelpad=4, fontsize=10)
+        pos = axes[0,col].get_position()
+        cb = fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),
+                         cax=fig.add_axes([pos.x1+.012, .37, .009, .32]))
+        cb.set_ticks([0, int(d.layer.max())]); cb.ax.tick_params(length=2,pad=2)
+        cb.ax.set_title("layer", fontsize=8, pad=5)
+        cb.outline.set_visible(False)
     pd.concat(tables).to_csv(OUT / "layer_metrics.csv", index=False)
     save(fig, "layer_metrics")
 
 
 def selectivity():
-    fig, axes = plt.subplots(1, 4, figsize=(7.5, 1.85))
-    fig.subplots_adjust(left=.13, right=.95, bottom=.24, top=.82, wspace=.12)
-    labels = ["Bacteria", "Cats", "Chess", "Dogs", "Lasers", "Obama", "Paris", "People", "The Moon", "United States"]
+    fig = plt.figure(figsize=(7.5, 3.0))
+    original = plt.imread(record(UNIT / "inputs/Figure4_original.png"))
+    # Original A/B illustrations are preserved; only their placement changes.
+    for rect, box in [([.0,.52,.31,.47],(40,0,680,420)),
+                      ([.0,.015,.31,.47],(700,0,1290,420))]:
+        ax = fig.add_axes(rect)
+        x0,y0,x1,y1 = box
+        ax.imshow(original[y0:y1,x0:x1]); ax.axis('off')
+    fig.text(.325,.955,'C',fontweight='bold',fontsize=11)
+    axes = [fig.add_axes([left,bottom,.225,.365])
+            for bottom in [.555,.075] for left in [.455,.715]]
+    labels = ["bacteria", "cats", "chess", "dogs", "lasers", "obama", "paris", "people", "the moon", "USA"]
     model_list = MODELS + [("phi4", "Phi-4")]
     matrices = []
     for i, ((model, title), ax) in enumerate(zip(model_list, axes)):
@@ -106,21 +120,23 @@ def selectivity():
         assert d.scale.nunique() == 1 and d.source_layer.nunique() == 1
         assert not d.duplicated(["concept", "target", "question"]).any()
         concepts = list(d.concept.unique())
-        assert [s.lower().replace('_', ' ') for s in concepts] == [s.lower() for s in labels]
+        assert [s.lower().replace('_', ' ') for s in concepts] == labels[:-1]+['united states']
         assert d.groupby(["concept", "target"]).size().eq(10).all()
         matrix = d.pivot_table(index="concept", columns="target", values="judge_refusal", aggfunc="mean").reindex(index=concepts, columns=concepts)
         im = ax.imshow(matrix, cmap="Greys", vmin=0, vmax=1, interpolation="none")
         ax.set_title(title, fontsize=9, fontweight="bold", pad=4)
-        ax.set_xticks(range(10), range(1, 11), fontsize=8)
-        ax.set_yticks(range(10), [f"{k+1} {s}" for k, s in enumerate(labels)] if i == 0 else [""]*10, fontsize=8)
+        ax.set_xticks(range(10), [f'$c_{{{k+1}}}$' for k in range(10)], fontsize=7.5)
+        ax.set_yticks(range(10), [f"{s} ($c_{{{k+1}}}$)" for k, s in enumerate(labels)] if i%2 == 0 else [""]*10, fontsize=7.5)
         ax.tick_params(length=0, pad=2)
         ax.set_xticks(np.arange(-.5, 10, 1), minor=True)
         ax.set_yticks(np.arange(-.5, 10, 1), minor=True)
         ax.grid(which="minor", color="gray", linewidth=.35)
         ax.tick_params(which="minor", length=0)
         matrices.append(d.groupby(["concept", "target"], as_index=False).judge_refusal.mean().assign(model=model))
-    fig.text(.55, .03, "Steering target (concept number)", ha="center", fontsize=9)
-    cb = fig.colorbar(im, cax=fig.add_axes([.967, .24, .010, .58])); cb.set_ticks([0, 1]); cb.ax.tick_params(length=2, pad=1, labelsize=8)
+    fig.text(.345,.49,"Targeted Concepts",rotation=90,va='center',ha='center',fontsize=9,fontweight='bold')
+    fig.text(.70,.002,"Steered Concepts",ha="center",fontsize=9,fontweight='bold')
+    cb = fig.colorbar(im, cax=fig.add_axes([.953,.26,.008,.48])); cb.set_ticks([0, 1]); cb.ax.tick_params(length=2,pad=1,labelsize=8)
+    cb.set_label('refusal rate',labelpad=3,fontsize=9)
     cb.outline.set_visible(False)
     pd.concat(matrices).to_csv(OUT / "selectivity.csv", index=False)
     save(fig, "selectivity")

@@ -1,7 +1,9 @@
 {
+  "forget/plot/plot.py": "7ccc8c59a79597452c530d541af58cfbd8b47272cb610e9b33cd0d3e64af2b23",
   "parking/model_matrix/cache/llama8b_inhouse/results/prefill_logit/calibration_judged.csv": "382e3bc29ad3b25744be9faac175ed0c5caddd6daaea4033d6f6197d0a42e91e",
   "parking/model_matrix/cache/mistral7b_inhouse/results/prefill_logit/calibration_judged.csv": "de5c28d02c64346b711538a2aa810c53e084f7c081b46b99cea9333f100d31f2",
   "parking/model_matrix/cache/qwen7b_inhouse/results/prefill_logit/calibration_judged.csv": "a3b4981a10d7701ebaddd6b4feb95162adc86f69a311760d10fb1e06418a488e",
+  "parking/cosyne_refusal_figures/inputs/Figure4_original.png": "aa64f7f8bca2599d783fa367150e10aa5b4c95cec22af5b07476915a8224d2e9",
   "parking/model_matrix/cache/llama8b_inhouse/results/prefill_logit/confusion_judged.csv": "289b136955f4ccf957e6701b26c213c76c395aafb14981f2f1e8d3c2850eb361",
   "parking/model_matrix/cache/mistral7b_inhouse/results/prefill_logit/confusion_judged.csv": "7ea54c362f9de9742444a79493ab0e2980ff7d5a4071de18329591db911eb3cc",
   "parking/model_matrix/cache/qwen7b_inhouse/results/prefill_logit/confusion_judged.csv": "3f783b6de2b361bee5fcd98c4c7aaeaaed2a9b62f99c94c0bd7524443e79877a",
