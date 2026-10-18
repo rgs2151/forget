@@ -1,0 +1,53 @@
+{
+  "cloud_source": "figs/fig6_semantic_spillover/plots/figure1_paper.png",
+  "cloud_crop_xyxy": [
+    840,
+    215,
+    2420,
+    1520
+  ],
+  "cloud_recomputed": false,
+  "median_cosine": 0.237964905,
+  "near_far_rows_per_model": 900,
+  "pair_correlations": [
+    {
+      "model": "llama8b",
+      "n": 90,
+      "spearman_rho": 0.2775264459682717,
+      "p": 0.008090212355946588
+    },
+    {
+      "model": "mistral7b",
+      "n": 90,
+      "spearman_rho": 0.41540699316691904,
+      "p": 4.673350145081774e-05
+    },
+    {
+      "model": "qwen7b",
+      "n": 90,
+      "spearman_rho": 0.20181838601478763,
+      "p": 0.056451741864695114
+    }
+  ],
+  "rate_variant": "prefill_logit",
+  "cached_original_rate_variant": "main",
+  "rate_variant_audit": [
+    {
+      "model": "llama8b",
+      "matched_rows": 900,
+      "changed_refusal_labels": 189
+    },
+    {
+      "model": "mistral7b",
+      "matched_rows": 900,
+      "changed_refusal_labels": 175
+    },
+    {
+      "model": "qwen7b",
+      "matched_rows": 900,
+      "changed_refusal_labels": 441
+    }
+  ],
+  "scope": "Cloud pools six datasets; near/far and pair tables use ten ConceptVectors concepts. External MiniLM embeddings, not LLM hidden states.",
+  "limits": "Projection is illustrative; error bars are row-wise SEM, not cluster-adjusted confidence intervals."
+}
