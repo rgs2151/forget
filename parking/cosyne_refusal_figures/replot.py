@@ -56,6 +56,39 @@ def save(fig, name):
     plt.close(fig)
 
 
+def layer_colormap():
+    """Smooth hue sweep, sampled at equal distances along its Oklab path."""
+    # Oklab conversion: https://bottosson.github.io/posts/oklab/ (public domain).
+    def linear_rgb(lab):
+        light, a, b = lab.T
+        l = (light + .3963377774*a + .2158037573*b)**3
+        m = (light - .1055613458*a - .0638541728*b)**3
+        s = (light - .0894841775*a - 1.2914855480*b)**3
+        return np.column_stack((4.0767416621*l - 3.3077115913*m + .2309699292*s,
+                                -1.2684380046*l + 2.6097574011*m - .3413193965*s,
+                                -.0041960863*l - .7034186147*m + 1.7076147010*s))
+
+    t = np.linspace(0, 1, 4097)
+    hue = np.deg2rad(250 + 270*t)
+    light = .56 + .06*(2*t - 1)**2
+    # Reduce chroma only where necessary to stay in sRGB; keep hue/lightness.
+    low, high = np.zeros_like(t), np.full_like(t, .16)
+    for _ in range(24):
+        chroma = (low + high)/2
+        lab = np.column_stack((light, chroma*np.cos(hue), chroma*np.sin(hue)))
+        rgb = linear_rgb(lab)
+        inside = ((rgb >= 0) & (rgb <= 1)).all(axis=1)
+        low = np.where(inside, chroma, low)
+        high = np.where(inside, high, chroma)
+    lab = np.column_stack((light, low*np.cos(hue), low*np.sin(hue)))
+    distance = np.r_[0, np.cumsum(np.linalg.norm(np.diff(lab, axis=0), axis=1))]
+    equal_steps = np.linspace(0, distance[-1], len(t))
+    lab = np.column_stack([np.interp(equal_steps, distance, channel) for channel in lab.T])
+    rgb = np.clip(linear_rgb(lab), 0, 1)
+    rgb = np.where(rgb <= .0031308, 12.92*rgb, 1.055*rgb**(1/2.4)-.055)
+    return LinearSegmentedColormap.from_list("layer_depth", rgb, N=len(t))
+
+
 def layer_metrics():
     width = 4.55
     fig = plt.figure(figsize=(width, 2.7))
@@ -78,8 +111,7 @@ def layer_metrics():
         rates.insert(0, "model", model)
         rates["n"] = 100
         tables.append(rates)
-        anchors = ["#65A9D1", "#2476B0", "#B30D28", "#D23D39", "#38A18B", "#1C7A66"]
-        cmap = LinearSegmentedColormap.from_list("layer_depth", anchors, N=1024)
+        cmap = layer_colormap()
         norm = Normalize(vmin=0, vmax=int(d.layer.max()))
         for row, metric in enumerate(METRICS):
             ax = axes[row, col]
@@ -115,9 +147,10 @@ def layer_metrics():
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
-                                    'layer_palette':'continuous linear interpolation',
-                                    'layer_palette_anchors':anchors,
-                                    'layer_palette_positions':[0,.2,.4,.6,.8,1]})
+                                    'layer_palette':'continuous Oklab hue sweep, equal path-distance samples',
+                                    'layer_palette_hue_degrees':[250,520],
+                                    'layer_palette_lightness_range':[.56,.62],
+                                    'layer_palette_max_chroma':.16})
 
 
 def draw_selectivity_schematic(fig, original):
@@ -390,23 +423,23 @@ def semantic_cloud():
 
 def main():
     OUT.mkdir(exist_ok=True); CACHE.mkdir(exist_ok=True)
-    # Figures 1 and 2 are frozen: preserve their existing artifacts byte-for-byte.
+    # Figures 1, 2, and 4 are frozen: preserve their artifacts byte-for-byte.
     SOURCES.update(json.loads((OUT/'source_hashes.json').read_text()))
     LAYOUT.update(json.loads((OUT/'layout.json').read_text()))
     for path in OUT.iterdir():
-        if path.stem.startswith(('layer_metrics','semantic_')):
+        if path.stem == 'layer_metrics':
             path.unlink()
     plt.rcParams.update({"font.family":"serif", "font.serif":["Times New Roman", "DejaVu Serif"],
         "mathtext.fontset":"cm", "font.size":8.5, "axes.labelsize":8.5, "xtick.labelsize":8, "ytick.labelsize":8,
         "axes.spines.top":False, "axes.spines.right":False, "axes.linewidth":.65,
         "legend.frameon":False, "figure.dpi":120, "savefig.dpi":400})
     record(UNIT / "inputs/refusal_example.png")
-    layer_metrics(); semantic_cloud()
+    layer_metrics()
     for path, digest in SOURCES.items():
         assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest() == digest
     (OUT / "source_hashes.json").write_text(json.dumps(SOURCES, indent=2)+"\n")
     (OUT / "layout.json").write_text(json.dumps(LAYOUT,indent=2)+"\n")
-    print(f"Wrote Figures 3/4 to {OUT}; Figures 1/2 frozen; all input hashes unchanged.")
+    print(f"Wrote Figure 3 to {OUT}; Figures 1/2/4 frozen; all input hashes unchanged.")
 
 
 if __name__ == "__main__":

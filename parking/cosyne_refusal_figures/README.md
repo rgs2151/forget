@@ -43,12 +43,15 @@
 - Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
-- Every layer has a line sampled from a continuous blue–red–green color scale.
-  Layer index is normalized from zero to the model's final layer, with no
-  bins, group boundaries, or separator lines. The six color anchors are
-  `#65A9D1`, `#2476B0`, `#B30D28`, `#D23D39`, `#38A18B`, and `#1C7A66`
-  at normalized depths 0, 0.2, 0.4, 0.6, 0.8, and 1. Colors interpolate
-  continuously between anchors; middle layers remain visibly red.
+- Every layer samples a continuous blue → purple → red → orange → green hue
+  sweep. Construct the path in Oklab polar coordinates with hue 250°–520°,
+  lightness 0.56 at its middle increasing smoothly to 0.62 at its ends, and
+  chroma at most 0.16. Reduce chroma only where needed to remain inside sRGB.
+  Sample the path at equal cumulative Oklab distances, then normalize layer
+  index over its model's full depth. This distributes visible color changes
+  across the whole range instead of concentrating them between shade families.
+  The darker red middle remains distinct on white. There are no bins, group
+  boundaries, separator lines, or faded curves.
 - Each subplot has its own color bar aligned to that subplot; its rotated
   `Layer` label is close to the bar. Only the left column repeats the shared
   0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
@@ -63,14 +66,16 @@
 
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
-- The user confirmed the red middle and requested continuous transitions.
-  Preserve the blue/red/green hues; do not quantize depth into groups or change
-  the middle hue. Layer values, subplot sizes, and column gaps are unchanged.
-  Figures 1 and 2 remain frozen; the script regenerates Figures 3 and 4 only.
+- The user confirmed the red middle and requested a full-range gradient.
+  Use a smooth hue sweep; do not restore separate shade families or quantize
+  depth into groups. Layer values, subplot sizes, and column gaps are unchanged.
+  Figures 1, 2, and 4 are approved and frozen. The entry point regenerates
+  Figure 3 only; every semantic output is preserved byte-for-byte.
 
 ## References
 
 - `figs/fig5_layer_scale_sweeps/publish_params.py` and its README.
+- Oklab conversion and polar coordinates: [Björn Ottosson](https://bottosson.github.io/posts/oklab/).
 - Saved per-run `prefill_logit/config.yml`; `forget/refuse/calibration.py`.
 
 # selectivity
@@ -235,6 +240,8 @@
 
 ## Notes
 
+- Figure 4 is approved and frozen. Do not regenerate its image, alter its
+  layout/caption, or change its placement in Word without a new user request.
 - The old cached semantic labels match `main` exactly (900/900 per model).
   They differ from `prefill_logit` in 189 Llama, 175 Mistral, and 441 Qwen rows.
   The old correlations 0.40/0.52/0.21 therefore must not accompany the new bars.
