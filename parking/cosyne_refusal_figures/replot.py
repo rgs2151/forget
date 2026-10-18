@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymupdf
-from matplotlib.colors import LinearSegmentedColormap, ListedColormap, BoundaryNorm
+from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.cm import ScalarMappable
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, ConnectionPatch, PathPatch
 from matplotlib.collections import PatchCollection
@@ -78,12 +78,9 @@ def layer_metrics():
         rates.insert(0, "model", model)
         rates["n"] = 100
         tables.append(rates)
-        groups = np.array_split(np.arange(d.layer.nunique()), 3)
-        families = [("#65A9D1", "#2476B0"), ("#B30D28", "#D23D39"), ("#38A18B", "#1C7A66")]
-        colors = np.vstack([LinearSegmentedColormap.from_list(str(i), shades)(np.linspace(0, 1, len(group)))
-                            for i, (group, shades) in enumerate(zip(groups, families))])
-        cmap = ListedColormap(colors)
-        norm = BoundaryNorm(np.arange(d.layer.nunique()+1)-.5, cmap.N)
+        anchors = ["#65A9D1", "#2476B0", "#B30D28", "#D23D39", "#38A18B", "#1C7A66"]
+        cmap = LinearSegmentedColormap.from_list("layer_depth", anchors, N=1024)
+        norm = Normalize(vmin=0, vmax=int(d.layer.max()))
         for row, metric in enumerate(METRICS):
             ax = axes[row, col]
             for layer, trace in rates.groupby("layer"):
@@ -114,14 +111,13 @@ def layer_metrics():
             cb.ax.minorticks_off()
             cb.set_label('Layer',rotation=270,labelpad=-1,fontsize=8.5)
             cb.outline.set_visible(False)
-            for group in groups[:-1]:
-                cb.ax.axhline(group[-1]+.5,color='white',lw=.65)
     pd.concat(tables).to_csv(OUT / "layer_metrics.csv", index=False)
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
-                                    'layer_palette_groups':['blue: early third','red: middle third','green: late third'],
-                                    'layer_palette_shades':families})
+                                    'layer_palette':'continuous linear interpolation',
+                                    'layer_palette_anchors':anchors,
+                                    'layer_palette_positions':[0,.2,.4,.6,.8,1]})
 
 
 def draw_selectivity_schematic(fig, original):
@@ -259,7 +255,7 @@ def draw_original_cloud(fig):
         counts[kind]+=1
     assert counts['questions']==5171 and counts['centroids']==311
     assert counts['highlight_markers']==4 and counts['shell_faces']>40000
-    ax=fig.add_axes([0,.06/2.15,cloud_width/4.4,(cloud_width*clip.height/clip.width)/2.15])
+    ax=fig.add_axes([0,.06/2.15,cloud_width/4.28,(cloud_width*clip.height/clip.width)/2.15])
     ax.add_collection(PatchCollection(paths,facecolors=faces,edgecolors=edges,
                                      linewidths=widths,antialiaseds=True))
     ax.set_xlim(clip.x0,clip.x1);ax.set_ylim(clip.y1,clip.y0)
@@ -360,24 +356,27 @@ def semantic_cloud():
         rho, p = spearmanr(d.semantic_similarity, d.spillover)
         correlations.append(dict(model=model, n=len(d), spearman_rho=float(rho), p=float(p)))
     pd.DataFrame(correlations).to_csv(OUT / "semantic_correlations.csv", index=False)
-    fig = plt.figure(figsize=(4.4, 2.15))
+    fig = plt.figure(figsize=(4.28, 2.15))
     source, crop, geometry_counts = draw_original_cloud(fig)
     fig.text(.005, .95, "A", weight="bold", fontsize=9)
-    fig.text(2.56/4.4, .95, "B", weight="bold", fontsize=9)
-    ax = fig.add_axes([2.92/4.4, .30/2.15, 1.40/4.4, 1.30/2.15])
+    fig.text(2.49/4.28, .95, "B", weight="bold", fontsize=9)
+    ax = fig.add_axes([2.80/4.28, .24/2.15, 1.40/4.28, 1.76/2.15])
     for i, near in enumerate([False, True]):
         s = stats[stats.near == near].set_index("model").loc[[m[0] for m in MODELS]]
         ax.bar(np.arange(3)+(i-.5)*.34, s["mean"], width=.34, color="#980000" if near else "#777777",
                label="Near" if near else "Far", yerr=s["sem"], capsize=2,
                error_kw={"elinewidth":.8, "capthick":.8})
     ax.set_xticks(range(3), ["Llama", "Mistral", "Qwen"], fontsize=8)
-    ax.set_ylim(0, .7); ax.set_yticks([0, .3, .6])
-    ax.set_ylabel("Off-target refusal\n(spillover)", fontsize=8.5, labelpad=3)
-    ax.legend(loc="lower right",bbox_to_anchor=(1,1.02),ncol=2,fontsize=8,
+    ax.set_ylim(0, .72); ax.set_yticks([0, .3, .6])
+    ax.set_ylabel("Off-target refusal (spillover)", fontsize=8.5, labelpad=3)
+    ax.legend(loc="upper left",ncol=2,fontsize=8,
               columnspacing=.9,
-              handlelength=.9,handletextpad=.4,borderaxespad=0,labelspacing=.15)
+              handlelength=.9,handletextpad=.4,borderaxespad=.3,labelspacing=.15)
     ax.spines["left"].set_position(("outward", 1.5)); ax.spines["bottom"].set_position(("outward", 1.5))
     save(fig, "semantic_cloud")
+    LAYOUT['semantic_cloud'].update({'bar_subplot_inches':[1.40,1.76],
+                                     'bar_ylim':[0,.72], 'legend':'upper left inside plot',
+                                     'ylabel':'Off-target refusal (spillover)'})
     (OUT / "semantic_provenance.json").write_text(json.dumps({"cloud_source":str(source.relative_to(ROOT)),
         "cloud_crop_pdf_points":crop, "cloud_recomputed":False, "cloud_vector_paths":geometry_counts,
         "example_pair_links":[{"names":["Germany","Austria"],"projected_pdf_points":[[402.2668457,232.5444336],[400.8131714,236.9431152]]},{"names":["Jason Momoa","Cannabis"],"projected_pdf_points":[[364.4332886,151.5898438],[429.9030762,214.6152344]]}],

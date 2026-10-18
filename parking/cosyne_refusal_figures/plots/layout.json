@@ -14,24 +14,22 @@
     "row_gap_inches": 0.24,
     "column_gap_inches": 0.46,
     "colorbars": 6,
-    "layer_palette_groups": [
-      "blue: early third",
-      "red: middle third",
-      "green: late third"
+    "layer_palette": "continuous linear interpolation",
+    "layer_palette_anchors": [
+      "#65A9D1",
+      "#2476B0",
+      "#B30D28",
+      "#D23D39",
+      "#38A18B",
+      "#1C7A66"
     ],
-    "layer_palette_shades": [
-      [
-        "#65A9D1",
-        "#2476B0"
-      ],
-      [
-        "#B30D28",
-        "#D23D39"
-      ],
-      [
-        "#38A18B",
-        "#1C7A66"
-      ]
+    "layer_palette_positions": [
+      0,
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1
     ]
   },
   "selectivity": {
@@ -48,12 +46,22 @@
     ]
   },
   "semantic_cloud": {
-    "width_inches": 4.4,
+    "width_inches": 4.28,
     "height_inches": 2.15,
     "font_sizes_pt": [
       8.0,
       8.5,
       9.0
-    ]
+    ],
+    "bar_subplot_inches": [
+      1.4,
+      1.76
+    ],
+    "bar_ylim": [
+      0,
+      0.72
+    ],
+    "legend": "upper left inside plot",
+    "ylabel": "Off-target refusal (spillover)"
   }
 }

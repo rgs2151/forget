@@ -43,14 +43,12 @@
 - Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
-- Every layer has a line. Three distinct color families mark equal-count depth
-  thirds: blue for early, red for middle, and green for late. Shades vary within
-  each family, with a clear color change and white color-bar separator between
-  families. Llama/Mistral: layers 0–10, 11–21, 22–31; Qwen: 0–9, 10–18, 19–27.
-  These are display groups, not estimated functional boundaries.
-- Blue spans `#65A9D1`–`#2476B0`; red spans `#B30D28`–`#D23D39`; green spans
-  `#38A18B`–`#1C7A66`. The middle group is distinctly red against the other
-  two families and white background. Every layer retains its own shade.
+- Every layer has a line sampled from a continuous blue–red–green color scale.
+  Layer index is normalized from zero to the model's final layer, with no
+  bins, group boundaries, or separator lines. The six color anchors are
+  `#65A9D1`, `#2476B0`, `#B30D28`, `#D23D39`, `#38A18B`, and `#1C7A66`
+  at normalized depths 0, 0.2, 0.4, 0.6, 0.8, and 1. Colors interpolate
+  continuously between anchors; middle layers remain visibly red.
 - Each subplot has its own color bar aligned to that subplot; its rotated
   `Layer` label is close to the bar. Only the left column repeats the shared
   0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
@@ -65,9 +63,9 @@
 
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
-- The user rejected the blended dark palette because middle and late layers
-  were hard to distinguish. The current separated color families address that
-  distinction. Layer values, subplot sizes, and column gaps are unchanged.
+- The user confirmed the red middle and requested continuous transitions.
+  Preserve the blue/red/green hues; do not quantize depth into groups or change
+  the middle hue. Layer values, subplot sizes, and column gaps are unchanged.
   Figures 1 and 2 remain frozen; the script regenerates Figures 3 and 4 only.
 
 ## References
@@ -191,10 +189,11 @@
   inference is rerun. Path counts, camera settings, crop, and source hash are recorded in `plots/semantic_provenance.json` and `source_hashes.json`.
 - Outputs: `plots/semantic_cloud.{png,pdf}`, `semantic_near_far.csv`,
   `semantic_pairs.csv`, `semantic_correlations.csv`, `semantic_provenance.json`.
-- Print size: 4.4 × 2.15 inches. Cloud width: 2.518 inches (same coordinate
+- Print size: 4.28 × 2.15 inches. Cloud width: 2.518 inches (same coordinate
   scale, with unused right space removed); bar plotting area:
-  1.40 × 1.30 inches. Text matches the other
-  plots. Word floats the image and caption together in one fixed-width cell.
+  1.40 × 1.76 inches, extending to the cloud panel’s upper edge. The single-line
+  y-axis title and narrower A/B gap save width; the legend sits inside the
+  upper-left plot area above the bars. Text matches the other plots. Word floats the image and caption together in one fixed-width cell.
   The justified caption stays immediately below the image at its width; only
   body text wraps beside the group.
 
@@ -221,9 +220,9 @@
   Jason Momoa/Cannabis with `Far`. Matching colored segments connect the two
   endpoints in each example pair. Near/Far refer to high/low semantic similarity.
 - B: gray bars are Far (below median similarity); dark red bars are Near
-  (at/above median). The legend contains only `Far` and `Near`; the caption
-  states the median definitions. The vertical axis is
-  `Off-target refusal (spillover)`; horizontal groups identify the three models.
+  (at/above median). The legend contains only `Far` and `Near` and sits inside the upper-left
+  plot area; the caption states the median definitions. The vertical axis is
+  `Off-target refusal (spillover)` on one line; horizontal groups identify the three models.
 - The near/far rate axis begins at zero. The cloud's axes are UMAP coordinates;
   similarity is measured in the original embedding space.
 
