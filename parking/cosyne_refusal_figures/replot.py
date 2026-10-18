@@ -205,6 +205,7 @@ def selectivity():
         matrices.append(d.groupby(["concept", "target"], as_index=False).judge_refusal.mean().assign(model=model))
     axes[0].set_xlabel('Steered concepts',fontsize=8.5,labelpad=-1)
     cb = fig.colorbar(im, cax=fig.add_axes([7.22/7.5,.30/1.65,.045/7.5,1.10/1.65])); cb.set_ticks([0, 1]); cb.ax.tick_params(length=1.5,pad=1,labelsize=8)
+    cb.set_label('Refusal rate',rotation=270,labelpad=2,fontsize=8.5)
     cb.outline.set_visible(False)
     pd.concat(matrices).to_csv(OUT / "selectivity.csv", index=False)
     save(fig, "selectivity")
