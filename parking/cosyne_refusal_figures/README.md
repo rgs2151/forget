@@ -43,15 +43,12 @@
 - Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
-- Every layer samples a continuous blue → purple → red → orange → green hue
-  sweep. Construct the path in Oklab polar coordinates with hue 250°–520°,
-  lightness 0.56 at its middle increasing smoothly to 0.62 at its ends, and
-  chroma at most 0.16. Reduce chroma only where needed to remain inside sRGB.
-  Sample the path at equal cumulative Oklab distances, then normalize layer
-  index over its model's full depth. This distributes visible color changes
-  across the whole range instead of concentrating them between shade families.
-  The darker red middle remains distinct on white. There are no bins, group
-  boundaries, separator lines, or faded curves.
+- Every layer samples one continuous scale defined by exactly three anchors:
+  blue `#2476B0` at normalized depth 0, red `#C32632` at 0.5, and green
+  `#1C7A66` at 1. Use direct linear RGB interpolation across each full half
+  of the scale. Red is exactly at the midpoint. Intermediate shades are only
+  mixtures of these anchors; there is no hue-wheel sweep, extra color anchor,
+  group boundary, separator line, or faded curve.
 - Each subplot has its own color bar aligned to that subplot; its rotated
   `Layer` label is close to the bar. Only the left column repeats the shared
   0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
@@ -67,15 +64,14 @@
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
 - The user confirmed the red middle and requested a full-range gradient.
-  Use a smooth hue sweep; do not restore separate shade families or quantize
-  depth into groups. Layer values, subplot sizes, and column gaps are unchanged.
+  Use only the blue/red/green anchors; no added pink, purple, orange, or yellow
+  regions. Do not restore separate shade families or quantize depth into groups. Layer values, subplot sizes, and column gaps are unchanged.
   Figures 1, 2, and 4 are approved and frozen. The entry point regenerates
   Figure 3 only; every semantic output is preserved byte-for-byte.
 
 ## References
 
 - `figs/fig5_layer_scale_sweeps/publish_params.py` and its README.
-- Oklab conversion and polar coordinates: [Björn Ottosson](https://bottosson.github.io/posts/oklab/).
 - Saved per-run `prefill_logit/config.yml`; `forget/refuse/calibration.py`.
 
 # selectivity

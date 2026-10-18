@@ -57,36 +57,10 @@ def save(fig, name):
 
 
 def layer_colormap():
-    """Smooth hue sweep, sampled at equal distances along its Oklab path."""
-    # Oklab conversion: https://bottosson.github.io/posts/oklab/ (public domain).
-    def linear_rgb(lab):
-        light, a, b = lab.T
-        l = (light + .3963377774*a + .2158037573*b)**3
-        m = (light - .1055613458*a - .0638541728*b)**3
-        s = (light - .0894841775*a - 1.2914855480*b)**3
-        return np.column_stack((4.0767416621*l - 3.3077115913*m + .2309699292*s,
-                                -1.2684380046*l + 2.6097574011*m - .3413193965*s,
-                                -.0041960863*l - .7034186147*m + 1.7076147010*s))
-
-    t = np.linspace(0, 1, 4097)
-    hue = np.deg2rad(250 + 270*t)
-    light = .56 + .06*(2*t - 1)**2
-    # Reduce chroma only where necessary to stay in sRGB; keep hue/lightness.
-    low, high = np.zeros_like(t), np.full_like(t, .16)
-    for _ in range(24):
-        chroma = (low + high)/2
-        lab = np.column_stack((light, chroma*np.cos(hue), chroma*np.sin(hue)))
-        rgb = linear_rgb(lab)
-        inside = ((rgb >= 0) & (rgb <= 1)).all(axis=1)
-        low = np.where(inside, chroma, low)
-        high = np.where(inside, high, chroma)
-    lab = np.column_stack((light, low*np.cos(hue), low*np.sin(hue)))
-    distance = np.r_[0, np.cumsum(np.linalg.norm(np.diff(lab, axis=0), axis=1))]
-    equal_steps = np.linspace(0, distance[-1], len(t))
-    lab = np.column_stack([np.interp(equal_steps, distance, channel) for channel in lab.T])
-    rgb = np.clip(linear_rgb(lab), 0, 1)
-    rgb = np.where(rgb <= .0031308, 12.92*rgb, 1.055*rgb**(1/2.4)-.055)
-    return LinearSegmentedColormap.from_list("layer_depth", rgb, N=len(t))
+    """Direct continuous RGB interpolation between exactly three anchors."""
+    return LinearSegmentedColormap.from_list(
+        "layer_depth", [(0.0, "#2476B0"), (0.5, "#C32632"), (1.0, "#1C7A66")],
+        N=4097)
 
 
 def layer_metrics():
@@ -147,10 +121,9 @@ def layer_metrics():
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
-                                    'layer_palette':'continuous Oklab hue sweep, equal path-distance samples',
-                                    'layer_palette_hue_degrees':[250,520],
-                                    'layer_palette_lightness_range':[.56,.62],
-                                    'layer_palette_max_chroma':.16})
+                                    'layer_palette':'direct continuous RGB interpolation; three anchors only',
+                                    'layer_palette_anchors':['#2476B0','#C32632','#1C7A66'],
+                                    'layer_palette_positions':[0,.5,1]})
 
 
 def draw_selectivity_schematic(fig, original):
