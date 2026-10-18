@@ -68,8 +68,9 @@
 - The user confirmed the red middle and requested a full-range gradient.
   Use only the blue/red/green anchors; no added pink, purple, orange, or yellow
   regions. Do not restore separate shade families or quantize depth into groups. Layer values, subplot sizes, and column gaps are unchanged.
-  Figures 1, 2, and 4 are approved and frozen. The entry point regenerates
-  Figure 3 only; every semantic output is preserved byte-for-byte.
+  All four figures are now approved and frozen. Do not run the plotting entry
+  point: its historical behavior regenerates Figure 3. The current revision
+  edits caption wording only; all figure files and data remain byte-identical.
 
 ## References
 
@@ -238,8 +239,9 @@
 
 ## Notes
 
-- Figure 4 is approved and frozen. Do not regenerate its image, alter its
-  layout/caption, or change its placement in Word without a new user request.
+- Figure 4 is approved and frozen along with Figures 1–3. Do not regenerate
+  images or alter their dimensions, typography, or data. The current user
+  request permits caption wording edits, with existing Word groups preserved.
 - The old cached semantic labels match `main` exactly (900/900 per model).
   They differ from `prefill_logit` in 189 Llama, 175 Mistral, and 441 Qwen rows.
   The old correlations 0.40/0.52/0.21 therefore must not accompany the new bars.
