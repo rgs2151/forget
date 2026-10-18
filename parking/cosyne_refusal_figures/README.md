@@ -44,9 +44,9 @@
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
 - Every layer samples one continuous scale defined by exactly three anchors:
-  blue `#2476B0` at normalized depth 0, red `#C32632` at 0.5, and green
-  `#2CA02C` at 1. Blue and red retain their previous values; green is a
-  clearer green rather than teal. Decode sRGB to linear-light RGB, interpolate
+  blue `#2476B0` at normalized depth 0, red `#980000` at 0.5, and green
+  `#2CA02C` at 1. Blue and green are unchanged; the red matches the dark red used in
+  Figure 2’s targeted-refusal schematic and Figure 4B’s Near bars. Decode sRGB to linear-light RGB, interpolate
   across each full half, then encode back to sRGB. This preserves brightness
   through the blends. Red is exactly at the midpoint. Intermediate shades are only
   mixtures of these anchors; there is no hue-wheel sweep, extra color anchor,

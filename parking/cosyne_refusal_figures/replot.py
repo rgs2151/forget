@@ -58,7 +58,7 @@ def save(fig, name):
 
 def layer_colormap():
     """Blend three anchors in linear-light RGB to avoid dark transitions."""
-    anchors = np.array([to_rgb(c) for c in ["#2476B0", "#C32632", "#2CA02C"]])
+    anchors = np.array([to_rgb(c) for c in ["#2476B0", "#980000", "#2CA02C"]])
     linear = np.where(anchors <= .04045, anchors/12.92,
                       ((anchors + .055)/1.055)**2.4)
     depth = np.linspace(0, 1, 4097)
@@ -128,7 +128,7 @@ def layer_metrics():
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
                                     'layer_palette':'continuous linear-light RGB interpolation; three anchors only',
-                                    'layer_palette_anchors':['#2476B0','#C32632','#2CA02C'],
+                                    'layer_palette_anchors':['#2476B0','#980000','#2CA02C'],
                                     'layer_palette_positions':[0,.5,1]})
 
 

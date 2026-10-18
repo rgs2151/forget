@@ -43,7 +43,7 @@ Layer and strength dependence. Refusal (top) and retention (bottom) versus scale
 ## Checks
 
 - Visual encoding checked against the final Word PDF and unit plots.
-- 920 settings, 100 targeted responses each; both means unchanged. Continuous linear-light RGB interpolation between blue, red, and green anchors at 0, 0.5, and 1; alpha 1.0; no numeric changes.
+- 920 settings, 100 targeted responses each; both means unchanged. Continuous linear-light RGB interpolation between blue, red, and green anchors at 0, 0.5, and 1 (midpoint #980000 matches Figures 2/4B); alpha 1.0; no numeric changes.
 - No additional results are asserted by this layout revision.
 
 # semantic_cloud

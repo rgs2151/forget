@@ -17,7 +17,7 @@
     "layer_palette": "continuous linear-light RGB interpolation; three anchors only",
     "layer_palette_anchors": [
       "#2476B0",
-      "#C32632",
+      "#980000",
       "#2CA02C"
     ],
     "layer_palette_positions": [
