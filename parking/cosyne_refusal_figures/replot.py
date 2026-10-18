@@ -2,7 +2,6 @@
 
 import ast
 import hashlib
-import io
 import json
 from pathlib import Path
 
@@ -12,12 +11,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymupdf
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, ConnectionPatch
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, ConnectionPatch, PathPatch
+from matplotlib.collections import PatchCollection
+from matplotlib.path import Path as MplPath
+from mpl_toolkits.mplot3d import proj3d
 from matplotlib.transforms import Affine2D
 from scipy.stats import spearmanr
-from forget.plot.plot import custom_cmap
 
 UNIT = Path(__file__).resolve().parent
 ROOT = UNIT.parents[1]
@@ -56,10 +57,10 @@ def save(fig, name):
 
 
 def layer_metrics():
-    record(ROOT / "forget/plot/plot.py")
-    fig = plt.figure(figsize=(5.1, 2.7))
-    axes = np.array([[fig.add_axes([x/5.1,y/2.7,.98/5.1,.98/2.7])
-                      for x in [.34,2.00,3.66]] for y in [1.52,.30]])
+    width = 4.55
+    fig = plt.figure(figsize=(width, 2.7))
+    axes = np.array([[fig.add_axes([x/width,y/2.7,.98/width,.98/2.7])
+                      for x in [.34,1.78,3.22]] for y in [1.52,.30]])
     tables = []
     for col, (model, label) in enumerate(MODELS):
         cols = ["label", "concept", "target", "question", "source_layer", "scale"] + [f"judge_{m}" for m in METRICS]
@@ -77,7 +78,8 @@ def layer_metrics():
         rates.insert(0, "model", model)
         rates["n"] = 100
         tables.append(rates)
-        cmap = custom_cmap(d.layer.nunique())
+        cmap = LinearSegmentedColormap.from_list(
+            "early_middle_late", ["#3B6FB6", "#4A145B", "#C66B2B"], N=d.layer.nunique())
         norm = Normalize(vmin=0, vmax=int(d.layer.max()))
         for row, metric in enumerate(METRICS):
             ax = axes[row, col]
@@ -104,14 +106,15 @@ def layer_metrics():
                 ax.tick_params(labelleft=False)
             pos = ax.get_position()
             cb = fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),
-                             cax=fig.add_axes([pos.x1+.045/5.1,pos.y0,.035/5.1,pos.height]))
-            cb.set_ticks([0,int(d.layer.max())]);cb.ax.tick_params(length=1.5,pad=1)
-            cb.set_label('Layer',rotation=270,labelpad=7,fontsize=8.5)
+                             cax=fig.add_axes([pos.x1+.04/width,pos.y0,.035/width,pos.height]))
+            cb.set_ticks([0,int(d.layer.max())]);cb.ax.tick_params(length=1.5,pad=.5)
+            cb.set_label('Layer',rotation=270,labelpad=-1,fontsize=8.5)
             cb.outline.set_visible(False)
     pd.concat(tables).to_csv(OUT / "layer_metrics.csv", index=False)
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
-                                    'row_gap_inches':.24,'colorbars':6})
+                                    'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
+                                    'layer_palette_anchors':['#3B6FB6','#4A145B','#C66B2B']})
 
 
 def draw_selectivity_schematic(fig, original):
@@ -205,74 +208,101 @@ def selectivity():
 
 def draw_original_cloud(fig):
     source = record(ROOT / "figs/fig6_semantic_spillover/plots/figure1_paper.pdf")
+    record(ROOT / "figs/fig6_semantic_spillover/semantic_spillover_figure.ipynb")
     pdf = pymupdf.open(source)
     page = pdf[0]
+    source_roi = pymupdf.Rect(201.6, 51.6, 580.8, 364.8)
     clip = pymupdf.Rect(201.6, 51.6, 580.8, 280.0)
-    # The last PDF artists are the four callout lines and six text boxes.
-    # Remove only those artists, then redraw their labels at the final print size.
-    stream = page.read_contents()
-    marker = b'/A13 gs 1 J 1.6 w'
-    assert stream.count(marker) == 1
-    pdf.update_stream(page.get_contents()[0], stream.split(marker)[0] + b'Q\n')
-    old_clip=pymupdf.Rect(201.6,51.6,580.8,364.8)
-    cloud_paths=[]
+    # Rebuild the original projected vector geometry as native Matplotlib paths.
+    # The notebook did not save 3D coordinates; never infer or refit them here.
+    paths, faces, edges, widths = [], [], [], []
+    counts = {'questions':0, 'centroids':0, 'shell_faces':0, 'highlight_markers':0}
+    stroke_scale = 72 * 3.2 / clip.width
     for drawing in page.get_drawings():
-        fill=drawing['fill']
-        if fill and old_clip.contains(drawing['rect']):
-            is_point=all(abs(c-.2902)<.01 for c in fill) or all(abs(c-.1647)<.01 for c in fill)
-            is_shell=fill[1]>fill[0]+.05 and fill[2]>fill[0]+.05
-            if is_point or is_shell:cloud_paths.append(drawing['rect'])
-    assert cloud_paths and all(clip.contains(box) for box in cloud_paths)
-    labels = []
-    for block in page.get_text('dict')['blocks']:
-        for line in block.get('lines', []):
-            for span in line['spans']:
-                box = pymupdf.Rect(span['bbox'])
-                if clip.contains(box):
-                    labels.append((span, line['dir']))
-                    page.add_redact_annot(box, fill=None)
-    page.apply_redactions(images=0, graphics=0, text=0)
-    pix = page.get_pixmap(matrix=pymupdf.Matrix(5,5),clip=clip,alpha=False)
+        if not source_roi.contains(drawing['rect']):
+            continue
+        fill = drawing['fill']
+        kind = None
+        if fill:
+            if all(abs(c-.2902)<.001 for c in fill):kind='questions'
+            elif all(abs(c-.1647)<.001 for c in fill):kind='centroids'
+            elif fill[1]>fill[0]+.05 and fill[2]>fill[0]+.05:kind='shell_faces'
+            elif drawing['seqno'] in [57,59,61,63]:kind='highlight_markers'
+        if kind is None:
+            continue
+        assert clip.contains(drawing['rect'])
+        vertices, codes = [], []
+        for item in drawing['items']:
+            assert item[0] in ['l','c']
+            start = tuple(item[1])
+            if not vertices or vertices[-1] != start:
+                vertices.append(start); codes.append(MplPath.MOVETO)
+            if item[0]=='l':
+                vertices.append(tuple(item[2]));codes.append(MplPath.LINETO)
+            else:
+                vertices.extend(tuple(pt) for pt in item[2:])
+                codes.extend([MplPath.CURVE4]*3)
+        vertices.append(vertices[0]);codes.append(MplPath.CLOSEPOLY)
+        paths.append(PathPatch(MplPath(vertices,codes)))
+        faces.append((*fill,drawing['fill_opacity']))
+        edge=drawing['color']
+        edges.append((*edge,drawing['stroke_opacity']) if edge else (0,0,0,0))
+        widths.append((drawing['width'] or 0)*stroke_scale)
+        counts[kind]+=1
+    assert counts['questions']==5171 and counts['centroids']==311
+    assert counts['highlight_markers']==4 and counts['shell_faces']>40000
     ax=fig.add_axes([0,.06/2.15,3.2/5.2,(3.2*clip.height/clip.width)/2.15])
-    ax.imshow(plt.imread(io.BytesIO(pix.tobytes('png'))),extent=(clip.x0,clip.x1,clip.y1,clip.y0))
-    ax.set_xlim(clip.x0,clip.x1);ax.set_ylim(clip.y1,clip.y0);ax.axis('off')
-    for span,direction in labels:
-        x0,y0,x1,y1=span['bbox']; is_axis=span['text'].startswith('UMAP')
-        label=span['text']
-        # Endpoint-only tick labels avoid crowding at the smaller print size.
-        if not is_axis:
-            t=span['text'].replace('−','-')
-            if y0>300 and x0<420:
-                if x0>=280 and t!='15':continue
-            elif y0>270 and x0>=420:
-                if t=='121416':
-                    # The source PDF groups these adjacent labels into one span.
-                    label='16';x0,y0,x1,y1=515.0186,281.7320,525.0267,293.7110
-                elif t!='0':continue
-            elif x0>=520 and y0<280 and t not in ['0.0','15.0']:
-                continue
-        ax.text((x0+x1)/2,(y0+y1)/2,label,ha='center',va='center',
-                rotation=np.degrees(np.arctan2(-direction[1],direction[0])),
-                fontsize=8.5 if is_axis else 8,fontweight='bold' if is_axis else 'normal')
+    ax.add_collection(PatchCollection(paths,facecolors=faces,edgecolors=edges,
+                                     linewidths=widths,antialiaseds=True))
+    ax.set_xlim(clip.x0,clip.x1);ax.set_ylim(clip.y1,clip.y0)
+    ax.set_aspect('equal');ax.axis('off')
+    label_artists=[]
     for name,point,anchor,color in [
         ('Germany',(402.2668457,232.5444336),(250,64),'#B30000'),
         ('Austria',(400.8131714,236.9431152),(250,100),'#B30000'),
-        ('Cannabis',(429.9030762,214.6152344),(510,64),'#6B6B6B'),
-        ('Jason Momoa',(364.4332886,151.5898438),(510,100),'#6B6B6B')]:
-        ax.plot([point[0],anchor[0]],[point[1],anchor[1]],color=color,lw=.8)
-        ax.text(*anchor,name,fontsize=8,ha='center',va='center',
-                bbox=dict(boxstyle='round,pad=.15',fc='white',ec=color,lw=.6))
-    for x,label,color in [(250,'Near\nHigh similarity','#B30000'),(475,'Far\nLow similarity','#6B6B6B')]:
-        ax.text(x,139,label,fontsize=8,ha='center',va='center',color='white',
-                bbox=dict(boxstyle='round,pad=.15',fc=color,ec='white',lw=.4))
-    # A compact orientation key replaces the empty projected base plane.
-    for endpoint,label,label_position in [((295,257),'UMAP-1',(295,272)),
-                                          ((272,223),'UMAP-2',(252,211))]:
-        ax.annotate('',xy=endpoint,xytext=(230,245),
-                    arrowprops=dict(arrowstyle='->',lw=.6,color='#555555'))
-        ax.text(*label_position,label,ha='center',va='center',fontsize=8.5)
+        ('Jason Momoa',(364.4332886,151.5898438),(500,64),'#6B6B6B'),
+        ('Cannabis',(429.9030762,214.6152344),(535,112),'#6B6B6B')]:
+        label_artists.append(ax.annotate(name,xy=point,xytext=anchor,
+            fontsize=8,ha='center',va='center',
+            bbox=dict(boxstyle='round,pad=.15',fc='white',ec=color,lw=.6),
+            arrowprops=dict(arrowstyle='-',color=color,lw=.8,shrinkA=2,shrinkB=0)))
+    for x,y,label,color in [(250,139,'Near','#B30000'),(535,150,'Far','#6B6B6B')]:
+        label_artists.append(ax.text(x,y,label,fontsize=8,ha='center',va='center',color='white',
+                bbox=dict(boxstyle='round,pad=.15',fc=color,ec='white',lw=.4)))
+    # Project a true 3D orthogonal basis using the source camera and box aspect.
+    camera_fig=plt.figure()
+    camera=camera_fig.add_subplot(projection='3d')
+    camera.set(xlim=(0,1),ylim=(0,1),zlim=(0,1))
+    camera.view_init(elev=18,azim=-62);camera.set_box_aspect((1,1,.85))
+    origin3=np.array([.5,.5,.5])
+    basis=np.vstack([origin3,origin3+np.diag([.4,.55,.4])])
+    projected=np.array(proj3d.proj_transform(*basis.T,camera.get_proj()))[:2].T
+    directions=projected[1:]-projected[0]
+    directions[:,1]*=-1
+    directions*=78/np.linalg.norm(directions[0])
+    plt.close(camera_fig)
+    origin=np.array([237.,252.])
+    for k,delta in enumerate(directions):
+        end=origin+delta
+        ax.annotate('',xy=end,xytext=origin,
+                    arrowprops=dict(arrowstyle='->',lw=.7,color='#444444',shrinkA=0,shrinkB=0))
+        # Place the labels parallel to their projected arrow shafts.
+        normal=np.array([-delta[1],delta[0]])/np.linalg.norm(delta)
+        offset=9 if k==0 else -9
+        fraction=.85 if k==1 else .57
+        position=origin+fraction*delta+offset*normal
+        angle=np.degrees(np.arctan2(-delta[1],delta[0]))
+        label_artists.append(ax.text(*position,f'UMAP-{k+1}',ha='center',va='center',
+            rotation=angle,rotation_mode='anchor',fontsize=8.5))
+    fig.canvas.draw()
+    # Annotation extents include the leader; check the label boxes themselves.
+    concept_boxes=[t.get_bbox_patch().get_window_extent() for t in label_artists[:6]]
+    text_boxes=concept_boxes+[t.get_window_extent(fig.canvas.get_renderer()) for t in label_artists[6:]]
+    overlaps=[(label_artists[i].get_text(),label_artists[j].get_text())
+              for i,a in enumerate(text_boxes) for j,b in enumerate(text_boxes) if j>i and a.overlaps(b)]
+    assert not overlaps, overlaps
     pdf.close()
-    return source, list(clip)
+    return source, list(clip), counts
 
 
 def semantic_cloud():
@@ -315,26 +345,27 @@ def semantic_cloud():
         correlations.append(dict(model=model, n=len(d), spearman_rho=float(rho), p=float(p)))
     pd.DataFrame(correlations).to_csv(OUT / "semantic_correlations.csv", index=False)
     fig = plt.figure(figsize=(5.2, 2.15))
-    source, crop = draw_original_cloud(fig)
+    source, crop, geometry_counts = draw_original_cloud(fig)
     fig.text(.005, .95, "A", weight="bold", fontsize=9)
     fig.text(3.35/5.2, .95, "B", weight="bold", fontsize=9)
     ax = fig.add_axes([3.72/5.2, .30/2.15, 1.40/5.2, 1.30/2.15])
     for i, near in enumerate([False, True]):
         s = stats[stats.near == near].set_index("model").loc[[m[0] for m in MODELS]]
         ax.bar(np.arange(3)+(i-.5)*.34, s["mean"], width=.34, color="#980000" if near else "#777777",
-               label="Near: at/above median" if near else "Far: below median", yerr=s["sem"], capsize=2,
+               label="Near" if near else "Far", yerr=s["sem"], capsize=2,
                error_kw={"elinewidth":.8, "capthick":.8})
     ax.set_xticks(range(3), ["Llama", "Mistral", "Qwen"], fontsize=8)
     ax.set_ylim(0, .7); ax.set_yticks([0, .3, .6])
     ax.set_ylabel("Off-target refusal\n(spillover)", fontsize=8.5, labelpad=3)
-    ax.legend(loc="lower right",bbox_to_anchor=(1,1.02),ncol=1,fontsize=8,
-              title='Semantic similarity',title_fontsize=8,
+    ax.legend(loc="lower right",bbox_to_anchor=(1,1.02),ncol=2,fontsize=8,
+              columnspacing=.9,
               handlelength=.9,handletextpad=.4,borderaxespad=0,labelspacing=.15)
     ax.spines["left"].set_position(("outward", 1.5)); ax.spines["bottom"].set_position(("outward", 1.5))
     save(fig, "semantic_cloud")
     (OUT / "semantic_provenance.json").write_text(json.dumps({"cloud_source":str(source.relative_to(ROOT)),
-        "cloud_crop_pdf_points":crop, "cloud_recomputed":False,
-        "cloud_annotations":"Original points/shells retained and checked inside the tighter crop; empty base trimmed, compact orientation key, separated pair labels, near/far definitions instead of cosine values.", "median_cosine":median,
+        "cloud_crop_pdf_points":crop, "cloud_recomputed":False, "cloud_vector_paths":geometry_counts,
+        "camera":{"elevation":18,"azimuth":-62,"box_aspect":[1,1,.85]},
+        "cloud_annotations":"Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa above Cannabis with separate leaders. Near/Far labels only; definitions in the caption.", "median_cosine":median,
         "near_far_rows_per_model":900, "pair_correlations":correlations,
         "rate_variant":"prefill_logit", "cached_original_rate_variant":"main", "rate_variant_audit":audit,
         "scope":"Cloud pools six datasets; near/far and pair tables use ten ConceptVectors concepts. External MiniLM embeddings, not LLM hidden states.",
@@ -343,20 +374,23 @@ def semantic_cloud():
 
 def main():
     OUT.mkdir(exist_ok=True); CACHE.mkdir(exist_ok=True)
+    # Figures 1 and 2 are frozen: preserve their existing artifacts byte-for-byte.
+    SOURCES.update(json.loads((OUT/'source_hashes.json').read_text()))
+    LAYOUT.update(json.loads((OUT/'layout.json').read_text()))
     for path in OUT.iterdir():
-        if path.suffix in {'.png','.pdf','.csv','.json'}:
+        if path.stem.startswith(('layer_metrics','semantic_')):
             path.unlink()
     plt.rcParams.update({"font.family":"serif", "font.serif":["Times New Roman", "DejaVu Serif"],
         "mathtext.fontset":"cm", "font.size":8.5, "axes.labelsize":8.5, "xtick.labelsize":8, "ytick.labelsize":8,
         "axes.spines.top":False, "axes.spines.right":False, "axes.linewidth":.65,
         "legend.frameon":False, "figure.dpi":120, "savefig.dpi":400})
     record(UNIT / "inputs/refusal_example.png")
-    layer_metrics(); selectivity(); semantic_cloud()
+    layer_metrics(); semantic_cloud()
     for path, digest in SOURCES.items():
         assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest() == digest
     (OUT / "source_hashes.json").write_text(json.dumps(SOURCES, indent=2)+"\n")
     (OUT / "layout.json").write_text(json.dumps(LAYOUT,indent=2)+"\n")
-    print(f"Wrote 3 figures and source summaries to {OUT}; all input hashes unchanged.")
+    print(f"Wrote Figures 3/4 to {OUT}; Figures 1/2 frozen; all input hashes unchanged.")
 
 
 if __name__ == "__main__":

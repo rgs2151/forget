@@ -7,7 +7,22 @@
     280.0
   ],
   "cloud_recomputed": false,
-  "cloud_annotations": "Original points/shells retained and checked inside the tighter crop; empty base trimmed, compact orientation key, separated pair labels, near/far definitions instead of cosine values.",
+  "cloud_vector_paths": {
+    "questions": 5171,
+    "centroids": 311,
+    "shell_faces": 46658,
+    "highlight_markers": 4
+  },
+  "camera": {
+    "elevation": 18,
+    "azimuth": -62,
+    "box_aspect": [
+      1,
+      1,
+      0.85
+    ]
+  },
+  "cloud_annotations": "Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa above Cannabis with separate leaders. Near/Far labels only; definitions in the caption.",
   "median_cosine": 0.237964905,
   "near_far_rows_per_model": 900,
   "pair_correlations": [

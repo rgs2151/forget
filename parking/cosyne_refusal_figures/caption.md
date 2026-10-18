@@ -34,7 +34,7 @@ Targeted refusal. A, schematic: target-concept questions are refused; other ques
 
 ## Caption
 
-Layer and strength dependence. Refusal (top) and retention (bottom) versus scale s = α. Each line is one layer; each panel has its own layer color bar. Each point averages 100 target-concept responses. Retention measures agreement with the unsteered answer, not preservation of other concepts.
+Layer and strength dependence. Refusal (top) and retention (bottom) versus scale s = α. Each line is one layer. Colors progress from blue (early) through dark purple (middle) to orange (late), with one color bar per panel. Each point averages 100 target-concept responses. Retention measures agreement with the unsteered answer, not preservation of other concepts.
 
 ## Panel Notes
 
@@ -43,7 +43,7 @@ Layer and strength dependence. Refusal (top) and retention (bottom) versus scale
 ## Checks
 
 - Visual encoding checked against the final Word PDF and unit plots.
-- 920 settings, 100 targeted responses each; both means unchanged. Original layer colors, alpha 1.0.
+- 920 settings, 100 targeted responses each; both means unchanged. Blue/purple/orange palette, alpha 1.0; no numeric changes.
 - No additional results are asserted by this layout revision.
 
 # semantic_cloud
@@ -54,7 +54,7 @@ Semantic similarity and off-target refusal (spillover). A, MiniLM question embed
 
 ## Panel Notes
 
-- Figure 4. A: original point-cloud geometry with separated labels and explicit Near/Far definitions; the empty frame base is cropped. B: narrow near/far bars.
+- Figure 4. A: reconstructed original projected geometry without a frame, separated Near/Far callouts, and a three-axis orientation key. Definitions remain in the caption. B: narrow near/far bars.
 
 ## Checks
 

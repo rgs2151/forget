@@ -14,10 +14,11 @@
 
 - Script: `replot.py`; run from the repository root with
   `/home/dev/miniconda3/envs/forget/bin/python -m parking.cosyne_refusal_figures.replot`.
-- Dependencies: the existing plotting environment plus PyMuPDF for preserving
-  the original semantic PDF geometry while replacing only its lettering.
-- Print size: 5.1 × 2.7 inches; six 0.98-inch-square plotting areas with a
-  0.24-inch gap between rows. Shared typography across all three plots:
+- Dependencies: the existing plotting environment plus PyMuPDF for reading
+  the original semantic PDF paths for reconstruction in Matplotlib.
+- Print size: 4.55 × 2.7 inches; six 0.98-inch-square plotting areas with a
+  0.24-inch gap between rows and a 0.46-inch gap between plotting columns.
+  The column gap includes the color bar, tick labels, and rotated Layer label. Shared typography across all three plots:
   8-point ticks/annotations, 8.5-point axes, 9-point bold panel/model titles.
   Embed at the recorded width; `plots/layout.json` records actual font sizes.
 - Inputs: `parking/model_matrix/cache/{llama8b,mistral7b,qwen7b}_inhouse/results/prefill_logit/calibration_judged.csv`.
@@ -42,13 +43,15 @@
 - Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
-- Every layer has a line. The exact original `custom_cmap` in
-  `forget/plot/plot.py` maps the layer index to color: purple/blue through
-  cyan/green/yellow to orange/red. Each subplot has its own layer color bar,
-  aligned to that subplot, with a rotated `Layer` label. Only the left column
-  repeats the shared 0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
-- All lines use alpha 1.0 and equal width 0.7. No layers are faded, recolored,
-  hidden, or preferentially emphasized in this restoration pass.
+- Every layer has a line. A three-anchor continuous palette runs from blue
+  (`#3B6FB6`, early) through dark purple (`#4A145B`, middle) to orange
+  (`#C66B2B`, late), sampled once per layer. The anchors are normalized depths
+  0, 0.5, and 1; these are visual reference points, not fitted layer groups.
+  The middle anchor has the highest contrast against white.
+- Each subplot has its own color bar aligned to that subplot; its rotated
+  `Layer` label is close to the bar. Only the left column repeats the shared
+  0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
+- All lines use alpha 1.0 and equal width 0.7. No layers are hidden or faded.
 
 ## Interpretation
 
@@ -59,9 +62,10 @@
 
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
-- The user requested restoration of the paper's line plot and palette, keeping
-  the two-by-three layout. Increasing middle-layer color contrast is a possible
-  later palette revision; this pass preserves the exact original colors.
+- The user approved the blue/purple/orange palette revision to make middle
+  layers visible against white. Layer values and the two-by-three layout are
+  unchanged. Figures 1 and 2 are frozen; the script only regenerates Figures
+  3 and 4 and their numeric summaries.
 
 ## References
 
@@ -142,16 +146,20 @@
 
 ## Method
 
-- Preserve the original Figure 6 turquoise-shell cloud geometry from
-  `figs/fig6_semantic_spillover/plots/figure1_paper.pdf`. In an in-memory copy,
-  remove the original callout artists and text, retaining every point, shell,
-  highlight, and camera projection. Trim the empty base of the projected frame;
-  assert that every point/shell path remains inside the crop. Add a compact
-  UMAP-1/UMAP-2 orientation key and retain the UMAP-3 axis. Replace lettering
-  at the final print size. Separate the four concept labels; their leader lines
-  terminate at the exact original PDF coordinates. Define Near/Far beside the
-  examples rather than displaying example cosine values. The source PDF itself
-  is never changed.
+- Reconstruct the original Figure 6 projected vector paths from
+  `figs/fig6_semantic_spillover/plots/figure1_paper.pdf` as native Matplotlib
+  paths. Preserve their coordinates, colors, alpha, stroke widths at final
+  size, and drawing order. Omit the surrounding panes, ticks, and frame.
+  The original notebook did not save its 3D coordinates; no coordinates are
+  inferred and no embeddings, projection, or density estimate are refitted.
+- Project an orthogonal three-axis orientation key using Matplotlib's 3D
+  camera with the notebook's elevation 18°, azimuth −62°, and box aspect
+  (1, 1, 0.85). Put the key at bottom-left, with UMAP-1/2/3 labels parallel
+  to their projected arrows. The key shows orientation, not a distance scale.
+- Keep every point and shell inside the crop. Place Jason Momoa above Cannabis
+  to follow their projected locations; connect each label directly to its
+  original point without crossing the other label. Use only Near and Far
+  tags and legend entries. Their meanings remain in the editable caption.
 - Reuse cached MiniLM question-to-target cosine similarities. Join them to
   `prefill_logit` refusal labels using exact `(concept, target, question)` keys,
   separately for each model. Require one-to-one matches for all 900 rows/model.
@@ -172,8 +180,9 @@
   has 450 observations per model.
 - Cloud: externally encoded MiniLM questions and concept centroids pooled
   across six datasets; original joint 3D UMAP and Gaussian-density shells.
-  No encoder, UMAP, or model inference is rerun. Crop coordinates and source
-  hash are recorded in `plots/semantic_provenance.json` and `source_hashes.json`.
+  Reconstructed paths: 5,171 question markers, 311 centroid markers, four
+  highlighted markers, and all shell triangles. No encoder, UMAP, or model
+  inference is rerun. Path counts, camera settings, crop, and source hash are recorded in `plots/semantic_provenance.json` and `source_hashes.json`.
 - Outputs: `plots/semantic_cloud.{png,pdf}`, `semantic_near_far.csv`,
   `semantic_pairs.csv`, `semantic_correlations.csv`, `semantic_provenance.json`.
 - Print size: 5.2 × 2.15 inches. Cloud width: 3.2 inches; bar plotting area:
@@ -200,10 +209,11 @@
 ## Legends
 
 - A: gray question points, darker concept centroids, turquoise projected-density
-  shells. Red annotates Germany/Austria with `Near / High similarity`; gray
-  annotates Cannabis/Jason Momoa with `Far / Low similarity`.
+  shells. Red annotates Germany/Austria with `Near`; gray annotates
+  Jason Momoa/Cannabis with `Far`. Near/Far refer to high/low semantic similarity.
 - B: gray bars are Far (below median similarity); dark red bars are Near
-  (at/above median). The legend states both definitions. The vertical axis is
+  (at/above median). The legend contains only `Far` and `Near`; the caption
+  states the median definitions. The vertical axis is
   `Off-target refusal (spillover)`; horizontal groups identify the three models.
 - The near/far rate axis begins at zero. The cloud's axes are UMAP coordinates;
   similarity is measured in the original embedding space.
@@ -222,7 +232,7 @@
   The old correlations 0.40/0.52/0.21 therefore must not accompany the new bars.
 - High-dimensional similarities are reused only after exact question/target
   matching. The historical cloud is preserved; its coordinate cache was not
-  needed for the crop and its original projection was not recomputed.
+  available; the saved projected vector geometry is reconstructed directly.
 - All input SHA-256 hashes are checked before/after plotting. The unit writes
   only its own `plots/` and `cache/`. No protected result or existing plot is
   modified. The three plots embed as complete images in Word, without native

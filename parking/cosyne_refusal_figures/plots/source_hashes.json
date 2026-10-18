@@ -33,5 +33,6 @@
   "parking/model_matrix/cache/mistral7b_conceptvectors/results/prefill_logit/confusion_judged.csv": "c9d6767a656c2436ec1063e775178d41b54f5f3669cc27bb620d2223d445244e",
   "parking/model_matrix/cache/qwen7b_conceptvectors/results/main/confusion_judged.csv": "d7971fd30d986e6c4ad1d14ec700c71108190e2cda8c1abd0941d2bc2b76a914",
   "parking/model_matrix/cache/qwen7b_conceptvectors/results/prefill_logit/confusion_judged.csv": "1e59d9e4459fbd12a2075d0cd114badac83600d058a373bf0aad7f809253e6f1",
-  "figs/fig6_semantic_spillover/plots/figure1_paper.pdf": "281d6a9ed84a00200456ad4c35d93612d8d7ff6bef05272b712878440ece97bd"
+  "figs/fig6_semantic_spillover/plots/figure1_paper.pdf": "281d6a9ed84a00200456ad4c35d93612d8d7ff6bef05272b712878440ece97bd",
+  "figs/fig6_semantic_spillover/semantic_spillover_figure.ipynb": "85de5de71677fb8361f4bd2b0cf489e63717d1c8089b34d855c3b3540a72df37"
 }
