@@ -1,12 +1,18 @@
 {
   "layer_metrics": {
-    "width_inches": 7.5,
-    "height_inches": 2.05,
+    "width_inches": 5.1,
+    "height_inches": 2.7,
     "font_sizes_pt": [
       8.0,
       8.5,
       9.0
-    ]
+    ],
+    "subplot_inches": [
+      0.98,
+      0.98
+    ],
+    "row_gap_inches": 0.24,
+    "colorbars": 6
   },
   "selectivity": {
     "width_inches": 7.5,
@@ -15,11 +21,15 @@
       8.0,
       8.5,
       9.0
+    ],
+    "matrix_inches": [
+      1.1,
+      1.1
     ]
   },
   "semantic_cloud": {
     "width_inches": 5.2,
-    "height_inches": 2.65,
+    "height_inches": 2.15,
     "font_sizes_pt": [
       8.0,
       8.5,

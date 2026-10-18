@@ -4,10 +4,10 @@
     201.6,
     51.6,
     580.8,
-    364.8
+    280.0
   ],
   "cloud_recomputed": false,
-  "cloud_annotations": "Original PDF geometry; annotations and axis text reset to final print sizes, callouts separated.",
+  "cloud_annotations": "Original points/shells retained and checked inside the tighter crop; empty base trimmed, compact orientation key, separated pair labels, near/far definitions instead of cosine values.",
   "median_cosine": 0.237964905,
   "near_far_rows_per_model": 900,
   "pair_correlations": [

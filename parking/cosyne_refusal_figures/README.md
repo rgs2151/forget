@@ -16,7 +16,8 @@
   `/home/dev/miniconda3/envs/forget/bin/python -m parking.cosyne_refusal_figures.replot`.
 - Dependencies: the existing plotting environment plus PyMuPDF for preserving
   the original semantic PDF geometry while replacing only its lettering.
-- Print size: 7.5 × 2.05 inches. Shared typography across all three plots:
+- Print size: 5.1 × 2.7 inches; six 0.98-inch-square plotting areas with a
+  0.24-inch gap between rows. Shared typography across all three plots:
   8-point ticks/annotations, 8.5-point axes, 9-point bold panel/model titles.
   Embed at the recorded width; `plots/layout.json` records actual font sizes.
 - Inputs: `parking/model_matrix/cache/{llama8b,mistral7b,qwen7b}_inhouse/results/prefill_logit/calibration_judged.csv`.
@@ -43,9 +44,9 @@
   refusal or retention rate, with endpoints 0 and 1.
 - Every layer has a line. The exact original `custom_cmap` in
   `forget/plot/plot.py` maps the layer index to color: purple/blue through
-  cyan/green/yellow to orange/red. Each column has its own layer color bar,
-  aligned to the full height of its two axes. Only the left column repeats the
-  shared 0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
+  cyan/green/yellow to orange/red. Each subplot has its own layer color bar,
+  aligned to that subplot, with a rotated `Layer` label. Only the left column
+  repeats the shared 0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
 - All lines use alpha 1.0 and equal width 0.7. No layers are faded, recolored,
   hidden, or preferentially emphasized in this restoration pass.
 
@@ -74,10 +75,12 @@
 - Read the four models' synthetic-concept confusion evaluations. Average
   refusal within each queried-concept/steering-target pair and retain the
   recorded operating point. Write four matrices and their numeric table.
-- Place a compact rendering of the paper's diagonal-and-bars schematic before
-  the four measured model matrices in one horizontal row. Keep its original
-  concept icons, red diagonal outline, off-diagonal outline, arrows, and bar
-  meaning. Reset text at the shared print size. Remove unrestricted refusal.
+- Rebuild the paper's diagonal-and-bars schematic with separate Matplotlib
+  matrix and bar axes before the four measured matrices in one horizontal row.
+  Reuse only the original concept icons; draw the diagonal outline,
+  off-diagonal outline, arrows, bars, and text at their final print size.
+  All five matrices have the same physical size and vertical alignment.
+  Remove unrestricted refusal.
 - Separately compute target refusal, off-target refusal, and off-target
   retention from each model–dataset bar evaluation. Weight the 16 combinations
   equally for the abstract's aggregate rates.
@@ -90,7 +93,7 @@
 - Ten queried concepts by ten targets; ten questions per matrix cell.
 - Schematic input: `inputs/Figure4_original.png`, a byte-identical copy of
   `/home/dev/forget/paper_main/figures/Figure4.png` and the supplied paper asset.
-- Print size: 7.5 × 1.65 inches; each measured matrix is 1.20 inches square.
+- Print size: 7.5 × 1.65 inches; every matrix is 1.10 inches square.
   Typography matches `layer_metrics`; no post-export image scaling in Word.
 - Outputs: `plots/selectivity.{png,pdf,csv}` and `plots/evaluation_summary.csv`.
 
@@ -142,10 +145,13 @@
 - Preserve the original Figure 6 turquoise-shell cloud geometry from
   `figs/fig6_semantic_spillover/plots/figure1_paper.pdf`. In an in-memory copy,
   remove the original callout artists and text, retaining every point, shell,
-  axis, highlight, and camera projection. Render this geometry and replace the
-  lettering at the final print size. Separate the four concept labels; their
-  leader lines terminate at the exact original PDF coordinates. Show endpoint
-  tick labels to avoid crowding. The source PDF itself is never changed.
+  highlight, and camera projection. Trim the empty base of the projected frame;
+  assert that every point/shell path remains inside the crop. Add a compact
+  UMAP-1/UMAP-2 orientation key and retain the UMAP-3 axis. Replace lettering
+  at the final print size. Separate the four concept labels; their leader lines
+  terminate at the exact original PDF coordinates. Define Near/Far beside the
+  examples rather than displaying example cosine values. The source PDF itself
+  is never changed.
 - Reuse cached MiniLM question-to-target cosine similarities. Join them to
   `prefill_logit` refusal labels using exact `(concept, target, question)` keys,
   separately for each model. Require one-to-one matches for all 900 rows/model.
@@ -170,8 +176,8 @@
   hash are recorded in `plots/semantic_provenance.json` and `source_hashes.json`.
 - Outputs: `plots/semantic_cloud.{png,pdf}`, `semantic_near_far.csv`,
   `semantic_pairs.csv`, `semantic_correlations.csv`, `semantic_provenance.json`.
-- Print size: 5.2 × 2.65 inches. Cloud width: 3.2 inches; bar plotting area:
-  1.40 × 1.55 inches (previously 2.85 inches wide). Text matches the other
+- Print size: 5.2 × 2.15 inches. Cloud width: 3.2 inches; bar plotting area:
+  1.40 × 1.30 inches. Text matches the other
   plots. Word floats this complete figure left, with prose/caption wrapping
   on the right and continuing underneath.
 
@@ -194,11 +200,13 @@
 ## Legends
 
 - A: gray question points, darker concept centroids, turquoise projected-density
-  shells. Red annotates Germany/Austria; gray annotates Cannabis/Jason Momoa.
-- B: gray bars are far pairs; dark red bars are near pairs. The vertical axis
-  is off-target refusal rate; horizontal groups identify the three models.
+  shells. Red annotates Germany/Austria with `Near / High similarity`; gray
+  annotates Cannabis/Jason Momoa with `Far / Low similarity`.
+- B: gray bars are Far (below median similarity); dark red bars are Near
+  (at/above median). The legend states both definitions. The vertical axis is
+  `Off-target refusal (spillover)`; horizontal groups identify the three models.
 - The near/far rate axis begins at zero. The cloud's axes are UMAP coordinates;
-  annotated similarities were calculated in the original embedding space.
+  similarity is measured in the original embedding space.
 
 ## Interpretation
 

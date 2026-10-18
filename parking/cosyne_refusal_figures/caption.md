@@ -34,7 +34,7 @@ Targeted refusal. A, schematic: target-concept questions are refused; other ques
 
 ## Caption
 
-Layer and strength dependence. Refusal (top) and retention (bottom) versus scale s = α. Each line is one layer; each point averages 100 target-concept responses. Retention measures agreement with the unsteered answer, not preservation of other concepts.
+Layer and strength dependence. Refusal (top) and retention (bottom) versus scale s = α. Each line is one layer; each panel has its own layer color bar. Each point averages 100 target-concept responses. Retention measures agreement with the unsteered answer, not preservation of other concepts.
 
 ## Panel Notes
 
@@ -50,11 +50,11 @@ Layer and strength dependence. Refusal (top) and retention (bottom) versus scale
 
 ## Caption
 
-Semantic similarity and off-target refusal. A, MiniLM question embeddings and concept centroids in three-dimensional UMAP; shells show projected density. Labels mark example pairs and their cosine similarity. B, refusal below (“Far”) or above (“Near”) median question-to-target similarity (0.238; 450 observations/group/model). Bars: means ± row-wise standard errors, without correction for repeated questions.
+Semantic similarity and off-target refusal (spillover). A, MiniLM question embeddings and concept centroids in three-dimensional UMAP; shells show projected density. Near and far examples illustrate high and low semantic similarity. B, question–target pairs below (Far) or at/above (Near) median similarity (450 observations/group/model). Bars: means ± row-wise standard errors, without correction for repeated questions.
 
 ## Panel Notes
 
-- Figure 4. A: original point-cloud geometry with separated labels. B: narrow near/far bars.
+- Figure 4. A: original point-cloud geometry with separated labels and explicit Near/Far definitions; the empty frame base is cropped. B: narrow near/far bars.
 
 ## Checks
 
