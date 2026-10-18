@@ -3,7 +3,7 @@
   "cloud_crop_pdf_points": [
     201.6,
     51.6,
-    580.8,
+    500.0,
     280.0
   ],
   "cloud_recomputed": false,
@@ -13,6 +13,40 @@
     "shell_faces": 46658,
     "highlight_markers": 4
   },
+  "example_pair_links": [
+    {
+      "names": [
+        "Germany",
+        "Austria"
+      ],
+      "projected_pdf_points": [
+        [
+          402.2668457,
+          232.5444336
+        ],
+        [
+          400.8131714,
+          236.9431152
+        ]
+      ]
+    },
+    {
+      "names": [
+        "Jason Momoa",
+        "Cannabis"
+      ],
+      "projected_pdf_points": [
+        [
+          364.4332886,
+          151.5898438
+        ],
+        [
+          429.9030762,
+          214.6152344
+        ]
+      ]
+    }
+  ],
   "camera": {
     "elevation": 18,
     "azimuth": -62,
@@ -22,7 +56,7 @@
       0.85
     ]
   },
-  "cloud_annotations": "Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa above Cannabis with separate leaders. Near/Far labels only; definitions in the caption.",
+  "cloud_annotations": "Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa/Cannabis/Far translated inward; both original example-pair connections restored at their exact projected endpoints. Near/Far labels only; definitions in the caption.",
   "median_cosine": 0.237964905,
   "near_far_rows_per_model": 900,
   "pair_correlations": [

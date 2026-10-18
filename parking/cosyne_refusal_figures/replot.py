@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymupdf
-from matplotlib.colors import Normalize, LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap, BoundaryNorm
 from matplotlib.cm import ScalarMappable
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, ConnectionPatch, PathPatch
 from matplotlib.collections import PatchCollection
@@ -78,9 +78,12 @@ def layer_metrics():
         rates.insert(0, "model", model)
         rates["n"] = 100
         tables.append(rates)
-        cmap = LinearSegmentedColormap.from_list(
-            "early_middle_late", ["#3B6FB6", "#4A145B", "#C66B2B"], N=d.layer.nunique())
-        norm = Normalize(vmin=0, vmax=int(d.layer.max()))
+        groups = np.array_split(np.arange(d.layer.nunique()), 3)
+        families = [("#65A9D1", "#2476B0"), ("#B30D28", "#D23D39"), ("#38A18B", "#1C7A66")]
+        colors = np.vstack([LinearSegmentedColormap.from_list(str(i), shades)(np.linspace(0, 1, len(group)))
+                            for i, (group, shades) in enumerate(zip(groups, families))])
+        cmap = ListedColormap(colors)
+        norm = BoundaryNorm(np.arange(d.layer.nunique()+1)-.5, cmap.N)
         for row, metric in enumerate(METRICS):
             ax = axes[row, col]
             for layer, trace in rates.groupby("layer"):
@@ -108,13 +111,17 @@ def layer_metrics():
             cb = fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),
                              cax=fig.add_axes([pos.x1+.04/width,pos.y0,.035/width,pos.height]))
             cb.set_ticks([0,int(d.layer.max())]);cb.ax.tick_params(length=1.5,pad=.5)
+            cb.ax.minorticks_off()
             cb.set_label('Layer',rotation=270,labelpad=-1,fontsize=8.5)
             cb.outline.set_visible(False)
+            for group in groups[:-1]:
+                cb.ax.axhline(group[-1]+.5,color='white',lw=.65)
     pd.concat(tables).to_csv(OUT / "layer_metrics.csv", index=False)
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
-                                    'layer_palette_anchors':['#3B6FB6','#4A145B','#C66B2B']})
+                                    'layer_palette_groups':['blue: early third','red: middle third','green: late third'],
+                                    'layer_palette_shades':families})
 
 
 def draw_selectivity_schematic(fig, original):
@@ -212,12 +219,13 @@ def draw_original_cloud(fig):
     pdf = pymupdf.open(source)
     page = pdf[0]
     source_roi = pymupdf.Rect(201.6, 51.6, 580.8, 364.8)
-    clip = pymupdf.Rect(201.6, 51.6, 580.8, 280.0)
+    clip = pymupdf.Rect(201.6, 51.6, 500.0, 280.0)
+    cloud_width = 3.2 * clip.width / 379.2
     # Rebuild the original projected vector geometry as native Matplotlib paths.
     # The notebook did not save 3D coordinates; never infer or refit them here.
     paths, faces, edges, widths = [], [], [], []
     counts = {'questions':0, 'centroids':0, 'shell_faces':0, 'highlight_markers':0}
-    stroke_scale = 72 * 3.2 / clip.width
+    stroke_scale = 72 * cloud_width / clip.width
     for drawing in page.get_drawings():
         if not source_roi.contains(drawing['rect']):
             continue
@@ -251,22 +259,30 @@ def draw_original_cloud(fig):
         counts[kind]+=1
     assert counts['questions']==5171 and counts['centroids']==311
     assert counts['highlight_markers']==4 and counts['shell_faces']>40000
-    ax=fig.add_axes([0,.06/2.15,3.2/5.2,(3.2*clip.height/clip.width)/2.15])
+    ax=fig.add_axes([0,.06/2.15,cloud_width/4.4,(cloud_width*clip.height/clip.width)/2.15])
     ax.add_collection(PatchCollection(paths,facecolors=faces,edgecolors=edges,
                                      linewidths=widths,antialiaseds=True))
     ax.set_xlim(clip.x0,clip.x1);ax.set_ylim(clip.y1,clip.y0)
     ax.set_aspect('equal');ax.axis('off')
+    # Restore both example-pair links at the exact original projected endpoints.
+    pair_links = [([(402.2668457,232.5444336),(400.8131714,236.9431152)],'#B30000'),
+                  ([(364.4332886,151.5898438),(429.9030762,214.6152344)],'#6B6B6B')]
+    for points,color in pair_links:
+        xy=np.asarray(points)
+        ax.plot(*xy.T,color='white',lw=3.2,solid_capstyle='round',zorder=3)
+        ax.plot(*xy.T,color=color,lw=1.5,solid_capstyle='round',zorder=4)
+        ax.plot(*xy.T,ls='none',marker='o',ms=2.0,mec='white',mew=.3,color=color,zorder=5)
     label_artists=[]
     for name,point,anchor,color in [
         ('Germany',(402.2668457,232.5444336),(250,64),'#B30000'),
         ('Austria',(400.8131714,236.9431152),(250,100),'#B30000'),
-        ('Jason Momoa',(364.4332886,151.5898438),(500,64),'#6B6B6B'),
-        ('Cannabis',(429.9030762,214.6152344),(535,112),'#6B6B6B')]:
+        ('Jason Momoa',(364.4332886,151.5898438),(415,64),'#6B6B6B'),
+        ('Cannabis',(429.9030762,214.6152344),(450,112),'#6B6B6B')]:
         label_artists.append(ax.annotate(name,xy=point,xytext=anchor,
             fontsize=8,ha='center',va='center',
             bbox=dict(boxstyle='round,pad=.15',fc='white',ec=color,lw=.6),
             arrowprops=dict(arrowstyle='-',color=color,lw=.8,shrinkA=2,shrinkB=0)))
-    for x,y,label,color in [(250,139,'Near','#B30000'),(535,150,'Far','#6B6B6B')]:
+    for x,y,label,color in [(250,139,'Near','#B30000'),(460,150,'Far','#6B6B6B')]:
         label_artists.append(ax.text(x,y,label,fontsize=8,ha='center',va='center',color='white',
                 bbox=dict(boxstyle='round,pad=.15',fc=color,ec='white',lw=.4)))
     # Project a true 3D orthogonal basis using the source camera and box aspect.
@@ -344,11 +360,11 @@ def semantic_cloud():
         rho, p = spearmanr(d.semantic_similarity, d.spillover)
         correlations.append(dict(model=model, n=len(d), spearman_rho=float(rho), p=float(p)))
     pd.DataFrame(correlations).to_csv(OUT / "semantic_correlations.csv", index=False)
-    fig = plt.figure(figsize=(5.2, 2.15))
+    fig = plt.figure(figsize=(4.4, 2.15))
     source, crop, geometry_counts = draw_original_cloud(fig)
     fig.text(.005, .95, "A", weight="bold", fontsize=9)
-    fig.text(3.35/5.2, .95, "B", weight="bold", fontsize=9)
-    ax = fig.add_axes([3.72/5.2, .30/2.15, 1.40/5.2, 1.30/2.15])
+    fig.text(2.56/4.4, .95, "B", weight="bold", fontsize=9)
+    ax = fig.add_axes([2.92/4.4, .30/2.15, 1.40/4.4, 1.30/2.15])
     for i, near in enumerate([False, True]):
         s = stats[stats.near == near].set_index("model").loc[[m[0] for m in MODELS]]
         ax.bar(np.arange(3)+(i-.5)*.34, s["mean"], width=.34, color="#980000" if near else "#777777",
@@ -364,8 +380,9 @@ def semantic_cloud():
     save(fig, "semantic_cloud")
     (OUT / "semantic_provenance.json").write_text(json.dumps({"cloud_source":str(source.relative_to(ROOT)),
         "cloud_crop_pdf_points":crop, "cloud_recomputed":False, "cloud_vector_paths":geometry_counts,
+        "example_pair_links":[{"names":["Germany","Austria"],"projected_pdf_points":[[402.2668457,232.5444336],[400.8131714,236.9431152]]},{"names":["Jason Momoa","Cannabis"],"projected_pdf_points":[[364.4332886,151.5898438],[429.9030762,214.6152344]]}],
         "camera":{"elevation":18,"azimuth":-62,"box_aspect":[1,1,.85]},
-        "cloud_annotations":"Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa above Cannabis with separate leaders. Near/Far labels only; definitions in the caption.", "median_cosine":median,
+        "cloud_annotations":"Native Matplotlib reconstruction of the source projected vector paths, preserving point/shell geometry and ordering. No frame or ticks. Three-axis key projected from the source camera; labels aligned with shafts. Jason Momoa/Cannabis/Far translated inward; both original example-pair connections restored at their exact projected endpoints. Near/Far labels only; definitions in the caption.", "median_cosine":median,
         "near_far_rows_per_model":900, "pair_correlations":correlations,
         "rate_variant":"prefill_logit", "cached_original_rate_variant":"main", "rate_variant_audit":audit,
         "scope":"Cloud pools six datasets; near/far and pair tables use ten ConceptVectors concepts. External MiniLM embeddings, not LLM hidden states.",

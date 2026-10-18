@@ -43,11 +43,14 @@
 - Columns: Llama, Mistral, Qwen. Rows: refusal, retention.
 - Horizontal position: `Scale s`, the steering strength. Vertical position:
   refusal or retention rate, with endpoints 0 and 1.
-- Every layer has a line. A three-anchor continuous palette runs from blue
-  (`#3B6FB6`, early) through dark purple (`#4A145B`, middle) to orange
-  (`#C66B2B`, late), sampled once per layer. The anchors are normalized depths
-  0, 0.5, and 1; these are visual reference points, not fitted layer groups.
-  The middle anchor has the highest contrast against white.
+- Every layer has a line. Three distinct color families mark equal-count depth
+  thirds: blue for early, red for middle, and green for late. Shades vary within
+  each family, with a clear color change and white color-bar separator between
+  families. Llama/Mistral: layers 0–10, 11–21, 22–31; Qwen: 0–9, 10–18, 19–27.
+  These are display groups, not estimated functional boundaries.
+- Blue spans `#65A9D1`–`#2476B0`; red spans `#B30D28`–`#D23D39`; green spans
+  `#38A18B`–`#1C7A66`. The middle group is distinctly red against the other
+  two families and white background. Every layer retains its own shade.
 - Each subplot has its own color bar aligned to that subplot; its rotated
   `Layer` label is close to the bar. Only the left column repeats the shared
   0–1 y tick labels. Axis titles are `Refusal` and `Retention`.
@@ -62,10 +65,10 @@
 
 - Inputs are read-only. The script asserts full layer/strength coverage,
   100 unique question–concept rows per cell, and no missing metric labels.
-- The user approved the blue/purple/orange palette revision to make middle
-  layers visible against white. Layer values and the two-by-three layout are
-  unchanged. Figures 1 and 2 are frozen; the script only regenerates Figures
-  3 and 4 and their numeric summaries.
+- The user rejected the blended dark palette because middle and late layers
+  were hard to distinguish. The current separated color families address that
+  distinction. Layer values, subplot sizes, and column gaps are unchanged.
+  Figures 1 and 2 remain frozen; the script regenerates Figures 3 and 4 only.
 
 ## References
 
@@ -157,8 +160,11 @@
   (1, 1, 0.85). Put the key at bottom-left, with UMAP-1/2/3 labels parallel
   to their projected arrows. The key shows orientation, not a distance scale.
 - Keep every point and shell inside the crop. Place Jason Momoa above Cannabis
-  to follow their projected locations; connect each label directly to its
-  original point without crossing the other label. Use only Near and Far
+  to follow their projected locations; move the right-hand label group inward
+  and connect each label to its original point. Restore a red Germany–Austria
+  segment and a gray Jason Momoa–Cannabis segment at the exact original
+  projected endpoints, with white outlines and endpoint dots for visibility.
+  Use only Near and Far
   tags and legend entries. Their meanings remain in the editable caption.
 - Reuse cached MiniLM question-to-target cosine similarities. Join them to
   `prefill_logit` refusal labels using exact `(concept, target, question)` keys,
@@ -185,10 +191,12 @@
   inference is rerun. Path counts, camera settings, crop, and source hash are recorded in `plots/semantic_provenance.json` and `source_hashes.json`.
 - Outputs: `plots/semantic_cloud.{png,pdf}`, `semantic_near_far.csv`,
   `semantic_pairs.csv`, `semantic_correlations.csv`, `semantic_provenance.json`.
-- Print size: 5.2 × 2.15 inches. Cloud width: 3.2 inches; bar plotting area:
+- Print size: 4.4 × 2.15 inches. Cloud width: 2.518 inches (same coordinate
+  scale, with unused right space removed); bar plotting area:
   1.40 × 1.30 inches. Text matches the other
-  plots. Word floats this complete figure left, with prose/caption wrapping
-  on the right and continuing underneath.
+  plots. Word floats the image and caption together in one fixed-width cell.
+  The justified caption stays immediately below the image at its width; only
+  body text wraps beside the group.
 
 ## Statistics
 
@@ -210,7 +218,8 @@
 
 - A: gray question points, darker concept centroids, turquoise projected-density
   shells. Red annotates Germany/Austria with `Near`; gray annotates
-  Jason Momoa/Cannabis with `Far`. Near/Far refer to high/low semantic similarity.
+  Jason Momoa/Cannabis with `Far`. Matching colored segments connect the two
+  endpoints in each example pair. Near/Far refer to high/low semantic similarity.
 - B: gray bars are Far (below median similarity); dark red bars are Near
   (at/above median). The legend contains only `Far` and `Near`; the caption
   states the median definitions. The vertical axis is
@@ -255,7 +264,9 @@
 - Input: `inputs/refusal_example.png`, copied byte-for-byte from the October 18
   attachment `codex-clipboard-e4a00456-b515-4076-b47f-4f682ea7babe.png`.
 - Word width: 2.8 inches. A single-cell floating table keeps the original image
-  and editable caption together; method text wraps on the left.
+  and editable, justified caption together at identical widths; method text
+  wraps on the left. Explicit zero inline-image distances align image/caption
+  edges in the PDF renderer.
 
 ## Statistics
 

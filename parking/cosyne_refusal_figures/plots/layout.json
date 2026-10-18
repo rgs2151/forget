@@ -14,10 +14,24 @@
     "row_gap_inches": 0.24,
     "column_gap_inches": 0.46,
     "colorbars": 6,
-    "layer_palette_anchors": [
-      "#3B6FB6",
-      "#4A145B",
-      "#C66B2B"
+    "layer_palette_groups": [
+      "blue: early third",
+      "red: middle third",
+      "green: late third"
+    ],
+    "layer_palette_shades": [
+      [
+        "#65A9D1",
+        "#2476B0"
+      ],
+      [
+        "#B30D28",
+        "#D23D39"
+      ],
+      [
+        "#38A18B",
+        "#1C7A66"
+      ]
     ]
   },
   "selectivity": {
@@ -34,7 +48,7 @@
     ]
   },
   "semantic_cloud": {
-    "width_inches": 5.2,
+    "width_inches": 4.4,
     "height_inches": 2.15,
     "font_sizes_pt": [
       8.0,
