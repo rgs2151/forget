@@ -14,11 +14,11 @@
     "row_gap_inches": 0.24,
     "column_gap_inches": 0.46,
     "colorbars": 6,
-    "layer_palette": "direct continuous RGB interpolation; three anchors only",
+    "layer_palette": "continuous linear-light RGB interpolation; three anchors only",
     "layer_palette_anchors": [
       "#2476B0",
       "#C32632",
-      "#1C7A66"
+      "#2CA02C"
     ],
     "layer_palette_positions": [
       0,

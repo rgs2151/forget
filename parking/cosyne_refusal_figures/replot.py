@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymupdf
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap, Normalize, to_rgb
 from matplotlib.cm import ScalarMappable
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, ConnectionPatch, PathPatch
 from matplotlib.collections import PatchCollection
@@ -57,10 +57,16 @@ def save(fig, name):
 
 
 def layer_colormap():
-    """Direct continuous RGB interpolation between exactly three anchors."""
-    return LinearSegmentedColormap.from_list(
-        "layer_depth", [(0.0, "#2476B0"), (0.5, "#C32632"), (1.0, "#1C7A66")],
-        N=4097)
+    """Blend three anchors in linear-light RGB to avoid dark transitions."""
+    anchors = np.array([to_rgb(c) for c in ["#2476B0", "#C32632", "#2CA02C"]])
+    linear = np.where(anchors <= .04045, anchors/12.92,
+                      ((anchors + .055)/1.055)**2.4)
+    depth = np.linspace(0, 1, 4097)
+    blended = np.column_stack([np.interp(depth, [0, .5, 1], channel)
+                               for channel in linear.T])
+    rgb = np.where(blended <= .0031308, 12.92*blended,
+                   1.055*blended**(1/2.4) - .055)
+    return LinearSegmentedColormap.from_list("layer_depth", rgb, N=len(depth))
 
 
 def layer_metrics():
@@ -121,8 +127,8 @@ def layer_metrics():
     save(fig, "layer_metrics")
     LAYOUT['layer_metrics'].update({'subplot_inches':[.98,.98],
                                     'row_gap_inches':.24,'column_gap_inches':.46,'colorbars':6,
-                                    'layer_palette':'direct continuous RGB interpolation; three anchors only',
-                                    'layer_palette_anchors':['#2476B0','#C32632','#1C7A66'],
+                                    'layer_palette':'continuous linear-light RGB interpolation; three anchors only',
+                                    'layer_palette_anchors':['#2476B0','#C32632','#2CA02C'],
                                     'layer_palette_positions':[0,.5,1]})
 
 

@@ -45,8 +45,10 @@
   refusal or retention rate, with endpoints 0 and 1.
 - Every layer samples one continuous scale defined by exactly three anchors:
   blue `#2476B0` at normalized depth 0, red `#C32632` at 0.5, and green
-  `#1C7A66` at 1. Use direct linear RGB interpolation across each full half
-  of the scale. Red is exactly at the midpoint. Intermediate shades are only
+  `#2CA02C` at 1. Blue and red retain their previous values; green is a
+  clearer green rather than teal. Decode sRGB to linear-light RGB, interpolate
+  across each full half, then encode back to sRGB. This preserves brightness
+  through the blends. Red is exactly at the midpoint. Intermediate shades are only
   mixtures of these anchors; there is no hue-wheel sweep, extra color anchor,
   group boundary, separator line, or faded curve.
 - Each subplot has its own color bar aligned to that subplot; its rotated
