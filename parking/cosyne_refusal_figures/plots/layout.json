@@ -1,0 +1,29 @@
+{
+  "layer_metrics": {
+    "width_inches": 7.5,
+    "height_inches": 2.05,
+    "font_sizes_pt": [
+      8.0,
+      8.5,
+      9.0
+    ]
+  },
+  "selectivity": {
+    "width_inches": 7.5,
+    "height_inches": 1.65,
+    "font_sizes_pt": [
+      8.0,
+      8.5,
+      9.0
+    ]
+  },
+  "semantic_cloud": {
+    "width_inches": 5.2,
+    "height_inches": 2.65,
+    "font_sizes_pt": [
+      8.0,
+      8.5,
+      9.0
+    ]
+  }
+}

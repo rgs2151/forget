@@ -1,12 +1,13 @@
 {
-  "cloud_source": "figs/fig6_semantic_spillover/plots/figure1_paper.png",
-  "cloud_crop_xyxy": [
-    840,
-    215,
-    2420,
-    1520
+  "cloud_source": "figs/fig6_semantic_spillover/plots/figure1_paper.pdf",
+  "cloud_crop_pdf_points": [
+    201.6,
+    51.6,
+    580.8,
+    364.8
   ],
   "cloud_recomputed": false,
+  "cloud_annotations": "Original PDF geometry; annotations and axis text reset to final print sizes, callouts separated.",
   "median_cosine": 0.237964905,
   "near_far_rows_per_model": 900,
   "pair_correlations": [
