@@ -8,7 +8,7 @@ from matplotlib.colors import Normalize
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "parking" / "steering_diagnostics" / "plots"
+OUT = ROOT / "debug" / "steering_diagnostics" / "plots"
 
 RED = "darkred"
 BLUE = "midnightblue"
@@ -46,16 +46,16 @@ def best_idk(path):
 
 def plot_prefill_evidence():
     phi_assistant = best_idk(
-        "parking/phi_steering/cache/structured_steering/phi_store_all_layers_v2/summary.csv"
+        "debug/phi_steering/cache/structured_steering/phi_store_all_layers_v2/summary.csv"
     )
     phi_prefill = best_idk(
-        "parking/phi_steering/cache/structured_steering/phi_all_content_best_validation_v1/summary.csv"
+        "debug/phi_steering/cache/structured_steering/phi_all_content_best_validation_v1/summary.csv"
     )
     qwen_assistant = best_idk(
-        "parking/qwen_steering/cache/qwen_clean_vectors_additive_assistant_control_v1/summary.csv"
+        "debug/qwen_steering/cache/qwen_clean_vectors_additive_assistant_control_v1/summary.csv"
     )
     qwen_prefill = best_idk(
-        "parking/qwen_steering/cache/qwen_clean_vectors_additive_all10_validation_v1/summary.csv"
+        "debug/qwen_steering/cache/qwen_clean_vectors_additive_all10_validation_v1/summary.csv"
     )
 
     fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.4))
@@ -136,13 +136,13 @@ def plot_model_summary():
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.5))
     plot_layer_traces(
         axes[0],
-        "parking/phi_steering/cache/structured_steering/phi_all_content_best_validation_v1/summary.csv",
+        "debug/phi_steering/cache/structured_steering/phi_all_content_best_validation_v1/summary.csv",
         "Phi all-content prefill sweep",
         "store vector + EOS pad",
     )
     plot_layer_traces(
         axes[1],
-        "parking/qwen_steering/cache/qwen_clean_vectors_additive_all10_validation_v1/summary.csv",
+        "debug/qwen_steering/cache/qwen_clean_vectors_additive_all10_validation_v1/summary.csv",
         "Qwen clean additive prefill sweep",
         "clean vector + additive mode",
     )

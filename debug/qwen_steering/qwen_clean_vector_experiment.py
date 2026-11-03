@@ -12,7 +12,7 @@ from forget.refuse.vectors import lda_vectors
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_ROOT = ROOT / "parking" / "qwen_steering" / "cache"
+OUT_ROOT = ROOT / "debug" / "qwen_steering" / "cache"
 
 
 def collect_by_concept(llm, frame, concepts, batch_size, system_fn, answer_fn):

@@ -10,7 +10,7 @@ from forget.refuse.prompts import refuse_system
 
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT_ROOT = ROOT / "parking" / "phi_steering" / "cache" / "structured_steering"
+OUT_ROOT = ROOT / "debug" / "phi_steering" / "cache" / "structured_steering"
 MODEL = "microsoft/phi-4"
 CONCEPTS = ["bacteria", "cats", "dogs", "united_states"]
 IDK_PATTERNS = [

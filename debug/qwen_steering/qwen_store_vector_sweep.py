@@ -14,7 +14,7 @@ from forget.steering.steering import AddSteer, GatedSteer
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_ROOT = ROOT / "parking" / "qwen_steering" / "cache"
+OUT_ROOT = ROOT / "debug" / "qwen_steering" / "cache"
 MODEL = "Qwen/Qwen2.5-7B-Instruct"
 STORE = "qwen7b_inhouse"
 LAYERS = list(range(28))

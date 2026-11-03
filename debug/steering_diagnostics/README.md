@@ -8,7 +8,7 @@
 
 ## Variables
 
-- Inputs: tracked run summaries under `parking/phi_steering/cache/` and `parking/qwen_steering/cache/`.
+- Inputs: tracked run summaries under `debug/phi_steering/cache/` and `debug/qwen_steering/cache/`.
 - Models: Phi-4 and Qwen2.5-7B.
 - Timing conditions: assistant boundary and prefill.
 - Measure: substring-matched IDK rate.
@@ -34,7 +34,7 @@
 ## References
 
 - Code: `make_debug_figures.py`.
-- Source units: `parking/phi_steering/` and `parking/qwen_steering/`.
+- Source units: `debug/phi_steering/` and `debug/qwen_steering/`.
 
 # phi_qwen_debug_sweeps
 

@@ -10,7 +10,10 @@ results but must write only to its own `cache/`, `runs/`, and `plots/`.
 | `judge_logit_validation/` | Hand-labeled reasoning/logit judge comparison |
 | `model_support_smoke/` | Tiny pipeline compatibility checks |
 | `phi_lda_memory/` | Phi LDA matrix-memory diagnosis |
+| `phi_steering/` | Phi steering investigation |
 | `qwen_activation_crash/` | Qwen asynchronous activation-capture diagnosis |
+| `qwen_steering/` | Qwen steering investigation |
+| `steering_diagnostics/` | Condensed Phi/Qwen diagnostic figures |
 | `steering_sanity/` | Llama and Qwen chat-template and wrapper compatibility check |
 
 Completed research analyses belong in `parking/`; non-runnable historical

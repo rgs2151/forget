@@ -14,7 +14,7 @@ from forget.steering.steering import GatedSteer
 
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT_ROOT = ROOT / "parking" / "phi_steering" / "cache" / "structured_steering"
+OUT_ROOT = ROOT / "debug" / "phi_steering" / "cache" / "structured_steering"
 
 MODEL_CONFIGS = {
     "llama": {

@@ -16,7 +16,7 @@ from forget.steering.steering import AddSteer, GatedSteer
 
 
 ROOT = Path(__file__).resolve().parents[3]
-BASE_OUT = ROOT / "parking" / "phi_steering" / "cache" / "phi_token_debug"
+BASE_OUT = ROOT / "debug" / "phi_steering" / "cache" / "phi_token_debug"
 OUT = BASE_OUT
 MODEL = "microsoft/phi-4"
 CONCEPTS = ["bacteria", "cats", "dogs", "united_states"]
