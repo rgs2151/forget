@@ -1,6 +1,7 @@
 # refusal_mechanisms
 
-Planned study; implementation and experiments have not started.
+Isolated study implemented in this unit. The frozen run configuration is
+`config.json`; completion is recorded in `cache/completed.json`.
 
 ## Method
 
@@ -52,7 +53,7 @@ Use the same detector and steering procedure throughout the investigation.
 - Measure semantic similarity with sentence-embedding cosine similarity and direction alignment with cosine similarity between learned concept vectors.
 - Measure coordinate concentration with Hoyer sparsity on absolute direction weights. Measure concept selectivity from detector responses across the ten concepts. These describe different properties; rank one does not imply sparse coordinates.
 - Relate classification errors and off-target refusal to semantic similarity, direction overlap, and sparsity. Keep repeated observations of a question grouped when estimating uncertainty or evaluating explanatory predictions.
-- These are planned analyses; no results or significance claims are available.
+- Geometry/error associations are descriptive; the figures do not establish causal explanations.
 
 ## Legends
 
@@ -70,6 +71,17 @@ Use the same detector and steering procedure throughout the investigation.
 
 ## Notes
 
+- Run from the code repository in the `forget` environment: `python -m parking.refusal_mechanisms.run`. Generate figures from completed outputs with `python -m parking.refusal_mechanisms.plot`.
+- `train.py` reproduces AxBench's ReFT-r1 top-k intervention, language-modeling loss, non-top-k L1 penalty, weight normalization, and projected gradient in a unit-local PyTorch adapter. A source-parity test compares its unpadded forward pass against the downloaded upstream implementation. This avoids installing or changing shared model/GPU code.
+- Training uses AxBench's example settings: three epochs, batch six, learning rate 0.01, top-k eight, and L1 coefficient 0.005. Conditional inference scales the learned unit refusal direction by its maximum activation on the positive training sequences and the configured factor.
+- Training, prompt detection, and prefill gating exclude padding and the common system/user-header prefix, located by comparing two differently worded prompts. Prompt detection uses the maximum ReLU projection over the remaining prompt tokens. Each concept/layer/seed threshold maximizes validation balanced accuracy, with ties selecting the larger threshold. Thresholds never use test labels.
+- Classification uses all 20 validation questions per concept. Steering calibration uses ten of those questions per concept at every layer and factor, selecting the existing refusal/fluency calibration objective. Each seed then evaluates its selected setting on the same 20 test questions per concept.
+- Source train/test rows and questions are recorded in `cache/rows.csv`; all three splits are disjoint by question. Fresh baseline outputs are generated once and reused as references.
+- Both GPUs run independent layer jobs concurrently for training and calibration, and share final evaluation and logit judging. Identical question/reference/answer triples are judged once and joined back to all corresponding observations; no rubric or binary score definition changes.
+- Gate logs distinguish prefill and decoding. Activation sparsity is Hoyer sparsity of the unsteered mean prompt residual; direction sparsity is Hoyer sparsity of weights; concept-response sparsity is Hoyer sparsity across the ten mean concept responses.
+- A direction with zero positive activation is retained with zero intervention amplitude. Its failure to steer is a result, not a reason to drop the layer. All-zero concept responses have undefined Hoyer sparsity; explanatory fits encode this explicitly with an inactive-response indicator and a zero placeholder for the undefined value.
+- Explanatory logistic regressions predict off-target refusal with semantics, then add prompt-detection measurements, then add direction overlap and sparsity. Hold out each queried concept in turn, keeping its questions and all three seeds together. Report out-of-fold AUROC and log loss; no significance or causal claim is made. Decoding gate activity is shown descriptively and excluded from predictive features because it depends on the generated response.
+- The protected result vault's file-size/mtime inventory is saved before the run and checked again at completion.
 - The only experimental conditions are no intervention and intervention.
 - This unit investigates refusal mechanisms using an established direction-learning method.
 - ReFT-r1 direction learning and conditional application are separate choices; document their implementation explicitly.
