@@ -10,10 +10,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import log_loss, roc_auc_score
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 from transformers import AutoModel, AutoTokenizer
 
 from forget.plot.plot import LAYER_CMAP_COLORS
@@ -22,6 +18,7 @@ from .core import CACHE, PLOTS, config, save_csv
 
 RED, GREEN, GRAY = '#980000', '#38761d', '#333333'
 CMAP = LinearSegmentedColormap.from_list('layers', LAYER_CMAP_COLORS)
+RATINGS = ['axbench_concept_relevance', 'axbench_instruction_relevance', 'axbench_fluency', 'axbench_aggregate']
 
 
 def style():
@@ -58,35 +55,42 @@ def classification_figure(metrics):
     finish(fig, 'classification', axes)
 
 
+def evaluation_summary(evaluation):
+    frame = evaluation.assign(subset=np.where(evaluation.concept == evaluation.target, 'targeted', 'untargeted'))
+    groups = frame.groupby(['label', 'subset'])
+    return groups[RATINGS].mean().join(groups.size().rename('n')).reset_index()
+
+
 def steering_figure(calibration, evaluation):
     fig, axes = plt.subplots(2, 2, figsize=(7.5, 5), layout='constrained')
     for ax, metric, label in zip(axes.flat,
-                               ['judge_refusal', 'judge_retention', 'judge_fluency'],
-                               ['Refusal rate', 'Retention rate', 'Fluency rate']):
+                               ['axbench_concept_relevance', 'axbench_instruction_relevance', 'axbench_fluency'],
+                               ['Refusal relevance', 'Instruction relevance', 'Fluency']):
         cells = calibration.groupby(['layer', 'scale'])[metric].mean().reset_index()
         for layer, group in cells.groupby('layer'):
             ax.plot(group.scale, group[metric], color=CMAP(layer / 15), lw=1)
-        ax.set(xlabel='Strength', ylabel=label, ylim=(-.03, 1.03), xticks=[.2, 5], yticks=[0, 1])
+        ax.set(xlabel='Strength', ylabel=label, ylim=(-.06, 2.06), xticks=[.5, 5], yticks=[0, 2])
     fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(0, 15), cmap=CMAP),
                  ax=axes[0, :], label='Layer', ticks=[0, 15], shrink=.7)
     ax = axes[1, 1]
-    intervention = evaluation[evaluation.label == 'intervention']
-    targeted = intervention[intervention.concept == intervention.target]
-    off = intervention[intervention.concept != intervention.target]
-    base = evaluation[evaluation.label == 'baseline']
+    summary = evaluation_summary(evaluation).set_index(['label', 'subset'])
     x = np.arange(3)
-    for shift, subset, color, label in [(-.25, base, '#aaaaaa', 'Baseline'),
-            (0, targeted, RED, 'Targeted'), (.25, off, GRAY, 'Untargeted')]:
-        rates = [subset[f'judge_{m}'].mean() for m in ['refusal', 'retention', 'fluency']]
-        ax.bar(x + shift, rates, width=.25, color=color, label=label)
-    ax.set(xticks=x, xticklabels=['Refusal', 'Retention', 'Fluency'], ylabel='Rate', ylim=(0, 1.05), yticks=[0, 1])
-    ax.legend(fontsize=8, loc='upper right')
+    for shift, condition, subset, color, label in [
+            (-.3, 'baseline', 'targeted', '#aaaaaa', 'Baseline: targeted'),
+            (-.1, 'intervention', 'targeted', RED, 'Targeted'),
+            (.1, 'baseline', 'untargeted', '#dddddd', 'Baseline: untargeted'),
+            (.3, 'intervention', 'untargeted', GRAY, 'Untargeted')]:
+        ratings = summary.loc[(condition, subset), RATINGS[:3]].to_numpy(dtype=float)
+        ax.bar(x + shift, ratings, width=.2, color=color, label=label)
+    ax.set(xticks=x, xticklabels=['Refusal', 'Instruction', 'Fluency'], ylabel='AxBench rating', ylim=(0, 2.1), yticks=[0, 2])
+    ax.legend(fontsize=6.5, loc='upper center', bbox_to_anchor=(.5, 1.02), ncol=2)
+    ax.set_ylim(0, 2.7)
     finish(fig, 'steering', axes)
 
 
-def matrix(ax, frame, value, title, concepts, cmap='Greys'):
+def matrix(ax, frame, value, title, concepts, vmax=2, cmap='Greys'):
     values = frame.groupby(['concept', 'target'])[value].mean().unstack().reindex(index=concepts, columns=concepts)
-    image = ax.imshow(values, vmin=0, vmax=1, cmap=cmap, aspect='equal')
+    image = ax.imshow(values, vmin=0, vmax=vmax, cmap=cmap, aspect='equal')
     ax.set(xticks=np.arange(10), xticklabels=[f'$c_{{{i+1}}}$' for i in range(10)],
         yticks=np.arange(10), yticklabels=[c.replace('_', ' ') for c in concepts], title=title,
         xlabel='Steering target', ylabel='Queried concept')
@@ -97,11 +101,12 @@ def matrix(ax, frame, value, title, concepts, cmap='Greys'):
 def spillover_figure(evaluation, predictions, concepts):
     frame = evaluation[evaluation.label == 'intervention']
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), layout='constrained')
-    for ax, source, field, title in [(axes[0], frame, 'judge_refusal', 'Refusal'),
-            (axes[1], frame, 'judge_retention', 'Retention'),
-            (axes[2], predictions, 'detector_positive', 'Concept detection')]:
-        im = matrix(ax, source, field, title, concepts)
-        fig.colorbar(im, ax=ax, ticks=[0, 1], fraction=.04, pad=.03)
+    for ax, source, field, title, vmax in [(axes[0], frame, 'axbench_concept_relevance', 'Refusal relevance', 2),
+            (axes[1], frame, 'axbench_instruction_relevance', 'Instruction relevance', 2),
+            (axes[2], predictions, 'detector_positive', 'Concept detection', 1)]:
+        im = matrix(ax, source, field, title, concepts, vmax=vmax)
+        fig.colorbar(im, ax=ax, ticks=[0, vmax], fraction=.04, pad=.03)
+    save_csv(frame.groupby(['concept', 'target']).size().rename('n').reset_index(), PLOTS / 'spillover_counts.csv')
     finish(fig, 'spillover', axes)
 
 
@@ -119,7 +124,7 @@ def sparsity_figure(metrics, predictions, bundles):
     axes[0, 1].set(xlabel='Layer', ylabel='Direction sparsity')
     selective = test.groupby('layer').concept_sparsity.mean()
     axes[1, 0].plot(selective.index, selective, color=GREEN)
-    axes[1, 0].set(xlabel='Layer', ylabel='Concept-response sparsity')
+    axes[1, 0].set(xlabel='Layer', ylabel='Concept-response\nsparsity')
     im = axes[1, 1].scatter(test.concept_sparsity, test.false_positive_rate, c=test.layer, cmap=CMAP,
                              vmin=0, vmax=15, s=14, alpha=.5, linewidths=0)
     axes[1, 1].set(xlabel='Concept-response sparsity', ylabel='False-positive rate')
@@ -151,11 +156,12 @@ def semantic_vectors(questions):
     return result.numpy()
 
 
-def explanatory_tables(evaluation, predictions, metrics, selected, cfg):
-    test_rows = pd.read_csv(CACHE / 'rows.csv', keep_default_na=False).query("split == 'test'").reset_index(drop=True)
-    embeddings = semantic_vectors(test_rows.question.tolist())
-    concepts = sorted(test_rows.concept.unique())
-    centroids = np.stack([embeddings[test_rows.concept == c].mean(0) for c in concepts])
+def explanatory_tables(evaluation, predictions, selected, cfg):
+    all_rows = pd.read_csv(CACHE / 'rows.csv', keep_default_na=False)
+    semantic_rows = all_rows[all_rows.split == 'validation'].reset_index(drop=True)
+    embeddings = semantic_vectors(semantic_rows.question.tolist())
+    concepts = sorted(semantic_rows.concept.unique())
+    centroids = np.stack([embeddings[semantic_rows.concept == c].mean(0) for c in concepts])
     centroids /= np.linalg.norm(centroids, axis=1, keepdims=True)
     semantic = centroids @ centroids.T
     records = []
@@ -170,43 +176,12 @@ def explanatory_tables(evaluation, predictions, metrics, selected, cfg):
                 cls = predictions[(predictions.seed == seed) & (predictions.concept == concept) & (predictions.target == target)]
                 records.append(dict(seed=seed, layer=layer, concept=concept, target=target,
                     semantic_similarity=semantic[i, j], direction_overlap=overlap[i, j],
-                    refusal=sub.judge_refusal.mean(), retention=sub.judge_retention.mean(),
+                    refusal=sub.axbench_concept_relevance.mean(), instruction=sub.axbench_instruction_relevance.mean(),
+                    n=len(sub),
                     detector_positive=cls.detector_positive.mean(), prefill_gate_fraction=sub.prefill_gate_fraction.mean(),
                     decode_gate_fraction=sub.decode_gate_fraction.mean()))
     pairs = pd.DataFrame(records)
     save_csv(pairs, PLOTS / 'concept_pairs.csv')
-    off = evaluation[evaluation.concept != evaluation.target].merge(
-        pairs[['seed', 'concept', 'target', 'semantic_similarity', 'direction_overlap']],
-        on=['seed', 'concept', 'target'], validate='many_to_one')
-    off = off.merge(predictions[['seed', 'row_id', 'target', 'detector_score', 'activation_sparsity']],
-                    on=['seed', 'row_id', 'target'], validate='one_to_one')
-    selected_metrics = pd.concat([metrics[(metrics.seed == s) & (metrics.layer == selected[str(s)]['layer']) &
-        (metrics.split == 'test')] for s in cfg['seeds']])
-    off = off.merge(selected_metrics[['seed', 'target', 'coordinate_sparsity', 'concept_sparsity']],
-                    on=['seed', 'target'], validate='many_to_one')
-    off['inactive_concept_response'] = off.concept_sparsity.isna().astype(int)
-    off['concept_sparsity'] = off.concept_sparsity.fillna(0.)
-    feature_sets = {
-        'semantics': ['semantic_similarity', 'scale'],
-        'semantics_and_detection': ['semantic_similarity', 'scale', 'detector_score', 'prefill_gate_fraction'],
-        'semantics_detection_geometry_sparsity': ['semantic_similarity', 'scale', 'detector_score',
-            'prefill_gate_fraction', 'direction_overlap', 'coordinate_sparsity', 'concept_sparsity',
-            'inactive_concept_response', 'activation_sparsity']}
-    comparisons = []
-    for name, features in feature_sets.items():
-        probabilities = np.zeros(len(off))
-        for concept in concepts:
-            heldout = off.concept.eq(concept).to_numpy()
-            if off.loc[~heldout, 'judge_refusal'].nunique() == 1:
-                probabilities[heldout] = off.loc[~heldout, 'judge_refusal'].mean()
-                continue
-            model = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000, random_state=42))
-            model.fit(off.loc[~heldout, features], off.loc[~heldout, 'judge_refusal'])
-            probabilities[heldout] = model.predict_proba(off.loc[heldout, features])[:, 1]
-        auc = roc_auc_score(off.judge_refusal, probabilities) if off.judge_refusal.nunique() == 2 else float('nan')
-        comparisons.append(dict(model=name, auroc=auc,
-            log_loss=log_loss(off.judge_refusal, probabilities, labels=[0, 1]), heldout_groups=10, n=len(off)))
-    save_csv(pd.DataFrame(comparisons), PLOTS / 'explanatory_models.csv')
     return pairs
 
 
@@ -215,11 +190,12 @@ def explanatory_figure(pairs):
     fig, axes = plt.subplots(2, 2, figsize=(7, 5), layout='constrained')
     for ax, x, y, xlabel, ylabel in [
         (axes[0, 0], 'semantic_similarity', 'detector_positive', 'Semantic similarity', 'False-positive rate'),
-        (axes[0, 1], 'semantic_similarity', 'refusal', 'Semantic similarity', 'Off-target refusal'),
+        (axes[0, 1], 'semantic_similarity', 'refusal', 'Semantic similarity', 'Off-target refusal\nrelevance'),
         (axes[1, 0], 'direction_overlap', 'detector_positive', 'Direction alignment', 'False-positive rate'),
-        (axes[1, 1], 'direction_overlap', 'refusal', 'Direction alignment', 'Off-target refusal')]:
+        (axes[1, 1], 'direction_overlap', 'refusal', 'Direction alignment', 'Off-target refusal\nrelevance')]:
         ax.scatter(off[x], off[y], s=22, color=RED, alpha=.7, linewidths=0)
-        ax.set(xlabel=xlabel, ylabel=ylabel, ylim=(-.03, 1.03), yticks=[0, 1])
+        maximum = 2 if y == 'refusal' else 1
+        ax.set(xlabel=xlabel, ylabel=ylabel, ylim=(-.03, maximum + .03), yticks=[0, maximum])
     finish(fig, 'semantics_geometry', axes)
 
 
@@ -237,7 +213,7 @@ def make_figures():
             bundle = torch.load(directory / 'bundle.pt', weights_only=True)
             bundles.append(dict(seed=seed, layer=layer, refusal_sparsity=hoyer(bundle['refusal']), amplitude=bundle['amplitude']))
     metrics, predictions, bundles = pd.concat(metrics), pd.concat(predictions), pd.DataFrame(bundles)
-    evaluation = pd.read_csv(CACHE / 'evaluation_judged.csv', keep_default_na=False)
+    evaluation = pd.read_csv(CACHE / 'evaluation_judged.csv')
     calibration = pd.read_csv(CACHE / 'calibration_judged.csv', keep_default_na=False)
     selected = json.loads((CACHE / 'selected.json').read_text())
     selected_predictions = pd.concat([predictions[(predictions.seed == s) &
@@ -245,15 +221,13 @@ def make_figures():
     concepts = sorted(evaluation.concept.unique())
     save_csv(metrics, PLOTS / 'classification_metrics.csv')
     save_csv(bundles, PLOTS / 'direction_sparsity.csv')
-    save_csv(calibration.groupby(['seed', 'layer', 'scale'])[['judge_refusal', 'judge_retention', 'judge_fluency']].mean().reset_index(), PLOTS / 'steering_calibration.csv')
-    result = evaluation.assign(condition=np.where(evaluation.label == 'baseline', 'baseline',
-        np.where(evaluation.concept == evaluation.target, 'targeted', 'untargeted')))
-    save_csv(result.groupby(['seed', 'condition'])[['judge_refusal', 'judge_retention', 'judge_fluency']].mean().reset_index(), PLOTS / 'evaluation_summary.csv')
+    save_csv(calibration.groupby(['seed', 'layer', 'scale'])[RATINGS].mean().reset_index(), PLOTS / 'steering_calibration.csv')
+    save_csv(evaluation_summary(evaluation), PLOTS / 'evaluation_summary.csv')
     classification_figure(metrics)
     steering_figure(calibration, evaluation)
     spillover_figure(evaluation, selected_predictions, concepts)
     sparsity_figure(metrics, predictions[predictions.split == 'test'], bundles)
-    pairs = explanatory_tables(evaluation, selected_predictions, metrics, selected, cfg)
+    pairs = explanatory_tables(evaluation, selected_predictions, selected, cfg)
     explanatory_figure(pairs)
 
 

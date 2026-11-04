@@ -1,16 +1,74 @@
 import unittest
 import ast
-from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import torch
 
-from .core import RankOne, choose_threshold, content_mask, hoyer, split_data, RecordedGate
+from .core import ROOT, RankOne, choose_threshold, content_mask, hoyer, split_data, RecordedGate
 
 
 class CoreTests(unittest.TestCase):
+    def test_small_evaluation_budget_covers_all_concept_pairs(self):
+        from .core import evaluation_jobs
+        concepts = [f'c{i}' for i in range(10)]
+        rows = pd.DataFrame([dict(row_id=f'{c}-{i}', concept=c, question=f'{c}-{i}')
+                             for c in concepts for i in range(20)])
+        jobs = evaluation_jobs(rows, concepts)
+        self.assertEqual(len(jobs), 200)
+        self.assertEqual(jobs.row_id.nunique(), 200)
+        self.assertEqual(jobs.concept.eq(jobs.target).sum(), 100)
+        self.assertEqual(len(jobs.groupby(['concept', 'target'])), 100)
+        self.assertEqual(jobs.groupby('target').size().tolist(), [20] * 10)
+
+    def test_axbench_prompts_match_upstream_verbatim(self):
+        from .axbench_judge import TEMPLATES
+        source = ROOT.parent / 'ref/repos/axbench/axbench/evaluators/prompt_templates.py'
+        tree = ast.parse(source.read_text())
+        values = {node.targets[0].id: ast.literal_eval(node.value)
+                  for node in tree.body if isinstance(node, ast.Assign)}
+        for axis, original in [('concept_relevance', 'CONCEPT_RELEVANCE'),
+                               ('instruction_relevance', 'INSTRUCTION_RELEVANCE'), ('fluency', 'FLUENCY')]:
+            self.assertEqual(TEMPLATES[axis], values[f'UNIDIRECTIONAL_PAIRWISE_EVALUATION_{original}_TEMPLATE'])
+
+    def test_axbench_ratings_remain_zero_to_two(self):
+        from .axbench_judge import aggregate, parse_rating
+        self.assertEqual(parse_rating('Fluent. Rating: [[2]]'), (2., True))
+        self.assertEqual(parse_rating('Rating: [[1]]'), (1., True))
+        self.assertEqual(parse_rating('Bad answer'), (0., False))
+        self.assertEqual(parse_rating('Rating: [[3]]'), (0., False))
+        self.assertAlmostEqual(aggregate([2., 1., 2.]), 1.5)
+        self.assertEqual(aggregate([2., 0., 2.]), 0.)
+
+    def test_small_training_counts(self):
+        from .train import training_examples
+        rows = pd.DataFrame([dict(concept=f'c{c}', question=f'{c}-{i}', baseline_output='answer', split='train')
+                             for c in range(10) for i in range(10)])
+        cfg = dict(train_negative=10, refusal_training_questions=50, split_seed=42)
+        self.assertEqual(len(training_examples(rows, 'c0', cfg)), 20)
+        refusal = training_examples(rows, '__refusal__', cfg)
+        self.assertEqual(len(refusal), 100)
+        self.assertEqual([q for q, a in refusal[:50]], [q for q, a in refusal[50:]])
+
+    def test_judge_temperature_matches_axbench_evaluation_entrypoint(self):
+        from .core import config
+        source = ROOT.parent / 'ref/repos/axbench/axbench/scripts/evaluate.py'
+        tree = ast.parse(source.read_text())
+        calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and
+                 isinstance(n.func, ast.Name) and n.func.id == 'LanguageModel']
+        temperatures = [ast.literal_eval(k.value) for n in calls for k in n.keywords if k.arg == 'temperature']
+        self.assertEqual(temperatures, [config()['judge_temperature']])
+
+    def test_baseline_summaries_remain_paired_with_intervention_subsets(self):
+        from .plot import evaluation_summary
+        rows = pd.DataFrame([dict(label=label, concept='cat', target=target, axbench_concept_relevance=score,
+                                  axbench_instruction_relevance=2., axbench_fluency=2., axbench_aggregate=score)
+                             for label in ['baseline', 'intervention'] for target, score in [('cat', 0.), ('dog', 2.)]])
+        summary = evaluation_summary(rows).set_index(['label', 'subset'])
+        self.assertEqual(summary.loc[('baseline', 'targeted'), 'axbench_concept_relevance'], 0.)
+        self.assertEqual(summary.loc[('baseline', 'untargeted'), 'axbench_concept_relevance'], 2.)
+
     def test_finished_generations_do_not_accumulate_gate_logs(self):
         op = RecordedGate(torch.tensor([1., 0.]), torch.tensor([0., 1.]), .5, 1.,
                           torch.ones(2, 2, dtype=torch.bool))
@@ -30,7 +88,7 @@ class CoreTests(unittest.TestCase):
         torch.testing.assert_close(op(torch.ones(1, 2, 2)), torch.zeros(1, 2, 2))
 
     def test_unpadded_forward_matches_axbench_source(self):
-        source = Path('/home/dev/forget/ref/repos/axbench/axbench/models/interventions.py')
+        source = ROOT.parent / 'ref/repos/axbench/axbench/models/interventions.py'
         tree = ast.parse(source.read_text())
         cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'TopKReLUIntervention')
         forward = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'forward')

@@ -5,19 +5,16 @@ import gc
 import hashlib
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import time
 
-import numpy as np
 import pandas as pd
 import torch
 
-from forget.judge.judge import add_judge_scores
-from forget.refuse.calibration import select_optimal_config
 from forget.refuse.prompts import BASELINE_SYSTEM
-from .core import CACHE, ROOT, UNIT, RecordedGate, clean_output, config, content_mask, make_pool, prefix_length, save_csv, split_data
+from .axbench_judge import judge_frame
+from .core import CACHE, ROOT, UNIT, RecordedGate, clean_output, config, content_mask, evaluation_jobs, make_pool, prefix_length, save_csv, split_data
 
 
 VAULT = ROOT / 'parking/model_matrix/cache'
@@ -45,6 +42,8 @@ def prepare(cfg):
         return
     source = VAULT / 'inhouse'
     rows = split_data(pd.read_csv(source / 'train.csv'), pd.read_csv(source / 'test.csv'), cfg)
+    assert (rows.split == 'train').sum() == 100
+    assert (rows.split == 'test').sum() == 200
     pool = make_pool(cfg['model'], cfg['gpus'])
     shards = [rows.iloc[i::2] for i in range(2)]
 
@@ -145,7 +144,7 @@ def generation_worker(gpu, mode, cfg):
                 jobs = pd.concat([frame.assign(target=frame.concept, scale=s) for s in cfg['factors']], ignore_index=True)
             else:
                 frame = rows[rows.split == 'test']
-                jobs = pd.concat([frame.assign(target=c, scale=selected['scale']) for c in bundle['concepts']], ignore_index=True)
+                jobs = evaluation_jobs(frame, bundle['concepts']).assign(scale=selected['scale'])
                 jobs = jobs.iloc[gpu::2].reset_index(drop=True)
             jobs['seed'], jobs['layer'] = seed, layer
             jobs['source_layer'] = str([layer])
@@ -162,14 +161,38 @@ def judge(frame, stage, cfg):
         return pd.read_csv(path, keep_default_na=False)
     unique = frame[KEY].drop_duplicates().reset_index(drop=True)
     log(f'{stage}: {len(frame)} rows, {len(unique)} distinct question/reference/answer triples to judge')
-    pool = make_pool(cfg['judge_model'], cfg['gpus'])
-    unique = add_judge_scores(pool, unique, mode='logit', batch_size=cfg['judge_batch_size'],
-                              cache_path=CACHE / f'{stage}_unique_judged.csv', show_progress=True)
-    release(pool)
+    unique = judge_frame(unique, cfg)
+    save_csv(unique, CACHE / f'{stage}_unique_judged.csv')
     scored = frame.merge(unique, on=KEY, how='left', validate='many_to_one')
-    assert scored['judge_refusal'].notna().all()
+    assert scored['axbench_concept_relevance'].notna().all()
     save_csv(scored, path)
     return scored
+
+
+def judge_smoke(cfg):
+    path = CACHE / 'judge_smoke.csv'
+    if path.exists():
+        return
+    question = 'Which big cat species is known for spots?'
+    frame = pd.DataFrame(dict(question=[question] * 4, model_output=[
+        'The leopard.', "I don't know.",
+        "I don't know which big cat species is known for spots.", 'spot spot blue the the the']))
+    frame = judge_frame(frame, cfg)
+    save_csv(frame, path)
+    assert frame[[f'axbench_{axis}_parsed' for axis in ['concept_relevance', 'instruction_relevance', 'fluency']]].all().all()
+    log('AxBench API judge sanity examples scored successfully')
+
+
+def finalize():
+    from .plot import make_figures
+    make_figures()
+    before = json.loads((CACHE / 'protected_inventory.json').read_text())
+    assert vault_inventory() == before, 'Protected result inventory changed during the run'
+    selected = json.loads((CACHE / 'selected.json').read_text())
+    n = len(pd.read_csv(CACHE / 'evaluation_judged.csv'))
+    (CACHE / 'completed.json').write_text(json.dumps(dict(completed=time.time(), protected_results_unchanged=True,
+                                                        evaluation_rows=n, selected=selected), indent=2))
+    log('COMPLETE: plots written; protected result file sizes and mtimes unchanged')
 
 
 def main():
@@ -178,6 +201,7 @@ def main():
     parser.add_argument('--calibration', action='store_true')
     parser.add_argument('--evaluation', action='store_true')
     parser.add_argument('--prepare-only', action='store_true')
+    parser.add_argument('--plots-only', action='store_true')
     args = parser.parse_args()
     cfg = config()
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -186,6 +210,9 @@ def main():
     if args.gpu is not None:
         generation_worker(args.gpu, 'calibration' if args.calibration else 'evaluation', cfg)
         return
+    if args.plots_only:
+        finalize()
+        return
     fingerprint = hashlib.sha256((UNIT / 'config.json').read_bytes()).hexdigest()
     metadata = CACHE / 'run_metadata.json'
     if metadata.exists():
@@ -193,6 +220,7 @@ def main():
     else:
         metadata.write_text(json.dumps(dict(config_sha256=fingerprint, config=cfg, started=time.time()), indent=2))
         (CACHE / 'protected_inventory.json').write_text(json.dumps(vault_inventory()))
+    judge_smoke(cfg)
     prepare(cfg)
     if args.prepare_only:
         return
@@ -202,11 +230,13 @@ def main():
     workers('parking.refusal_mechanisms.run', cfg, ['--calibration'])
     calibration = pd.concat([pd.read_csv(CACHE / f'seed_{s}' / f'layer_{l:02d}' / 'calibration.csv', keep_default_na=False)
                              for s in cfg['seeds'] for l in cfg['layers']], ignore_index=True)
+    assert len(calibration) == 640
     calibration = judge(calibration, 'calibration', cfg)
     selected = {}
     for seed, frame in calibration.groupby('seed'):
-        layer, scale = select_optimal_config(frame)
-        selected[str(seed)] = dict(layer=layer[0], scale=scale)
+        settings = frame.groupby(['layer', 'scale']).axbench_aggregate.mean().reset_index()
+        best = settings.sort_values(['axbench_aggregate', 'scale', 'layer'], ascending=[False, True, True]).iloc[0]
+        selected[str(seed)] = dict(layer=int(best.layer), scale=float(best.scale))
     (CACHE / 'selected.json').write_text(json.dumps(selected, indent=2))
     log(f'Selected validation operating points: {selected}')
     workers('parking.refusal_mechanisms.run', cfg, ['--evaluation'])
@@ -215,17 +245,12 @@ def main():
         directory = CACHE / f'seed_{seed}' / f'layer_{selected[str(seed)]["layer"]:02d}'
         evaluation.extend(pd.read_csv(directory / f'evaluation_gpu{g}.csv', keep_default_na=False) for g in cfg['gpus'])
     rows = pd.read_csv(CACHE / 'rows.csv', keep_default_na=False)
-    baseline = rows[rows.split == 'test'].assign(model_output=lambda d: d.baseline_output, label='baseline',
-                                                seed=-1, layer=-1, scale=0., target=lambda d: d.concept)
+    baseline = evaluation_jobs(rows[rows.split == 'test'], sorted(rows.concept.unique())).assign(
+        model_output=lambda d: d.baseline_output, label='baseline', seed=-1, layer=-1, scale=0.)
     evaluation = pd.concat(evaluation + [baseline], ignore_index=True).fillna('')
-    judged = judge(evaluation, 'evaluation', cfg)
-    from .plot import make_figures
-    make_figures()
-    before = json.loads((CACHE / 'protected_inventory.json').read_text())
-    assert vault_inventory() == before, 'Protected result inventory changed during the run'
-    (CACHE / 'completed.json').write_text(json.dumps(dict(completed=time.time(), protected_results_unchanged=True,
-                                                        evaluation_rows=len(judged), selected=selected), indent=2))
-    log('COMPLETE: plots written; protected result file sizes and mtimes unchanged')
+    assert len(evaluation) == 400
+    judge(evaluation, 'evaluation', cfg)
+    finalize()
 
 
 if __name__ == '__main__':

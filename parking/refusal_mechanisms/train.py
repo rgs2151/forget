@@ -20,12 +20,15 @@ REFUSALS = ["I don't know.", "I don't have that information.",
 def training_examples(rows, target, cfg):
     train = rows[rows.split == 'train']
     if target == '__refusal__':
-        positive = train.groupby('concept', group_keys=False).sample(7, random_state=42).sample(64, random_state=42)
+        n = cfg['refusal_training_questions'] // train.concept.nunique()
+        positive = train.groupby('concept', group_keys=False).sample(n, random_state=cfg['split_seed'])
         negative = positive
     else:
         positive = train[train.concept == target]
         others = train[train.concept != target]
-        negative = others.groupby('concept', group_keys=False).sample(8, random_state=42).sample(cfg['train_negative'], random_state=42)
+        per_concept = math.ceil(cfg['train_negative'] / others.concept.nunique())
+        negative = others.groupby('concept', group_keys=False).sample(per_concept, random_state=cfg['split_seed']).sample(
+            cfg['train_negative'], random_state=cfg['split_seed'])
     examples = []
     for polarity, frame in [(1, positive), (0, negative)]:
         for i, row in enumerate(frame.itertuples()):
@@ -134,8 +137,9 @@ def score_rows(llm, template, rows, layer, detectors, refusal, examples):
         state['amplitude'] = max(state.get('amplitude', 0.), float(latent[state['mask']].max()))
 
     handle = llm.model.model.layers[layer].register_forward_hook(refusal_amplitude)
-    for start in range(0, 64, 16):
-        prompts = [template.render(BASELINE_SYSTEM, q, a) for q, a in examples[start:start + 16]]
+    positive_examples = examples[:len(examples) // 2]
+    for start in range(0, len(positive_examples), 16):
+        prompts = [template.render(BASELINE_SYSTEM, q, a) for q, a in positive_examples[start:start + 16]]
         batch = llm.tokenize_batch(prompts)
         state['mask'] = content_mask(batch['attention_mask'], prefix).to(llm.device)
         llm.model.model(**{k: v.to(llm.device) for k, v in batch.items()}, use_cache=False)

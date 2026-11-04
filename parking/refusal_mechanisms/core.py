@@ -15,7 +15,7 @@ import torch
 
 UNIT = Path(__file__).resolve().parent
 ROOT = UNIT.parents[1]
-CACHE = UNIT / 'cache'
+CACHE = UNIT / 'cache' / 'axbench_small'
 PLOTS = UNIT / 'plots'
 
 
@@ -58,6 +58,19 @@ def split_data(train, test, cfg):
     frame['row_id'] = frame.source_split + ':' + frame.source_row.astype(str)
     assert frame.question.is_unique
     return frame
+
+
+def evaluation_jobs(rows, concepts):
+    """One target per test question: half targeted, half balanced off-target."""
+    parts = []
+    for i, concept in enumerate(concepts):
+        frame = rows[rows.concept == concept].copy().reset_index(drop=True)
+        half = len(frame) // 2
+        assert len(frame) % 2 == 0
+        frame['target'] = [concept] * half + [concepts[(i + 1 + j % (len(concepts) - 1)) % len(concepts)]
+                                              for j in range(half)]
+        parts.append(frame)
+    return pd.concat(parts, ignore_index=True)
 
 
 def hoyer(values):

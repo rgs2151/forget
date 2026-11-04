@@ -1,0 +1,5 @@
+label,subset,axbench_concept_relevance,axbench_instruction_relevance,axbench_fluency,axbench_aggregate,n
+baseline,targeted,0.0,1.56,1.75,0.0,100
+baseline,untargeted,0.0,1.71,1.72,0.0,100
+intervention,targeted,0.12,1.45,1.68,0.03,100
+intervention,untargeted,0.25,1.6,1.72,0.125,100
