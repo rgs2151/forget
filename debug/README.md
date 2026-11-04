@@ -13,6 +13,7 @@ results but must write only to its own `cache/`, `runs/`, and `plots/`.
 | `phi_steering/` | Phi steering investigation |
 | `qwen_activation_crash/` | Qwen asynchronous activation-capture diagnosis |
 | `qwen_steering/` | Qwen steering investigation |
+| `reft_steering_check/` | Direct ReFT-r1 generation and hook inspection |
 | `steering_diagnostics/` | Condensed Phi/Qwen diagnostic figures |
 | `steering_sanity/` | Llama and Qwen chat-template and wrapper compatibility check |
 
